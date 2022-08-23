@@ -3,10 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "dev": "vue-cli-service serve",
+    "start": "nodemon --watch server/src --exec ts-node --swc server/src/index.ts",
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
-    "test:e2e": "vue-cli-service test:e2e",
+    "test:e2e": "vue-cli-service test:unit && vue-cli-service test:e2e",
+    "test": "vue-cli-service test:e2e --headless",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
@@ -18,11 +20,16 @@
     "@ionic/vue": "^6.0.0",
     "@ionic/vue-router": "^6.0.0",
     "core-js": "^3.6.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "mongodb": "^4.9.0",
     "vue": "^3.2.21",
     "vue-router": "^4.0.12"
   },
   "devDependencies": {
     "@capacitor/cli": "4.1.0",
+    "@ionic/cli": "^6.20.1",
+    "@swc/core": "^1.2.242",
     "@types/jest": "^27.0.2",
     "@typescript-eslint/eslint-plugin": "^5.6.0",
     "@typescript-eslint/parser": "^5.6.0",
@@ -41,7 +48,9 @@
     "eslint": "^8.4.1",
     "eslint-plugin-vue": "^8.2.0",
     "jest": "^27.3.1",
+    "nodemon": "^2.0.19",
     "ts-jest": "^27.0.7",
+    "ts-node": "^10.9.1",
     "typescript": "^4.3.5"
   },
   "description": "An Ionic project"
