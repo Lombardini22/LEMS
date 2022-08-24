@@ -1,5 +1,6 @@
 import { config } from 'dotenv'
 import { z, ZodError } from 'zod'
+import { ServerError } from './ServerError'
 
 config()
 
@@ -10,18 +11,21 @@ const Env = z.object({
 })
 type Env = z.infer<typeof Env>
 
-let env: Env | null
+let env: Env | null = null
 
 export function withEnv<T>(op: (env: Env) => T): T {
-  if (!env) {
-    try {
-      env = Env.parse(process.env)
-    } catch (e) {
-      console.log('Invalid environment file')
-      console.log((e as ZodError).message)
-      throw new Error('Invalid environment file: information above')
-    }
+  if (env) {
+    return op(env)
   }
 
-  return op(env)
+  try {
+    env = Env.parse(process.env)
+    return op(env)
+  } catch (e) {
+    throw new ServerError(
+      500,
+      'Invalid environment file',
+      (e as ZodError).message,
+    )
+  }
 }
