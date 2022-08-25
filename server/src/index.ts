@@ -1,11 +1,10 @@
-import { withServer } from './withServer'
-import { withEnv } from './withEnv'
-import { withDatabase } from './database/withDatabase'
+import { env } from './resources/env'
+import { useServer } from './server'
 
 try {
-  withDatabase(() =>
-    withEnv(env =>
-      withServer(app => {
+  env.use(env =>
+    Promise.resolve(
+      useServer(app => {
         app.listen(env.SERVER_PORT, () =>
           console.log(`Server ready at port ${env.SERVER_PORT}`),
         )

@@ -9,18 +9,17 @@ import {
   ModifyResult,
 } from 'mongodb'
 import { ServerError } from '../ServerError'
-import { withDatabase } from './withDatabase'
+import { database } from '../resources/database'
 
 export class Collection<I extends { _id?: ObjectId }> {
-  name: string
+  readonly name: string
 
   constructor(name: string) {
     this.name = name
   }
 
-  protected async getCollection(): Promise<MongoCollection<I>> {
-    const [result] = await withDatabase(db => db.collection<I>(this.name))
-    return result
+  protected getCollection(): Promise<MongoCollection<I>> {
+    return database.use(db => Promise.resolve(db.collection(this.name)))
   }
 
   async raw<T>(op: (collection: MongoCollection<I>) => T): Promise<T> {

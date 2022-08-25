@@ -1,9 +1,8 @@
 import { ObjectId } from 'mongodb'
 import { emptyCursor, emptyCursorQuery } from '../../../shared/Cursor'
+import { env } from '../resources/env'
 import { expectT } from '../testUtils'
-import { withEnv } from '../withEnv'
 import { Collection } from './Collection'
-import { withDatabase } from './withDatabase'
 
 interface TestDoc {
   _id?: ObjectId
@@ -11,22 +10,11 @@ interface TestDoc {
 }
 
 describe('Collection', () => {
-  let closeDb: () => Promise<void>
   const collection = new Collection<TestDoc>('collection-test')
-
-  beforeAll(async () => {
-    const [, _closeDb] = await withDatabase(() => null)
-    closeDb = _closeDb
-  })
-
-  afterAll(async () => {
-    await collection.raw(_ => _.drop())
-    await closeDb()
-  })
 
   describe('raw', () => {
     it('should work', async () => {
-      return await withEnv(async env => {
+      return await env.use(async env => {
         const result = await collection.raw(_ => _.dbName)
         expectT(result).toEqual(env.MONGO_DB_NAME)
       })

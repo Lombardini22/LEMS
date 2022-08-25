@@ -1,6 +1,7 @@
 import { config } from 'dotenv'
 import { z, ZodError } from 'zod'
-import { ServerError } from './ServerError'
+import { ServerError } from '../ServerError'
+import { Resource } from './Resource'
 
 config()
 
@@ -11,16 +12,9 @@ const Env = z.object({
 })
 type Env = z.infer<typeof Env>
 
-let env: Env | null = null
-
-export function withEnv<T>(op: (env: Env) => T): T {
-  if (env) {
-    return op(env)
-  }
-
+export const env = Resource.make(async () => {
   try {
-    env = Env.parse(process.env)
-    return op(env)
+    return Env.parse(process.env)
   } catch (e) {
     throw new ServerError(
       500,
@@ -28,4 +22,4 @@ export function withEnv<T>(op: (env: Env) => T): T {
       (e as ZodError).message,
     )
   }
-}
+}, Promise.resolve)
