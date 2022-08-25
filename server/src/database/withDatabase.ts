@@ -4,7 +4,9 @@ import { withEnv } from '../withEnv'
 
 let client: MongoClient | null = null
 
-export async function withDatabase<T>(op: (db: Db) => T): Promise<T> {
+export async function withDatabase<T>(
+  op: (db: Db) => T,
+): Promise<[result: T, release: () => Promise<void>]> {
   return await withEnv(async env => {
     if (!client) {
       try {
@@ -16,15 +18,16 @@ export async function withDatabase<T>(op: (db: Db) => T): Promise<T> {
 
     const result = await op(client.db(env.MONGO_DB_NAME))
 
-    try {
-      if (process.env['NODE_ENV'] === 'test') {
-        await client.close()
-        client = null
+    const release = async () => {
+      try {
+        // client will always be non-null as it's assigned above
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        await client!.close()
+      } catch (e) {
+        throw new ServerError(500, 'Unable to disconnect from database', e)
       }
-    } catch (e) {
-      throw new ServerError(500, 'Unable to disconnect from database')
     }
 
-    return result
+    return [result, release]
   })
 }
