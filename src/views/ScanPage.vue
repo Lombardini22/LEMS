@@ -2,34 +2,30 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-title>Blank</ion-title>
+        <ion-title>Scan</ion-title>
       </ion-toolbar>
     </ion-header>
 
     <ion-content :fullscreen="true">
       <ion-header collapse="condense">
         <ion-toolbar>
-          <ion-title size="large">Blank</ion-title>
+          <ion-title size="large">Scan</ion-title>
         </ion-toolbar>
       </ion-header>
 
       <div id="container">
-        <strong>Ready to create an app?</strong>
+        <strong>Please Scan A QRCode to Checkin</strong>
         <p>
-          Start with Ionic
-          <a
-            target="_blank"
-            rel="noopener noreferrer"
-            href="https://ionicframework.com/docs/components"
-            >UI Components</a
-          >
+          <ion-button @click="scan()">
+            <ion-icon :icon="qrCodeOutline" /> Scan
+          </ion-button>
         </p>
       </div>
     </ion-content>
   </ion-page>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import {
   IonContent,
   IonHeader,
@@ -37,18 +33,9 @@ import {
   IonTitle,
   IonToolbar,
 } from '@ionic/vue'
-import { defineComponent } from 'vue'
+import { qrCodeOutline } from 'ionicons/icons'
 
-export default defineComponent({
-  name: 'HomePage',
-  components: {
-    IonContent,
-    IonHeader,
-    IonPage,
-    IonTitle,
-    IonToolbar,
-  },
-})
+
 </script>
 
 <style scoped>
