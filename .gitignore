@@ -35,6 +35,3 @@ tests/e2e/screenshots/
 tests/e2e/videos/
 .env*
 !.env.example
-
-yarn.lock
-package-lock.json
