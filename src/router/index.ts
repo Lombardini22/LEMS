@@ -3,6 +3,7 @@ import { RouteRecordRaw } from 'vue-router'
 import ScanPage from '../views/ScanPage.vue'
 import TabsPage from '../views/TabsPage.vue'
 import ManualPage from '../views/ManualPage.vue'
+import QuasarPage from '../views/QuasarPage.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -34,6 +35,11 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "manual",
         component: ManualPage,
+        // beforeEnter: authCheck,
+      },
+      {
+        path: "quasar",
+        component: QuasarPage,
         // beforeEnter: authCheck,
       },
     ],

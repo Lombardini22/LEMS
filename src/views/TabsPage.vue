@@ -12,6 +12,10 @@
           <ion-icon :icon="listOutline" />
           <ion-label>List / Manual</ion-label>
         </ion-tab-button>
+         <ion-tab-button tab="tab3" href="/tabs/quasar">
+          <ion-icon :icon="atCircle" />
+          <ion-label>Quasar</ion-label>
+        </ion-tab-button>
       </ion-tab-bar>
     </ion-tabs>
   </ion-page>
@@ -27,5 +31,5 @@ import {
   IonPage,
   IonRouterOutlet,
 } from '@ionic/vue'
-import { listOutline,  qrCodeOutline } from 'ionicons/icons'
+import { atCircle, listOutline,  qrCodeOutline } from 'ionicons/icons'
 </script>

@@ -4,6 +4,9 @@
       <ion-toolbar>
         <ion-title>Manual Entry</ion-title>
       </ion-toolbar>
+      <ion-toolbar>
+        <ion-searchbar animated @input="(e) => search = (e.detail.value!)"></ion-searchbar>
+      </ion-toolbar>
     </ion-header>
 
     <ion-content :fullscreen="true">
@@ -11,41 +14,26 @@
         <ion-toolbar>
           <ion-title size="large">Manual Entry</ion-title>
         </ion-toolbar>
+        <ion-toolbar>
+          <ion-searchbar animated @v-model="search"></ion-searchbar>
+        </ion-toolbar>
       </ion-header>
 
-      <ion-content
-        :scroll-events="true"
-        @ionScrollStart="logScrollStart()"
-        @ionScrollEnd="logScrollEnd()"
-      >
-        <div >
+      <ion-content :scroll-events="true" @ionScrollStart="logScrollStart()" @ionScrollEnd="logScrollEnd()">
+        <div>
           <h1>Lists</h1>
 
           <!-- List of Input Items -->
           <ion-list>
             <ion-item v-for="item in data" :key="item.id">
-              <ion-label
-                >{{ item.name.firstname }} {{ item.name.lastname }}</ion-label
-              >
+              <ion-label>{{ item.name.firstname }} {{ item.name.lastname }}</ion-label>
               <ion-button slot="end">
-                Print <ion-icon :icon="printOutline" />
+                Print
+                <ion-icon :icon="printOutline" />
               </ion-button>
             </ion-item>
           </ion-list>
 
-          <!-- List of Sliding Items -->
-          <ion-list>
-            <ion-item-sliding v-for="item in data" :key="item.id">
-              <ion-item>
-                <ion-label
-                  >{{ item.name.firstname }} {{ item.name.lastname }}</ion-label
-                >
-              </ion-item>
-              <ion-item-options side="end">
-                <ion-item-option @click="print(item.id)">PRINT</ion-item-option>
-              </ion-item-options>
-            </ion-item-sliding>
-          </ion-list>
         </div>
       </ion-content>
     </ion-content>
@@ -53,7 +41,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import axios from 'axios'
 import {
   IonContent,
@@ -62,15 +50,14 @@ import {
   IonTitle,
   IonToolbar,
   IonItem,
-  IonItemOption,
-  IonItemOptions,
-  IonItemSliding,
   IonList,
   IonLabel,
   IonButton,
+  IonSearchbar
 } from '@ionic/vue'
 import { printOutline } from 'ionicons/icons'
 const data = ref([] as any[])
+const search = ref()
 
 axios.get('https://fakestoreapi.com/users').then(res => {
   console.table(res.data)
@@ -85,13 +72,14 @@ const logScrollStart = () => {
   console.log('scrolling started')
 }
 
-// const logScrolling = (event: CustomEvent) => {
-//   console.log('scrolling', event.detail.currentY)
-// }
-
 const logScrollEnd = () => {
   console.log('scrolling ended')
 }
+
+
+watch(search, (value: string) => {
+  console.log("search:  ", value)
+})
 </script>
 
 <style scoped>
