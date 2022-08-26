@@ -17,13 +17,19 @@ export class Result<E extends Error, A> {
     this.state = state
   }
 
-  static success<E extends Error, A = never>(value: A): Result<E, A> {
+  static success<E extends Error, A = never>(value: A): Result<E, A>
+  static success<E extends Error>(): Result<E, void>
+  static success<E extends Error, A = never>(value?: A): Result<E, A | void> {
     return new Result({ _tag: 'Success', value })
   }
 
   static asyncSuccess<E extends Error, A = never>(
     value: A,
-  ): Promise<Result<E, A>> {
+  ): Promise<Result<E, A>>
+  static asyncSuccess<E extends Error>(): Promise<Result<E, void>>
+  static asyncSuccess<E extends Error, A = never>(
+    value?: A,
+  ): Promise<Result<E, A | void>> {
     return Promise.resolve(new Result({ _tag: 'Success', value }))
   }
 

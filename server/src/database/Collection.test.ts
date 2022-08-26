@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb'
 import { emptyCursor, emptyCursorQuery } from '../../../shared/Cursor'
+import { Result } from '../../../shared/Result'
 import { env } from '../resources/env'
 import { expectResult } from '../testUtils'
 import { Collection } from './Collection'
@@ -14,9 +15,11 @@ describe('Collection', () => {
 
   describe('raw', () => {
     it('should work', async () => {
-      return await env.use(async env => {
-        const result = await collection.raw(_ => Promise.resolve(_.dbName))
+      const result = await collection.raw(_ => Promise.resolve(_.dbName))
+
+      await env.use(async env => {
         expectResult(result).toHaveSucceededWith(env.MONGO_DB_NAME)
+        return Result.asyncSuccess()
       })
     })
   })
