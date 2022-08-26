@@ -7,9 +7,9 @@
     "start": "nodemon --watch server/src --exec ts-node --swc server/src/index.ts",
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
-    "test:e2e": "vue-cli-service test:unit && vue-cli-service test:e2e",
+    "test:e2e": "vue-cli-service test:e2e",
     "test:server": "jest -c server/jest.config.js",
-    "test": "vue-cli-service test:e2e --headless",
+    "test": "vue-cli-service test:unit && vue-cli-service test:e2e --headless && jest -c server/jest.config.js",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
