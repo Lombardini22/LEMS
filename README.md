@@ -18,3 +18,13 @@
 - `yarn test:unit --watch` to start unit tests in watch mode
 - `yarn test:e2e` to start Cypress
 - `yarn test` to run all tests once (Cypress tests run in headless mode)
+
+## Build
+
+### Android
+
+- Set `yarn` as the default package manager for Ionic: `npx @ionic/cli config set -g npmClient yarn`
+- [Install Android Studio](https://developer.android.com/studio)
+- Sync the app with Capacitor: `npx @ionic/cli cap sync`
+- Open the app in Android Studio: `npx @ionic/cli cap open android`
+- Use Android Studio to generate a bundle or APK
