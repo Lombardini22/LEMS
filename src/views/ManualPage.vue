@@ -2,7 +2,7 @@
   <ion-page>
     <ion-header :translucent="true">
       <ion-toolbar>
-        <ion-title>Manual Entry</ion-title>
+        <ion-title>Guest List</ion-title>
       </ion-toolbar>
       <ion-toolbar>
         <ion-searchbar animated @input="(e) => search = (e.detail.value!)"></ion-searchbar>
@@ -12,7 +12,7 @@
     <ion-content :fullscreen="true">
       <ion-header collapse="condense">
         <ion-toolbar>
-          <ion-title size="large">Manual Entry</ion-title>
+          <ion-title size="large">Guest List</ion-title>
         </ion-toolbar>
         <ion-toolbar>
           <ion-searchbar animated @v-model="search"></ion-searchbar>
@@ -21,13 +21,12 @@
 
       <ion-content :scroll-events="true" @ionScrollStart="logScrollStart()" @ionScrollEnd="logScrollEnd()">
         <div>
-          <h1>Lists</h1>
 
           <!-- List of Input Items -->
           <ion-list>
             <ion-item v-for="item in data" :key="item.id">
               <ion-label>{{ item.name.firstname }} {{ item.name.lastname }}</ion-label>
-              <ion-button slot="end">
+              <ion-button slot="end" @click="print(item)">
                 Print
                 <ion-icon :icon="printOutline" />
               </ion-button>

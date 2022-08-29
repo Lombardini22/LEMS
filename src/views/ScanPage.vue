@@ -15,10 +15,19 @@
 
       <div id="container">
         <strong>Please Scan A QRCode to Checkin</strong>
+        <ion-input
+            rounded
+            outlined
+            v-model="qrString"
+            placeholder="Scan Your QRCode Using the Scanners"
+            autofocus
+            ref="qrInput"
+            v-on:focusout="onFocusOut"
+        ></ion-input>
         <p>
-          <ion-button @click="presentAlert">
+          <!-- <ion-button @click="presentAlert">
             <ion-icon :icon="qrCodeOutline" /> Scan
-          </ion-button>
+          </ion-button> -->
         </p>
       </div>
     </ion-content>
@@ -32,21 +41,29 @@ import {
   IonPage,
   IonTitle,
   IonToolbar,
-  alertController
+  alertController,
+  IonInput,
 } from '@ionic/vue'
-import { qrCodeOutline } from 'ionicons/icons'
+import { ref } from 'vue'
+// import { qrCodeOutline } from 'ionicons/icons'
+const qrString = ref('')
+const qrInput = ref<HTMLInputElement>()
+  
+const onFocusOut = () => {
+  if (qrInput.value) {
+    qrInput.value.focus()
+  }
+}
+// const presentAlert = async () => {
+//   const alert = await alertController.create({
+//     header: 'Alert',
+//     subHeader: 'Important message',
+//     message: 'Thanks for checking in!',
+//     buttons: ['OK'],
+//   })
 
-const presentAlert = async () => {
-        const alert = await alertController.create({
-          header: 'Alert',
-          subHeader: 'Important message',
-          message: 'Thanks for checking in!',
-          buttons: ['OK'],
-        });
-
-        await alert.present();
-      }
-
+//   await alert.present()
+// }
 </script>
 
 <style scoped>
