@@ -16,7 +16,7 @@
       <div id="container">
         <strong>Please Scan A QRCode to Checkin</strong>
         <p>
-          <ion-button @click="scan()">
+          <ion-button @click="presentAlert">
             <ion-icon :icon="qrCodeOutline" /> Scan
           </ion-button>
         </p>
@@ -32,9 +32,20 @@ import {
   IonPage,
   IonTitle,
   IonToolbar,
+  alertController
 } from '@ionic/vue'
 import { qrCodeOutline } from 'ionicons/icons'
 
+const presentAlert = async () => {
+        const alert = await alertController.create({
+          header: 'Alert',
+          subHeader: 'Important message',
+          message: 'Thanks for checking in!',
+          buttons: ['OK'],
+        });
+
+        await alert.present();
+      }
 
 </script>
 
