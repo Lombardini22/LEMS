@@ -1,5 +1,6 @@
 import { config } from 'dotenv'
 import { z, ZodError } from 'zod'
+import { Result } from '../../../shared/Result'
 import { ServerError } from '../ServerError'
 import { Resource } from './Resource'
 
@@ -12,14 +13,16 @@ const Env = z.object({
 })
 type Env = z.infer<typeof Env>
 
-export const env = Resource.make(async () => {
-  try {
-    return Env.parse(process.env)
-  } catch (e) {
-    throw new ServerError(
-      500,
-      'Invalid environment file',
-      (e as ZodError).message,
-    )
-  }
-}, Promise.resolve)
+export const env = Resource.make(
+  () =>
+    Result.tryCatch(
+      () => Env.parse(process.env),
+      e =>
+        new ServerError(
+          500,
+          'Invalid environment file',
+          (e as ZodError).message,
+        ),
+    ),
+  Promise.resolve,
+)

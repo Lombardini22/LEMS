@@ -1,44 +1,73 @@
+import { Result } from '../../../shared/Result'
+import { ServerError } from '../ServerError'
+
 export class Resource<T, M = T> {
-  private readonly acquireFn: () => Promise<T>
-  private readonly releaseFn: (resource: T) => Promise<void>
-  private readonly mapFn: (resource: T) => Promise<M>
+  private readonly acquireFn: () => Promise<Result<ServerError, T>>
+
+  private readonly releaseFn: (
+    resource: T,
+  ) => Promise<Result<ServerError, void>>
+
+  private readonly mapFn: (resource: T) => Promise<Result<ServerError, M>>
 
   private resource: T | null = null
 
   private constructor(
-    acquire: () => Promise<T>,
-    release: (resource: T) => Promise<void>,
-    mapFn?: (resource: T) => Promise<M>,
+    acquire: () => Promise<Result<ServerError, T>>,
+    release: (resource: T) => Promise<Result<ServerError, void>>,
+    mapFn?: (resource: T) => Promise<Result<ServerError, M>>,
   ) {
     this.acquireFn = acquire
     this.releaseFn = release
-    this.mapFn = mapFn || (x => Promise.resolve(x as unknown as M))
+    this.mapFn =
+      mapFn || (x => Result.success(() => Promise.resolve(x as unknown as M)))
   }
 
   static make<T>(
-    acquire: () => Promise<T>,
-    release: (resource: T) => Promise<void>,
+    acquire: () => Promise<Result<ServerError, T>>,
+    release: (resource: T) => Promise<Result<ServerError, void>>,
   ): Resource<T>
   static make<T, M>(
-    acquire: () => Promise<T>,
-    release: (resource: T) => Promise<void>,
-    mapFn: (resource: T) => Promise<M>,
+    acquire: () => Promise<Result<ServerError, T>>,
+    release: (resource: T) => Promise<Result<ServerError, void>>,
+    mapFn: (resource: T) => Promise<Result<ServerError, M>>,
   ): Resource<T, M>
   static make<T, M>(
-    acquire: () => Promise<T>,
-    release: (resource: T) => Promise<void>,
-    mapFn?: (resource: T) => Promise<M>,
+    acquire: () => Promise<Result<ServerError, T>>,
+    release: (resource: T) => Promise<Result<ServerError, void>>,
+    mapFn?: (resource: T) => Promise<Result<ServerError, M>>,
   ): Resource<T, T | M> {
     return new Resource(acquire, release, mapFn)
   }
 
-  async use<R>(op: (resource: M) => Promise<R>): Promise<R> {
-    this.resource = this.resource || (await this.acquireFn())
-    return await this.mapFn(this.resource).then(op)
+  async use<R>(
+    op: (resource: M) => Promise<Result<ServerError, R>>,
+  ): Promise<Result<ServerError, R>> {
+    if (!this.resource) {
+      const acquisitionResult = await this.acquireFn()
+
+      if (acquisitionResult.isSuccess()) {
+        this.resource = acquisitionResult.unsafeGetValue()
+      } else {
+        return Result.failure(() => acquisitionResult.unsafeGetError())
+      }
+    }
+
+    const mapResult = await this.mapFn(this.resource)
+    return mapResult.flatMap(op)
   }
 
-  async release(): Promise<void> {
-    this.resource = this.resource || (await this.acquireFn())
+  async release(): Promise<Result<ServerError, void>> {
+    if (!this.resource) {
+      const acquisitionResult = await this.acquireFn()
+
+      if (acquisitionResult.isSuccess()) {
+        this.resource = acquisitionResult.unsafeGetValue()
+      } else {
+        return Result.failure(() => acquisitionResult.unsafeGetError())
+      }
+    }
+
     return this.releaseFn(this.resource)
   }
 }

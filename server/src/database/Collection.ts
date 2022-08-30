@@ -6,10 +6,11 @@ import {
   Collection as MongoCollection,
   Filter,
   Document,
-  ModifyResult,
 } from 'mongodb'
 import { ServerError } from '../ServerError'
 import { database } from '../resources/database'
+import { Result } from '../../../shared/Result'
+import { constant } from '../../../shared/utils'
 
 export class Collection<I extends { _id?: ObjectId }> {
   readonly name: string
@@ -18,79 +19,126 @@ export class Collection<I extends { _id?: ObjectId }> {
     this.name = name
   }
 
-  protected getCollection(): Promise<MongoCollection<I>> {
-    return database.use(db => Promise.resolve(db.collection(this.name)))
+  protected getCollection(): Promise<Result<ServerError, MongoCollection<I>>> {
+    return database.use(db => Result.success(() => db.collection(this.name)))
   }
 
-  async raw<T>(op: (collection: MongoCollection<I>) => T): Promise<T> {
-    return op(await this.getCollection())
+  async raw<T>(
+    op: (collection: MongoCollection<I>) => Promise<Result<ServerError, T>>,
+  ): Promise<Result<ServerError, T>> {
+    const collection = await this.getCollection()
+    return collection.flatMap(op)
   }
 
-  async insert(doc: OptionalUnlessRequiredId<I>): Promise<WithId<I>>
-  async insert(docs: OptionalUnlessRequiredId<I>[]): Promise<WithId<I>[]>
+  async insert(
+    doc: OptionalUnlessRequiredId<I>,
+  ): Promise<Result<ServerError, WithId<I>>>
+  async insert(
+    docs: OptionalUnlessRequiredId<I>[],
+  ): Promise<Result<ServerError, WithId<I>[]>>
   async insert(
     doc: OptionalUnlessRequiredId<I> | OptionalUnlessRequiredId<I>[],
-  ): Promise<WithId<I> | WithId<I>[]> {
+  ): Promise<Result<ServerError, WithId<I> | WithId<I>[]>> {
     const docs = Array.isArray(doc) ? doc : [doc]
     const collection = await this.getCollection()
-    const insertResult = await collection.insertMany(docs)
 
-    const insertedIds = Object.values(insertResult.insertedIds)
-    let result: WithId<I>[]
+    const insertResult = await collection.flatMap(c =>
+      Result.tryCatch(
+        () => c.insertMany(docs),
+        error =>
+          new ServerError(
+            500,
+            `Unable to insert documents in collection ${this.name}`,
+            { error },
+          ),
+      ),
+    )
 
-    if (insertedIds.length === docs.length) {
-      result = await collection
-        .find({ _id: { $in: insertedIds } } as unknown as Filter<I>)
-        .toArray()
-    } else {
-      throw new ServerError(
-        500,
-        `Failed to insert document(s) in collection "${this.name}"`,
-        { doc },
-      )
-    }
+    const insertedIds = await insertResult.map(_ =>
+      Object.values(_.insertedIds),
+    )
 
-    if (Array.isArray(doc)) {
-      return result
-    } else if (result[0]) {
-      return result[0]
-    } else {
-      throw new ServerError(
-        500,
-        `Unable to find inserted document in collection ${this.name}`,
-        { doc, insertedIds },
-      )
-    }
-  }
-
-  async findOne(filter: Filter<I>): Promise<WithId<I>> {
-    const collection = await this.getCollection()
-
-    try {
-      const result = await collection.findOne(filter)
-
-      if (result === null) {
-        throw new ServerError(404, 'Document not found')
+    return await insertedIds.flatMap(async insertedIds => {
+      if (insertedIds.length !== docs.length) {
+        return Result.failure(
+          () =>
+            new ServerError(
+              500,
+              `Failed to insert document(s) in collection "${this.name}"`,
+              { doc },
+            ),
+        )
       }
 
-      return result
-    } catch (e) {
-      throw new ServerError(
-        500,
-        `Unable to execute query on collection "${this.name}"`,
-        { error: e, filter },
+      const result = await collection.flatMap(c =>
+        Result.tryCatch(
+          () =>
+            c
+              .find({ _id: { $in: insertedIds } } as unknown as Filter<I>)
+              .toArray(),
+          error =>
+            new ServerError(
+              500,
+              `Unable to execute find in collection ${this.name}`,
+              { error, doc },
+            ),
+        ),
       )
-    }
+
+      if (Array.isArray(doc)) {
+        return result
+      } else {
+        const firstDocResult = await result.map(_ => _[0])
+        const firstDoc = await firstDocResult.getOrElse(() => undefined)
+
+        if (firstDoc) {
+          return await Result.success(() => firstDoc)
+        } else {
+          return await Result.failure(
+            () =>
+              new ServerError(
+                500,
+                `Unable to find inserted document in collection ${this.name}`,
+                { doc, insertedIds },
+              ),
+          )
+        }
+      }
+    })
   }
 
-  getById(_id: ObjectId): Promise<WithId<I>> {
+  async findOne(filter: Filter<I>): Promise<Result<ServerError, WithId<I>>> {
+    const collection = await this.getCollection()
+
+    const result = await collection.flatMap(c =>
+      Result.tryCatch(
+        () => c.findOne(filter),
+        error =>
+          new ServerError(
+            500,
+            `Unable to execute query on collection "${this.name}"`,
+            { error, filter },
+          ),
+      ),
+    )
+
+    return await result.flatMap(doc => {
+      if (doc === null) {
+        return Result.failure(() => new ServerError(404, 'Document not found'))
+      } else {
+        return Result.success(() => doc)
+      }
+    })
+  }
+
+  getById(_id: ObjectId): Promise<Result<ServerError, WithId<I>>> {
     return this.findOne({ _id } as Filter<I>)
   }
 
   find<T = I>(
     searchField: string,
     initialFilters: Document[] = [],
-  ): (query: CursorQuery) => Promise<Cursor<T>> {
+  ): (query: CursorQuery) => Promise<Result<ServerError, Cursor<T>>> {
     return async query => {
       const queryMatchStage = query.query
         ? [
@@ -225,82 +273,92 @@ export class Collection<I extends { _id?: ObjectId }> {
 
       const result = await this.aggregate<Cursor<T>>(aggregation)
 
-      if (!result[0]) {
-        throw new ServerError(
-          500,
-          `Empty response for find in collection "${this.name}"`,
-          { query },
-        )
-      }
-
-      return result[0]
+      return await result.flatMap(result => {
+        if (!result[0]) {
+          return Result.failure(
+            () =>
+              new ServerError(
+                500,
+                `Empty response for find in collection "${this.name}"`,
+                { query },
+              ),
+          )
+        } else {
+          return Result.success(constant(result[0]))
+        }
+      })
     }
   }
 
-  async aggregate<T>(pipeline: Document[]): Promise<T[]> {
+  async aggregate<T>(pipeline: Document[]): Promise<Result<ServerError, T[]>> {
     const collection = await this.getCollection()
 
-    try {
-      return collection.aggregate<T>(pipeline).toArray()
-    } catch (e) {
-      throw new ServerError(
-        500,
-        `Unable to perform aggregation on collection "${this.name}"`,
-        { error: e, pipeline },
-      )
-    }
+    return collection.flatMap(c =>
+      Result.tryCatch(
+        () => c.aggregate<T>(pipeline).toArray(),
+        error =>
+          new ServerError(
+            500,
+            `Unable to perform aggregation on collection "${this.name}"`,
+            { error, pipeline },
+          ),
+      ),
+    )
   }
 
   async update(
     _id: ObjectId,
     doc: OptionalUnlessRequiredId<I>,
-  ): Promise<WithId<I>> {
+  ): Promise<Result<ServerError, WithId<I>>> {
     const collection = await this.getCollection()
 
-    const result = await (async () => {
-      try {
-        return await (collection.findOneAndUpdate(
-          { _id } as Filter<I>,
-          { $set: doc },
-          {
-            returnDocument: 'after',
-          },
-        ) as Promise<ModifyResult<I>>)
-      } catch (e) {
-        throw new ServerError(
-          500,
-          `Unable to update a document in collection ${this.name}`,
-          { error: e, _id, doc },
-        )
+    const result = await collection.flatMap(c =>
+      Result.tryCatch(
+        () =>
+          c.findOneAndUpdate(
+            { _id } as Filter<I>,
+            { $set: doc },
+            { returnDocument: 'after' },
+          ),
+        error =>
+          new ServerError(
+            500,
+            `Unable to update a document in collection ${this.name}`,
+            { error, _id, doc },
+          ),
+      ),
+    )
+
+    return result.flatMap(result => {
+      if (!result.ok || result.value === null) {
+        return Result.failure(() => new ServerError(404, 'Document not found'))
+      } else {
+        return Result.success(constant(result.value))
       }
-    })()
-
-    if (!result.ok || result.value === null) {
-      throw new ServerError(404, 'Document not found')
-    }
-
-    return result.value
+    })
   }
 
-  async delete(_id: ObjectId): Promise<WithId<I>> {
+  async delete(_id: ObjectId): Promise<Result<ServerError, WithId<I>>> {
     const collection = await this.getCollection()
 
-    const result = await (async () => {
-      try {
-        return await collection.findOneAndDelete({ _id } as Filter<I>)
-      } catch (e) {
-        throw new ServerError(
-          500,
-          `Unable to delete a document in collection ${this.name}`,
-          { error: e, _id },
-        )
+    const result = await collection.flatMap(c =>
+      Result.tryCatch(
+        () => c.findOneAndDelete({ _id } as Filter<I>),
+        error =>
+          new ServerError(
+            500,
+            `Unable to delete a document in collection ${this.name}`,
+            { error, _id },
+          ),
+      ),
+    )
+
+    return await result.flatMap(result => {
+      if (!result.ok || result.value === null) {
+        return Result.failure(() => new ServerError(404, 'Document not found'))
+      } else {
+        return Result.success(constant(result.value))
       }
-    })()
-
-    if (!result.ok || result.value === null) {
-      throw new ServerError(404, 'Document not found')
-    }
-
-    return result.value
+    })
   }
 }
