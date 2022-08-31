@@ -3,6 +3,7 @@ import { mailchimp } from '../resources/mailchimp'
 import { Path } from '../routing/Path'
 import { Router } from '../routing/Router'
 import { ServerError } from '../ServerError'
+import CryptoJS from 'crypto-js'
 
 type AddGuestThroughMailChimpParams = {
   // Merge tag: ?
@@ -22,7 +23,11 @@ export const guestsRouter = Router.make('/guests').get(
       const { listId, subscriberHash } = req.params
 
       return Result.tryCatch(
-        () => mailchimp.lists.getListMember(listId, subscriberHash),
+        () =>
+          mailchimp.lists.getListMember(
+            listId,
+            CryptoJS.MD5(subscriberHash).toString(),
+          ),
         error =>
           new ServerError(404, 'MailChimp subscriber not found', {
             error,
