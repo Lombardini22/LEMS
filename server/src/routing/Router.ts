@@ -169,16 +169,21 @@ export class Router {
   }
 
   static handleError(error: Error, res: Response): Response {
+    const isTesting = process.env['NODE_ENV'] === 'test'
+
     if (error instanceof ServerError) {
       if (error.status === 500) {
         // TODO: send extras to LogTail or something
+        !isTesting && console.log(error.extra)
         return res.status(500).end()
       } else {
         // TODO: send extras to LogTail or something
+        !isTesting && console.log(error.extra)
         return res.status(error.status).json({ error: error.message })
       }
     } else {
       // TODO: send error message to LogTail or something
+      !isTesting && console.log(error)
       return res.status(500).end()
     }
   }
