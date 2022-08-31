@@ -10,9 +10,9 @@ export class Resource<T, M = T> {
 
   private readonly mapFn: (resource: T) => Promise<Result<ServerError, M>>
 
-  private resource: T | null = null
+  protected resource: T | null = null
 
-  private constructor(
+  protected constructor(
     acquire: () => Promise<Result<ServerError, T>>,
     release: (resource: T) => Promise<Result<ServerError, void>>,
     mapFn?: (resource: T) => Promise<Result<ServerError, M>>,
@@ -68,6 +68,9 @@ export class Resource<T, M = T> {
       }
     }
 
-    return this.releaseFn(this.resource)
+    const result = await this.releaseFn(this.resource)
+
+    this.resource = null
+    return result
   }
 }

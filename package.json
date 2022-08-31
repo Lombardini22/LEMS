@@ -8,7 +8,7 @@
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
     "test:e2e": "vue-cli-service test:e2e",
-    "test:server": "jest -c server/jest.config.js",
+    "test:server": "jest -c server/jest.config.js --runInBand",
     "test": "vue-cli-service test:unit && vue-cli-service test:e2e --headless && jest -c server/jest.config.js",
     "lint": "vue-cli-service lint"
   },

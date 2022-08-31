@@ -1,4 +1,4 @@
-import express, { ErrorRequestHandler, Request, Response } from 'express'
+import express, { Router as ExpressRouter, Request, Response } from 'express'
 import { Result } from '../../../shared/Result'
 import { ServerError } from '../ServerError'
 import { Path } from './Path'
@@ -25,14 +25,19 @@ interface RouterHandler<
 }
 
 export class Router {
+  private readonly path: string
   private readonly handlers: RouterHandler[]
 
-  private constructor(handlers: RouterHandler<any, any, any, any>[]) {
+  private constructor(
+    path: string,
+    handlers: RouterHandler<any, any, any, any>[],
+  ) {
+    this.path = path
     this.handlers = handlers
   }
 
-  static make() {
-    return new Router([])
+  static make(path: string) {
+    return new Router(path, [])
   }
 
   get<Output, Query extends Record<string, string>, P extends Path<never>>(
@@ -56,7 +61,7 @@ export class Router {
       handler,
     }
 
-    return new Router([...this.handlers, newHandler])
+    return new Router(this.path, [...this.handlers, newHandler])
   }
 
   post<Output, Body, P extends Path<never>>(
@@ -80,7 +85,7 @@ export class Router {
       handler,
     }
 
-    return new Router([...this.handlers, newHandler])
+    return new Router(this.path, [...this.handlers, newHandler])
   }
 
   put<Output, Body, P extends Path<never>>(
@@ -104,7 +109,7 @@ export class Router {
       handler,
     }
 
-    return new Router([...this.handlers, newHandler])
+    return new Router(this.path, [...this.handlers, newHandler])
   }
 
   delete<Output, Query, P extends Path<never>>(
@@ -128,50 +133,42 @@ export class Router {
       handler,
     }
 
-    return new Router([...this.handlers, newHandler])
+    return new Router(this.path, [...this.handlers, newHandler])
   }
 
   attachTo(app: express.Express): express.Express {
-    const errorHandler: ErrorRequestHandler = (error, _, res, next) => {
-      if (error) {
-        return this.handleError(error, res)
-      } else {
-        return next()
+    const expressRouter = this.handlers.reduce((app, handler) => {
+      const path = handler.path.toString()
+
+      const handlerFn = async (req: Request, res: Response) => {
+        try {
+          const result = await handler.handler(req)
+
+          return result.fold(
+            error => Router.handleError(error, res),
+            value => res.json(value),
+          )
+        } catch (error) {
+          return Router.handleError(error as Error, res)
+        }
       }
-    }
 
-    return this.handlers
-      .reduce((app, handler) => {
-        const path = handler.path.toString()
+      switch (handler.method) {
+        case 'GET':
+          return app.get(path, handlerFn)
+        case 'POST':
+          return app.post(path, handlerFn)
+        case 'PUT':
+          return app.put(path, handlerFn)
+        case 'DELETE':
+          return app.delete(path, handlerFn)
+      }
+    }, ExpressRouter())
 
-        const handlerFn = async (req: Request, res: Response) => {
-          try {
-            const result = await handler.handler(req)
-
-            return result.fold(
-              error => this.handleError(error, res),
-              value => res.json(value),
-            )
-          } catch (error) {
-            return this.handleError(error as Error, res)
-          }
-        }
-
-        switch (handler.method) {
-          case 'GET':
-            return app.get(path, handlerFn)
-          case 'POST':
-            return app.post(path, handlerFn)
-          case 'PUT':
-            return app.put(path, handlerFn)
-          case 'DELETE':
-            return app.delete(path, handlerFn)
-        }
-      }, app.use(express.json()).use(express.urlencoded({ extended: true })))
-      .use(errorHandler)
+    return app.use(this.path, expressRouter)
   }
 
-  private handleError(error: Error, res: Response): Response {
+  static handleError(error: Error, res: Response): Response {
     if (error instanceof ServerError) {
       if (error.status === 500) {
         // TODO: send extras to LogTail or something

@@ -18,29 +18,32 @@ interface Response<T> {
 }
 
 export async function sendHttpRequest<O>(
-  app: express.Express,
   method: 'GET' | 'DELETE',
   path: string,
+  app?: express.Express,
 ): Promise<Result<ServerError, Response<O>>>
 export async function sendHttpRequest<I, O>(
-  app: express.Express,
   method: 'POST' | 'PUT',
   path: string,
-  body: I,
+  body?: I,
+  app?: express.Express,
 ): Promise<Result<ServerError, Response<O>>>
 export async function sendHttpRequest<O>(
-  app: express.Express,
-  method = 'GET',
-  path: string,
-  body = {},
+  ...args: any[]
 ): Promise<Result<ServerError, Response<O>>> {
-  const hasData = (method === 'POST' || method === 'PUT') && body
+  const method = args[0] as string
+  const isCommand = method === 'POST' || method === 'PUT'
+  const path = args[1] as string
+  const body = isCommand ? args[2] : undefined
+  const app = (isCommand ? args[3] : args[2]) as express.Express | undefined
+
+  const hasData = isCommand && body
   const data = hasData ? JSON.stringify(body) : null
 
   return env.use(
     env =>
       new Promise(done => {
-        const server = app.listen(env.SERVER_PORT)
+        const server = app?.listen(env.SERVER_PORT)
 
         const request = http.request(
           {
@@ -64,7 +67,7 @@ export async function sendHttpRequest<O>(
             })
 
             response.on('end', () => {
-              server.close()
+              server?.close()
 
               Result.tryCatch(
                 () => JSON.parse(data),
@@ -77,7 +80,7 @@ export async function sendHttpRequest<O>(
         )
 
         request.on('error', () => {
-          server.close()
+          server?.close()
 
           Result.failure(() => new ServerError(500, 'HTTP request error')).then(
             done,
