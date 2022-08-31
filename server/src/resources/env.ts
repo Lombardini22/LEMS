@@ -10,21 +10,21 @@ const Env = z.object({
   SERVER_PORT: z.string(),
   MONGO_URI: z.string(),
   MONGO_DB_NAME: z.string(),
+  MAILCHIMP_API_KEY: z.string(),
+  MAILCHIMP_SERVER_PREFIX: z.string(),
 })
 type Env = z.infer<typeof Env>
 
 export const env = Resource.make(
   () =>
-    Promise.resolve(
-      Result.tryCatch(
-        () => Env.parse(process.env),
-        e =>
-          new ServerError(
-            500,
-            'Invalid environment file',
-            (e as ZodError).message,
-          ),
-      ),
+    Result.tryCatch(
+      () => Env.parse(process.env),
+      e =>
+        new ServerError(
+          500,
+          'Invalid environment file',
+          (e as ZodError).message,
+        ),
     ),
-  Result.asyncSuccess,
+  Promise.resolve,
 )

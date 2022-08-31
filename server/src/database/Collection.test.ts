@@ -1,8 +1,9 @@
 import { ObjectId } from 'mongodb'
 import { emptyCursor, emptyCursorQuery } from '../../../shared/Cursor'
 import { Result } from '../../../shared/Result'
+import { expectResult } from '../../../shared/testUtils'
 import { env } from '../resources/env'
-import { expectResult } from '../testUtils'
+import { ServerError } from '../ServerError'
 import { Collection } from './Collection'
 
 interface TestDoc {
@@ -15,11 +16,15 @@ describe('Collection', () => {
 
   describe('raw', () => {
     it('should work', async () => {
-      const result = await collection.raw(_ => Promise.resolve(_.dbName))
+      return await env.use(async env => {
+        const result = await collection.raw(_ =>
+          Result.tryCatch(
+            () => _.dbName,
+            () => new ServerError(500, 'Failed'),
+          ),
+        )
 
-      await env.use(async env => {
-        expectResult(result).toHaveSucceededWith(env.MONGO_DB_NAME)
-        return Result.asyncSuccess()
+        return expectResult(result).toHaveSucceededWith(env.MONGO_DB_NAME)
       })
     })
   })
@@ -32,8 +37,7 @@ describe('Collection', () => {
           name: 'Insert test',
         }
 
-        const result = await collection.insert(data)
-        expectResult(result).toHaveSucceededWith(data)
+        expectResult(await collection.insert(data)).toHaveSucceededWith(data)
       })
     })
 
@@ -56,10 +60,16 @@ describe('Collection', () => {
         name: 'Unique hdkjhfkjshdkjh screw the law of large numbers',
       }
 
-      await collection.raw(_ => _.insertOne(data))
-      const result = await collection.findOne({ name: data.name })
+      await collection.raw(_ =>
+        Result.tryCatch(
+          () => _.insertOne(data),
+          () => new ServerError(500, 'Failed'),
+        ),
+      )
 
-      expectResult(result).toHaveSucceededWith(data)
+      expectResult(
+        await collection.findOne({ name: data.name }),
+      ).toHaveSucceededWith(data)
     })
   })
 
@@ -70,10 +80,15 @@ describe('Collection', () => {
         name: 'GetById test',
       }
 
-      const insertResult = await collection.raw(_ => _.insertOne(data))
+      const insertResult = await collection.raw(_ =>
+        Result.tryCatch(
+          () => _.insertOne(data),
+          () => new ServerError(500, 'Failed'),
+        ),
+      )
 
-      const result = await insertResult.asyncFlatMap(_ =>
-        collection.getById(_.insertedId),
+      const result = await insertResult.flatMap(insertResult =>
+        collection.getById(insertResult.insertedId),
       )
 
       expectResult(result).toHaveSucceededWith(data)
@@ -87,11 +102,15 @@ describe('Collection', () => {
         name: 'Aggregate test',
       }
 
-      const insertResult = await collection.raw(_ => _.insertOne(data))
-      const _id = insertResult.map(_ => _.insertedId)
+      const insertResult = await collection.raw(_ =>
+        Result.tryCatch(
+          () => _.insertOne(data),
+          () => new ServerError(500, 'Failed'),
+        ),
+      )
 
-      const result = await _id.asyncFlatMap(_id =>
-        collection.aggregate<TestDoc>([{ $match: { _id } }]),
+      const result = await insertResult.flatMap(({ insertedId }) =>
+        collection.aggregate<TestDoc>([{ $match: { _id: insertedId } }]),
       )
 
       expectResult(result).toHaveSucceededWith([data])
@@ -100,7 +119,14 @@ describe('Collection', () => {
 
   describe('find', () => {
     describe('with no data', () => {
-      beforeEach(() => collection.raw(_ => _.deleteMany({})))
+      beforeEach(() =>
+        collection.raw(_ =>
+          Result.tryCatch(
+            () => _.deleteMany({}),
+            () => new ServerError(500, 'Failed'),
+          ),
+        ),
+      )
 
       it('should work', async () => {
         const result = await collection.find('name')(emptyCursorQuery())
@@ -130,7 +156,7 @@ describe('Collection', () => {
             after: null,
           })
 
-          expectResult(result.map(_ => _.pageInfo)).toHaveSucceededWith({
+          expectResult(await result.map(_ => _.pageInfo)).toHaveSucceededWith({
             totalCount: 6,
             startCursor: 'Some A',
             endCursor: 'Some B',
@@ -139,7 +165,7 @@ describe('Collection', () => {
           })
 
           expectResult(
-            result.map(_ => _.edges.map(_ => _.node.name)),
+            await result.map(_ => _.edges.map(_ => _.node.name)),
           ).toHaveSucceededWith(['Some A', 'Some B'])
         })
 
@@ -151,7 +177,7 @@ describe('Collection', () => {
             after: 'Some B',
           })
 
-          expectResult(result.map(_ => _.pageInfo)).toHaveSucceededWith({
+          expectResult(await result.map(_ => _.pageInfo)).toHaveSucceededWith({
             totalCount: 6,
             startCursor: 'Some C',
             endCursor: 'Some D',
@@ -160,7 +186,7 @@ describe('Collection', () => {
           })
 
           expectResult(
-            result.map(_ => _.edges.map(_ => _.node.name)),
+            await result.map(_ => _.edges.map(_ => _.node.name)),
           ).toHaveSucceededWith(['Some C', 'Some D'])
         })
 
@@ -172,7 +198,7 @@ describe('Collection', () => {
             after: 'Some D',
           })
 
-          expectResult(result.map(_ => _.pageInfo)).toHaveSucceededWith({
+          expectResult(await result.map(_ => _.pageInfo)).toHaveSucceededWith({
             totalCount: 6,
             startCursor: 'Some E',
             endCursor: 'Some F',
@@ -181,7 +207,7 @@ describe('Collection', () => {
           })
 
           expectResult(
-            result.map(_ => _.edges.map(_ => _.node.name)),
+            await result.map(_ => _.edges.map(_ => _.node.name)),
           ).toHaveSucceededWith(['Some E', 'Some F'])
         })
       })
@@ -195,7 +221,7 @@ describe('Collection', () => {
             before: null,
           })
 
-          expectResult(result.map(_ => _.pageInfo)).toHaveSucceededWith({
+          expectResult(await result.map(_ => _.pageInfo)).toHaveSucceededWith({
             totalCount: 6,
             startCursor: 'Some F',
             endCursor: 'Some E',
@@ -204,7 +230,7 @@ describe('Collection', () => {
           })
 
           expectResult(
-            result.map(_ => _.edges.map(_ => _.node.name)),
+            await result.map(_ => _.edges.map(_ => _.node.name)),
           ).toHaveSucceededWith(['Some F', 'Some E'])
         })
 
@@ -216,7 +242,7 @@ describe('Collection', () => {
             before: 'Some E',
           })
 
-          expectResult(result.map(_ => _.pageInfo)).toHaveSucceededWith({
+          expectResult(await result.map(_ => _.pageInfo)).toHaveSucceededWith({
             totalCount: 6,
             startCursor: 'Some D',
             endCursor: 'Some C',
@@ -225,7 +251,7 @@ describe('Collection', () => {
           })
 
           expectResult(
-            result.map(_ => _.edges.map(_ => _.node.name)),
+            await result.map(_ => _.edges.map(_ => _.node.name)),
           ).toHaveSucceededWith(['Some D', 'Some C'])
         })
 
@@ -237,7 +263,7 @@ describe('Collection', () => {
             before: 'Some C',
           })
 
-          expectResult(result.map(_ => _.pageInfo)).toHaveSucceededWith({
+          expectResult(await result.map(_ => _.pageInfo)).toHaveSucceededWith({
             totalCount: 6,
             startCursor: 'Some B',
             endCursor: 'Some A',
@@ -246,7 +272,7 @@ describe('Collection', () => {
           })
 
           expectResult(
-            result.map(_ => _.edges.map(_ => _.node.name)),
+            await result.map(_ => _.edges.map(_ => _.node.name)),
           ).toHaveSucceededWith(['Some B', 'Some A'])
         })
       })
@@ -260,13 +286,23 @@ describe('Collection', () => {
       }
 
       const updatedName = 'Updated name'
-      const insertResult = await collection.raw(_ => _.insertOne(data))
 
-      const result = await insertResult.asyncFlatMap(_ =>
-        collection.update(_.insertedId, { name: updatedName }),
+      const insertResult = await collection.raw(_ =>
+        Result.tryCatch(
+          () => _.insertOne(data),
+          () => new ServerError(500, 'Failed'),
+        ),
       )
 
-      expectResult(result.map(_ => _.name)).toHaveSucceededWith(updatedName)
+      const result = await insertResult.flatMap(({ insertedId }) =>
+        collection.update(insertedId, {
+          name: updatedName,
+        }),
+      )
+
+      expectResult(await result.map(_ => _.name)).toHaveSucceededWith(
+        updatedName,
+      )
     })
   })
 
@@ -276,13 +312,18 @@ describe('Collection', () => {
         name: 'Delete test',
       }
 
-      const insertResult = await collection.raw(_ => _.insertOne(data))
-
-      const result = await insertResult.asyncFlatMap(_ =>
-        collection.delete(_.insertedId),
+      const insertResult = await collection.raw(_ =>
+        Result.tryCatch(
+          () => _.insertOne(data),
+          () => new ServerError(500, 'Failed'),
+        ),
       )
 
-      expectResult(result.map(_ => _.name)).toHaveSucceededWith(data.name)
+      const result = await insertResult.flatMap(({ insertedId }) =>
+        collection.delete(insertedId),
+      )
+
+      expectResult(await result.map(_ => _.name)).toHaveSucceededWith(data.name)
     })
   })
 })

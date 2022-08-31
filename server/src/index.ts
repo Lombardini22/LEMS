@@ -1,17 +1,7 @@
-import { env } from './resources/env'
-import { useServer } from './server'
+import { Result } from '../../shared/Result'
+import { guestsRouter } from './guests/guestsRouter'
+import { Server } from './resources/Server'
 
-try {
-  env.use(env =>
-    Promise.resolve(
-      useServer(app => {
-        app.listen(env.SERVER_PORT, () =>
-          console.log(`Server ready at port ${env.SERVER_PORT}`),
-        )
-      }),
-    ),
-  )
-} catch (e) {
-  // TODO: sensible exception handling here
-  console.log(e)
-}
+Server.make()
+  .withRouter(guestsRouter)
+  .use(() => Result.success(() => console.log('Server is ready')))

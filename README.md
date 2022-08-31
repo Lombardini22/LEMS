@@ -19,12 +19,9 @@
 - `yarn test:e2e` to start Cypress
 - `yarn test` to run all tests once (Cypress tests run in headless mode)
 
-## Build
+## Guides
 
-### Android
+### Add an environment variable
 
-- Set `yarn` as the default package manager for Ionic: `npx @ionic/cli config set -g npmClient yarn`
-- [Install Android Studio](https://developer.android.com/studio)
-- Sync the app with Capacitor: `npx @ionic/cli cap sync`
-- Open the app in Android Studio: `npx @ionic/cli cap open android`
-- Use Android Studio to generate a bundle or APK
+- Add the environment variable to the `.env` **and** `.env.example` files. Do not use the real value in the example file (duh!)
+- If the environment should be read server side, add it to the `env.ts` file, where the `env` resource is. Use Zod to point out the runtime type
