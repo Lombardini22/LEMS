@@ -20,6 +20,8 @@
     "@capacitor/status-bar": "4.0.1",
     "@ionic/vue": "^6.0.0",
     "@ionic/vue-router": "^6.0.0",
+    "@mailchimp/mailchimp_marketing": "^3.0.78",
+    "add": "^2.0.6",
     "axios": "^0.27.2",
     "core-js": "^3.6.5",
     "dotenv": "^16.0.1",
@@ -27,6 +29,7 @@
     "mongodb": "^4.9.0",
     "vue": "^3.2.21",
     "vue-router": "^4.0.12",
+    "yarn": "^1.22.19",
     "zod": "^3.18.0"
   },
   "devDependencies": {
@@ -34,6 +37,7 @@
     "@ionic/cli": "^6.20.1",
     "@swc/core": "^1.2.242",
     "@types/jest": "^27.0.2",
+    "@types/mailchimp__mailchimp_marketing": "^3.0.5",
     "@typescript-eslint/eslint-plugin": "^5.6.0",
     "@typescript-eslint/parser": "^5.6.0",
     "@vue/cli-plugin-babel": "~5.0.0-rc.1",
