@@ -7,6 +7,9 @@ import { mailchimp } from '../../resources/mailchimp'
 import { Request } from '../../routing/Router'
 import { ServerError } from '../../ServerError'
 import { MD5 } from 'crypto-js'
+import { guestsCollection } from './guestsCollection'
+import { WithId } from 'mongodb'
+import { Guest } from '../../../../shared/models/Guest'
 
 export type AddGuestThroughMailChimpParams = {
   listId: string
@@ -15,7 +18,7 @@ export type AddGuestThroughMailChimpParams = {
 
 export function addGuestThroughMailChimp(
   req: Request<AddGuestThroughMailChimpParams>,
-): Promise<Result<ServerError, MembersSuccessResponse>> {
+): Promise<Result<ServerError, WithId<Guest>>> {
   return mailchimp.use(async mailchimp => {
     const { listId, email } = req.params
 
@@ -29,7 +32,7 @@ export function addGuestThroughMailChimp(
         }),
     )
 
-    return response.flatMap(response => {
+    const guestData = await response.flatMap(response => {
       if (isMembersSuccessResponse(response)) {
         return Result.success(() => response)
       } else {
@@ -41,6 +44,47 @@ export function addGuestThroughMailChimp(
         )
       }
     })
+
+    const guest = await guestData.flatMap(async mcGuest => {
+      if (!mcGuest.merge_fields['FNAME'] || !mcGuest.merge_fields['LNAME']) {
+        return Result.failure(
+          () =>
+            new ServerError(500, 'Invalid data returned by MailChimp API', {
+              guestData: mcGuest,
+            }),
+        )
+      }
+
+      const guestData: Guest = {
+        ...{
+          firstName: mcGuest.merge_fields['FNAME'],
+          lastName: mcGuest.merge_fields['LNAME'],
+          email: mcGuest.email_address,
+        },
+        ...(mcGuest.merge_fields['MMERGE8']
+          ? {
+              companyName: mcGuest.merge_fields['MMERGE8'],
+            }
+          : {}),
+      }
+
+      const existingGuestResult = await guestsCollection.findOne({
+        email: mcGuest.email_address,
+      })
+
+      return existingGuestResult.fold<Result<ServerError, WithId<Guest>>>(
+        error => {
+          if (error.status === 404) {
+            return guestsCollection.insert(guestData)
+          } else {
+            return existingGuestResult
+          }
+        },
+        guest => guestsCollection.update(guest._id, guestData),
+      )
+    })
+
+    return guest
   })
 }
 
