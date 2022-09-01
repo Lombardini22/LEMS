@@ -43,7 +43,7 @@ describe('addGuestThroughMailChimp', () => {
     expect(getListMember).toHaveBeenCalledTimes(1)
     expect(getListMember).toHaveBeenCalledWith(
       'listId',
-      MD5('email').toString(),
+      MD5('email'.toLowerCase()).toString(),
     )
 
     expectResult(result).toHaveSucceededWith({

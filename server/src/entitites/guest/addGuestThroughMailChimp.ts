@@ -23,7 +23,11 @@ export function addGuestThroughMailChimp(
     const { listId, email } = req.params
 
     const response = await Result.tryCatch(
-      () => mailchimp.lists.getListMember(listId, MD5(email).toString()),
+      () =>
+        mailchimp.lists.getListMember(
+          listId,
+          MD5(email.toLowerCase()).toString(),
+        ),
       error =>
         new ServerError(404, 'MailChimp subscriber not found', {
           error,
