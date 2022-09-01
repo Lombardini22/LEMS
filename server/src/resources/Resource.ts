@@ -73,20 +73,4 @@ export class Resource<T, M = T> {
     this.resource = null
     return result
   }
-
-  private async impureAcquire(): Promise<Result<ServerError, T>> {
-    if (this.resource) {
-      return Result.success(this.resource)
-    } else {
-      const result = await this.acquireFn()
-
-      return result.fold(
-        error => Result.failure(error),
-        value => {
-          this.resource = value
-          return Result.success(value)
-        },
-      )
-    }
-  }
 }
