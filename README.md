@@ -18,3 +18,10 @@
 - `yarn test:unit --watch` to start unit tests in watch mode
 - `yarn test:e2e` to start Cypress
 - `yarn test` to run all tests once (Cypress tests run in headless mode)
+
+## Guides
+
+### Add an environment variable
+
+- Add the environment variable to the `.env` **and** `.env.example` files. Do not use the real value in the example file (duh!)
+- If the environment should be read server side, add it to the `env.ts` file, where the `env` resource is. Use Zod to point out the runtime type
