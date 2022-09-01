@@ -1,5 +1,5 @@
 import { Result } from '../../shared/Result'
-import { guestsRouter } from './guests/guestsRouter'
+import { guestsRouter } from './entitites/guest/guestsRouter'
 import { Server } from './resources/Server'
 
 Server.make()

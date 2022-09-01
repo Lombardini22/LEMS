@@ -1,11 +1,15 @@
-import express, { Router as ExpressRouter, Request, Response } from 'express'
+import express, {
+  Router as ExpressRouter,
+  Request as ExpressRequest,
+  Response,
+} from 'express'
 import { Result } from '../../../shared/Result'
 import { ServerError } from '../ServerError'
 import { Path } from './Path'
 
 type RouterMethod = 'GET' | 'POST' | 'PUT' | 'DELETE'
 
-interface RouterRequest<Params = unknown, Query = unknown, Body = unknown> {
+export interface Request<Params = unknown, Query = unknown, Body = unknown> {
   params: Params
   query: Query
   body: Body
@@ -20,7 +24,7 @@ interface RouterHandler<
   method: RouterMethod
   path: Path<Params>
   handler: (
-    req: RouterRequest<Params, Query, Body>,
+    req: Request<Params, Query, Body>,
   ) => Promise<Result<ServerError, Output>>
 }
 
@@ -43,7 +47,7 @@ export class Router {
   get<Output, Query extends Record<string, string>, P extends Path<never>>(
     path: P,
     handler: (
-      req: RouterRequest<
+      req: Request<
         P extends Path<infer Params> ? Params : never,
         Query,
         unknown
@@ -67,7 +71,7 @@ export class Router {
   post<Output, Body, P extends Path<never>>(
     path: P,
     handler: (
-      req: RouterRequest<
+      req: Request<
         P extends Path<infer Params> ? Params : never,
         unknown,
         Body
@@ -91,7 +95,7 @@ export class Router {
   put<Output, Body, P extends Path<never>>(
     path: P,
     handler: (
-      req: RouterRequest<
+      req: Request<
         P extends Path<infer Params> ? Params : never,
         unknown,
         Body
@@ -115,7 +119,7 @@ export class Router {
   delete<Output, Query, P extends Path<never>>(
     path: P,
     handler: (
-      req: RouterRequest<
+      req: Request<
         P extends Path<infer Params> ? Params : never,
         Query,
         unknown
@@ -140,7 +144,7 @@ export class Router {
     const expressRouter = this.handlers.reduce((app, handler) => {
       const path = handler.path.toString()
 
-      const handlerFn = async (req: Request, res: Response) => {
+      const handlerFn = async (req: ExpressRequest, res: Response) => {
         try {
           const result = await handler.handler(req)
 
