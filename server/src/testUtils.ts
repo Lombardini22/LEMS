@@ -71,7 +71,7 @@ export async function sendHttpRequest<O>(
 
               Result.tryCatch(
                 () => JSON.parse(data),
-                () => new ServerError(status, 'JSON parsing error'),
+                () => new ServerError(status, 'JSON parsing error', { data }),
               )
                 .then(result => result.map(data => ({ status, data })))
                 .then(done)
@@ -79,12 +79,12 @@ export async function sendHttpRequest<O>(
           },
         )
 
-        request.on('error', () => {
+        request.on('error', error => {
           server?.close()
 
-          Result.failure(() => new ServerError(500, 'HTTP request error')).then(
-            done,
-          )
+          Result.failure(
+            () => new ServerError(500, 'HTTP request error', { error }),
+          ).then(done)
         })
 
         if (data) {
