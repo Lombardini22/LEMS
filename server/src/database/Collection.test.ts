@@ -73,7 +73,7 @@ describe('Collection', () => {
     })
   })
 
-  describe('getById', () => {
+  describe('findById', () => {
     it('should work', async () => {
       const data = {
         _id: new ObjectId(),
@@ -88,7 +88,7 @@ describe('Collection', () => {
       )
 
       const result = await insertResult.flatMap(insertResult =>
-        collection.getById(insertResult.insertedId),
+        collection.findById(insertResult.insertedId),
       )
 
       expectResult(result).toHaveSucceededWith(data)

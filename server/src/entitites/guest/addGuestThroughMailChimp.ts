@@ -10,11 +10,16 @@ import { MD5 } from 'crypto-js'
 import { guestsCollection } from './guestsCollection'
 import { WithId } from 'mongodb'
 import { Guest } from '../../../../shared/models/Guest'
+import { Path } from '../../routing/Path'
 
-export type AddGuestThroughMailChimpParams = {
+type AddGuestThroughMailChimpParams = {
   listId: string
   email: string
 }
+
+export const addGuestThroughMailChimpPath = Path.start()
+  .param<AddGuestThroughMailChimpParams>('listId')
+  .param<AddGuestThroughMailChimpParams>('email')
 
 export function addGuestThroughMailChimp(
   req: Request<AddGuestThroughMailChimpParams>,

@@ -1,15 +1,18 @@
-import { Path } from '../../routing/Path'
 import { Router } from '../../routing/Router'
 import {
   addGuestThroughMailChimp,
-  AddGuestThroughMailChimpParams,
-} from './addGuestThroughMailChimp'
-
-const addGuestThroughMailChimpPath = Path.start()
-  .param<AddGuestThroughMailChimpParams>('listId')
-  .param<AddGuestThroughMailChimpParams>('email')
-
-export const guestsRouter = Router.make('/guests').get(
   addGuestThroughMailChimpPath,
-  addGuestThroughMailChimp,
-)
+} from './addGuestThroughMailChimp'
+import { createGuest, createGuestPath } from './createGuest'
+import { deleteGuest, deleteGuestPath } from './deleteGuest'
+import { findGuestById, findGuestByIdPath } from './findGuestById'
+import { findGuests, findGuestsPath } from './findGuests'
+import { updateGuest, updateGuestPath } from './updateGuest'
+
+export const guestsRouter = Router.make('/guests')
+  .post(createGuestPath, createGuest)
+  .get(findGuestsPath, findGuests)
+  .get(findGuestByIdPath, findGuestById)
+  .put(updateGuestPath, updateGuest)
+  .delete(deleteGuestPath, deleteGuest)
+  .get(addGuestThroughMailChimpPath, addGuestThroughMailChimp)

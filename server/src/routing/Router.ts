@@ -44,19 +44,19 @@ export class Router {
     return new Router(path, [])
   }
 
-  get<Output, Query extends Record<string, string>, P extends Path<never>>(
+  get<Output, P extends Path<never, never>>(
     path: P,
     handler: (
       req: Request<
         P extends Path<infer Params> ? Params : never,
-        Query,
+        P extends Path<any, infer Query> ? Query : never,
         unknown
       >,
     ) => Promise<Result<ServerError, Output>>,
   ) {
     const newHandler: RouterHandler<
       P extends Path<infer Params> ? Params : never,
-      Query,
+      P extends Path<any, infer Query> ? Query : never,
       unknown,
       Output
     > = {
@@ -116,19 +116,19 @@ export class Router {
     return new Router(this.path, [...this.handlers, newHandler])
   }
 
-  delete<Output, Query, P extends Path<never>>(
+  delete<Output, P extends Path<never>>(
     path: P,
     handler: (
       req: Request<
         P extends Path<infer Params> ? Params : never,
-        Query,
+        P extends Path<any, infer Query> ? Query : never,
         unknown
       >,
     ) => Promise<Result<ServerError, Output>>,
   ) {
     const newHandler: RouterHandler<
       P extends Path<infer Params> ? Params : never,
-      Query,
+      P extends Path<any, infer Query> ? Query : never,
       unknown,
       Output
     > = {

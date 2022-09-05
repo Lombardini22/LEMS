@@ -6,6 +6,7 @@ import {
   Collection as MongoCollection,
   Filter,
   Document,
+  MatchKeysAndValues,
 } from 'mongodb'
 import { ServerError } from '../ServerError'
 import { database } from '../resources/database'
@@ -131,11 +132,11 @@ export class Collection<I extends { _id?: ObjectId }> {
     })
   }
 
-  getById(_id: ObjectId): Promise<Result<ServerError, WithId<I>>> {
+  findById(_id: ObjectId): Promise<Result<ServerError, WithId<I>>> {
     return this.findOne({ _id } as Filter<I>)
   }
 
-  find<T = I>(
+  find<T = WithId<I>>(
     searchField: string,
     initialFilters: Document[] = [],
   ): (query: CursorQuery) => Promise<Result<ServerError, Cursor<T>>> {
@@ -290,7 +291,9 @@ export class Collection<I extends { _id?: ObjectId }> {
     }
   }
 
-  async aggregate<T>(pipeline: Document[]): Promise<Result<ServerError, T[]>> {
+  async aggregate<T extends Document>(
+    pipeline: Document[],
+  ): Promise<Result<ServerError, T[]>> {
     const collection = await this.getCollection()
 
     return collection.flatMap(c =>
@@ -314,12 +317,20 @@ export class Collection<I extends { _id?: ObjectId }> {
 
     const result = await collection.flatMap(c =>
       Result.tryCatch(
-        () =>
-          c.findOneAndUpdate(
+        () => {
+          return c.findOneAndUpdate(
             { _id } as Filter<I>,
-            { $set: doc },
+            {
+              $set: Object.entries(doc)
+                .filter(([key]) => key !== '_id')
+                .reduce(
+                  (res, [key, value]) => ({ ...res, [key]: value }),
+                  {} as MatchKeysAndValues<I>,
+                ),
+            },
             { returnDocument: 'after' },
-          ),
+          )
+        },
         error =>
           new ServerError(
             500,
