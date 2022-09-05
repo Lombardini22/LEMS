@@ -3,18 +3,22 @@
     <ion-tabs>
       <ion-router-outlet></ion-router-outlet>
       <ion-tab-bar slot="bottom">
-        <ion-tab-button tab="tab1" href="/tabs/home">
+        <ion-tab-button tab="tab1" href="home">
           <ion-icon :icon="qrCodeOutline" />
           <ion-label>QR Scan</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button tab="tab2" href="/tabs/manual">
+        <ion-tab-button tab="tab2" href="manual">
           <ion-icon :icon="listOutline" />
           <ion-label>List / Manual</ion-label>
         </ion-tab-button>
-         <ion-tab-button tab="tab3" href="/tabs/quasar">
+         <ion-tab-button tab="tab3" href="quasar">
           <ion-icon :icon="atCircle" />
           <ion-label>Quasar</ion-label>
+        </ion-tab-button>
+        <ion-tab-button tab="tab4" href="ticket">
+          <ion-icon :icon="ticketOutline" />
+          <ion-label>Ticket</ion-label>
         </ion-tab-button>
       </ion-tab-bar>
     </ion-tabs>
@@ -31,5 +35,5 @@ import {
   IonPage,
   IonRouterOutlet,
 } from '@ionic/vue'
-import { atCircle, listOutline,  qrCodeOutline } from 'ionicons/icons'
+import { atCircle, listOutline,  qrCodeOutline, ticketOutline } from 'ionicons/icons'
 </script>

@@ -4,28 +4,20 @@ import ScanPage from '../views/ScanPage.vue'
 import TabsPage from '../views/TabsPage.vue'
 import ManualPage from '../views/ManualPage.vue'
 import QuasarPage from '../views/QuasarPage.vue'
+import TicketPage from '../views/TicketPage.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    redirect: '/tabs/home',
-  },
-  {
-    path: '/home',
-    name: 'Home',
-    component: ScanPage,
+    redirect: '/home',
   },
   {
     path: "/",
-    redirect: "/tabs/tab1",
-  },
-  {
-    path: "/tabs/",
     component: TabsPage,
     children: [
       {
-        path: "",
-        redirect: "/tabs/home",
+        path: "/",
+        redirect: "/home",
       },
       {
         path: "home",
@@ -40,6 +32,11 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: "quasar",
         component: QuasarPage,
+        // beforeEnter: authCheck,
+      },
+      {
+        path: "Ticket/:listId/:email",
+        component: TicketPage,
         // beforeEnter: authCheck,
       },
     ],
