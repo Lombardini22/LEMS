@@ -15,13 +15,32 @@ import { constant } from '../../../shared/utils'
 
 export class Collection<I extends { _id?: ObjectId }> {
   readonly name: string
+  private init:
+    | ((collection: MongoCollection<I>) => Promise<Result<ServerError, void>>)
+    | null
 
-  constructor(name: string) {
+  constructor(
+    name: string,
+    init?: (
+      collection: MongoCollection<I>,
+    ) => Promise<Result<ServerError, void>>,
+  ) {
     this.name = name
+    this.init = init || null
   }
 
   protected getCollection(): Promise<Result<ServerError, MongoCollection<I>>> {
-    return database.use(db => Result.success(() => db.collection(this.name)))
+    return database.use(async db => {
+      const collection = db.collection<I>(this.name)
+
+      if (this.init) {
+        const initResult = await this.init(collection)
+        this.init = null
+        return initResult.map(() => collection)
+      } else {
+        return Result.success(() => collection)
+      }
+    })
   }
 
   async raw<T>(
