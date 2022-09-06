@@ -8,8 +8,18 @@ import { guestsCollection } from './guestsCollection'
 
 export const createGuestPath = Path.start()
 
-export function createGuest(
+export async function createGuest(
   req: Request<unknown, unknown, Guest>,
 ): Promise<Result<ServerError, WithId<Guest>>> {
-  return guestsCollection.insert(req.body)
+  const result = await guestsCollection.insert(req.body)
+  return result.mapError(e => {
+    if (e.extra['error']['code']) {
+      return new ServerError(
+        409,
+        'A guest with the same email address already exists',
+      )
+    } else {
+      return e
+    }
+  })
 }
