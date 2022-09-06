@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb'
 import { Cursor } from '../../../../shared/Cursor'
-import { Guest } from '../../../../shared/models/Guest'
+import { Guest, hashGuestEmail } from '../../../../shared/models/Guest'
 import { Result } from '../../../../shared/Result'
 import { expectResult } from '../../../../shared/testUtils'
 import { constVoid } from '../../../../shared/utils'
@@ -30,6 +30,7 @@ describe('guestRouter', () => {
           firstName: 'John',
           lastName: 'Doe',
           email: 'john.doe@example.com',
+          emailHash: hashGuestEmail('john.doe@example.com'),
           companyName: 'ACME Inc.',
         }
 
@@ -44,15 +45,17 @@ describe('guestRouter', () => {
           data: expect.objectContaining(data),
         })
 
-        const _id = insertionResult.unsafeGetValue().data._id
+        const emailHash = insertionResult.unsafeGetValue().data.emailHash
 
         const findOneResult = await sendHttpRequest<GuestResult>(
           'GET',
-          `/guests/${_id}`,
+          `/guests/${emailHash}`,
         )
 
         expectResult(findOneResult).toHaveSucceeded()
-        expectT(findOneResult.unsafeGetValue().data._id).toEqual(_id)
+        expectT(findOneResult.unsafeGetValue().data.emailHash).toEqual(
+          emailHash,
+        )
 
         const guest = {
           ...findOneResult.unsafeGetValue().data,
@@ -66,13 +69,13 @@ describe('guestRouter', () => {
 
         expectResult(findresult).toHaveSucceeded()
         expectT(findresult.unsafeGetValue().data.edges.length).toEqual(1)
-        expectT(findresult.unsafeGetValue().data.edges[0]?.node._id).toEqual(
-          _id,
-        )
+        expectT(
+          findresult.unsafeGetValue().data.edges[0]?.node.emailHash,
+        ).toEqual(emailHash)
 
         const updateResult = await sendHttpRequest<Guest, GuestResult>(
           'PUT',
-          `/guests/${_id}`,
+          `/guests/${emailHash}`,
           {
             ...guest,
             firstName: 'Updated First Name',
@@ -90,11 +93,13 @@ describe('guestRouter', () => {
 
         const deletionResult = await sendHttpRequest<GuestResult>(
           'DELETE',
-          `/guests/${_id}`,
+          `/guests/${emailHash}`,
         )
 
         expectResult(deletionResult).toHaveSucceeded()
-        expectT(deletionResult.unsafeGetValue().data._id).toEqual(_id)
+        expectT(deletionResult.unsafeGetValue().data.emailHash).toEqual(
+          emailHash,
+        )
 
         return Result.success(constVoid)
       }))

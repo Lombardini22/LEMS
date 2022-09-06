@@ -15,13 +15,32 @@ import { constant } from '../../../shared/utils'
 
 export class Collection<I extends { _id?: ObjectId }> {
   readonly name: string
+  private init:
+    | ((collection: MongoCollection<I>) => Promise<Result<ServerError, void>>)
+    | null
 
-  constructor(name: string) {
+  constructor(
+    name: string,
+    init?: (
+      collection: MongoCollection<I>,
+    ) => Promise<Result<ServerError, void>>,
+  ) {
     this.name = name
+    this.init = init || null
   }
 
   protected getCollection(): Promise<Result<ServerError, MongoCollection<I>>> {
-    return database.use(db => Result.success(() => db.collection(this.name)))
+    return database.use(async db => {
+      const collection = db.collection<I>(this.name)
+
+      if (this.init) {
+        const initResult = await this.init(collection)
+        this.init = null
+        return initResult.map(() => collection)
+      } else {
+        return Result.success(() => collection)
+      }
+    })
   }
 
   async raw<T>(
@@ -310,7 +329,7 @@ export class Collection<I extends { _id?: ObjectId }> {
   }
 
   async update(
-    _id: ObjectId,
+    filter: Filter<I>,
     doc: OptionalUnlessRequiredId<I>,
   ): Promise<Result<ServerError, WithId<I>>> {
     const collection = await this.getCollection()
@@ -319,7 +338,7 @@ export class Collection<I extends { _id?: ObjectId }> {
       Result.tryCatch(
         () => {
           return c.findOneAndUpdate(
-            { _id } as Filter<I>,
+            filter,
             {
               $set: Object.entries(doc)
                 .filter(([key]) => key !== '_id')
@@ -335,7 +354,7 @@ export class Collection<I extends { _id?: ObjectId }> {
           new ServerError(
             500,
             `Unable to update a document in collection ${this.name}`,
-            { error, _id, doc },
+            { error, filter, doc },
           ),
       ),
     )
@@ -349,17 +368,17 @@ export class Collection<I extends { _id?: ObjectId }> {
     })
   }
 
-  async delete(_id: ObjectId): Promise<Result<ServerError, WithId<I>>> {
+  async delete(filter: Filter<I>): Promise<Result<ServerError, WithId<I>>> {
     const collection = await this.getCollection()
 
     const result = await collection.flatMap(c =>
       Result.tryCatch(
-        () => c.findOneAndDelete({ _id } as Filter<I>),
+        () => c.findOneAndDelete(filter),
         error =>
           new ServerError(
             500,
             `Unable to delete a document in collection ${this.name}`,
-            { error, _id },
+            { error, filter },
           ),
       ),
     )

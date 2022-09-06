@@ -6,10 +6,9 @@ import { Result } from '../../../../shared/Result'
 import { mailchimp } from '../../resources/mailchimp'
 import { Request } from '../../routing/Router'
 import { ServerError } from '../../ServerError'
-import { MD5 } from 'crypto-js'
 import { guestsCollection } from './guestsCollection'
 import { WithId } from 'mongodb'
-import { Guest } from '../../../../shared/models/Guest'
+import { Guest, hashGuestEmail } from '../../../../shared/models/Guest'
 import { Path } from '../../routing/Path'
 
 type AddGuestThroughMailChimpParams = {
@@ -26,13 +25,10 @@ export function addGuestThroughMailChimp(
 ): Promise<Result<ServerError, WithId<Guest>>> {
   return mailchimp.use(async mailchimp => {
     const { listId, email } = req.params
+    const emailHash = hashGuestEmail(email)
 
     const response = await Result.tryCatch(
-      () =>
-        mailchimp.lists.getListMember(
-          listId,
-          MD5(email.toLowerCase()).toString(),
-        ),
+      () => mailchimp.lists.getListMember(listId, emailHash),
       error =>
         new ServerError(404, 'MailChimp subscriber not found', {
           error,
@@ -69,6 +65,7 @@ export function addGuestThroughMailChimp(
           firstName: mcGuest.merge_fields['FNAME'],
           lastName: mcGuest.merge_fields['LNAME'],
           email: mcGuest.email_address,
+          emailHash,
         },
         ...(mcGuest.merge_fields['MMERGE8']
           ? {
@@ -77,9 +74,7 @@ export function addGuestThroughMailChimp(
           : {}),
       }
 
-      const existingGuestResult = await guestsCollection.findOne({
-        email: mcGuest.email_address,
-      })
+      const existingGuestResult = await guestsCollection.findOne({ emailHash })
 
       return existingGuestResult.fold<Result<ServerError, WithId<Guest>>>(
         error => {
@@ -89,7 +84,7 @@ export function addGuestThroughMailChimp(
             return existingGuestResult
           }
         },
-        guest => guestsCollection.update(guest._id, guestData),
+        guest => guestsCollection.update({ _id: guest._id }, guestData),
       )
     })
 

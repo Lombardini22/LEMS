@@ -8,12 +8,11 @@ import { env } from '../../resources/env'
 import { Result } from '../../../../shared/Result'
 import { constVoid } from '../../../../shared/utils'
 
-type QrCodeParams = { listId: string; email: string }
+type QrCodeParams = { emailHash: string }
 
 export const sendQrCodePath = Path.start()
   .literal('qr')
-  .param<QrCodeParams>('listId')
-  .param<QrCodeParams>('email')
+  .param<QrCodeParams>('emailHash')
 
 export const sendQrCode: RequestHandler<
   QrCodeParams,
@@ -22,8 +21,9 @@ export const sendQrCode: RequestHandler<
   unknown
 > = (req, res) => {
   env.use(async env => {
-    const { listId, email } = req.params
-    const guest = await guestsCollection.findOne({ email })
+    const guest = await guestsCollection.findOne({
+      emailHash: req.params.emailHash,
+    })
 
     await guest.fold(
       error => {
@@ -32,14 +32,10 @@ export const sendQrCode: RequestHandler<
       async () => {
         const stream = new PassThrough()
 
-        await toFileStream(
-          stream,
-          `${env.CLIENT_URL}/ticket/${listId}/${email}`,
-          {
-            type: 'png',
-            width: 200,
-          },
-        )
+        await toFileStream(stream, env.CLIENT_URL, {
+          type: 'png',
+          width: 200,
+        })
 
         stream.pipe(res)
       },

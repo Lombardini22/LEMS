@@ -295,9 +295,12 @@ describe('Collection', () => {
       )
 
       const result = await insertResult.flatMap(({ insertedId }) =>
-        collection.update(insertedId, {
-          name: updatedName,
-        }),
+        collection.update(
+          { _id: insertedId },
+          {
+            name: updatedName,
+          },
+        ),
       )
 
       expectResult(await result.map(_ => _.name)).toHaveSucceededWith(
@@ -320,7 +323,7 @@ describe('Collection', () => {
       )
 
       const result = await insertResult.flatMap(({ insertedId }) =>
-        collection.delete(insertedId),
+        collection.delete({ _id: insertedId }),
       )
 
       expectResult(await result.map(_ => _.name)).toHaveSucceededWith(data.name)
