@@ -12,12 +12,10 @@ export function expectResult<E, A>(result: Result<E, A>) {
       return Result.success(constVoid)
     },
     toHaveSucceededWith(value: A) {
-      expect(result.isSuccess()).toBe(true)
       expect(result.unsafeGetValue()).toEqual(value)
       return Result.success(constVoid)
     },
     toHaveFailedWith(error: E) {
-      expect(result.isFailure()).toBe(true)
       expect(result.unsafeGetError()).toEqual(error)
       return Result.success(constVoid)
     },
