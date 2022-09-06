@@ -10,6 +10,8 @@ export interface Guest {
   companyName?: string
 }
 
+export type GuestCreationInput = Omit<Guest, 'emailHash'>
+
 export function hashGuestEmail(email: string): string {
   return MD5(email.toLowerCase()).toString()
 }

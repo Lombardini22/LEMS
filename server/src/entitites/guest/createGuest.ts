@@ -1,5 +1,9 @@
 import { WithId } from 'mongodb'
-import { Guest } from '../../../../shared/models/Guest'
+import {
+  Guest,
+  GuestCreationInput,
+  hashGuestEmail,
+} from '../../../../shared/models/Guest'
 import { Result } from '../../../../shared/Result'
 import { Path } from '../../routing/Path'
 import { Request } from '../../routing/Router'
@@ -9,9 +13,13 @@ import { guestsCollection } from './guestsCollection'
 export const createGuestPath = Path.start()
 
 export async function createGuest(
-  req: Request<unknown, unknown, Guest>,
+  req: Request<unknown, unknown, GuestCreationInput>,
 ): Promise<Result<ServerError, WithId<Guest>>> {
-  const result = await guestsCollection.insert(req.body)
+  const result = await guestsCollection.insert({
+    ...req.body,
+    emailHash: hashGuestEmail(req.body.email),
+  })
+
   return result.mapError(e => {
     if (e.extra['error']['code']) {
       return new ServerError(
