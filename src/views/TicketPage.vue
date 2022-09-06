@@ -22,8 +22,8 @@
           </div>
           <div class="ticket_body">
             <section class="ticket_section">
-              <h3><strong>{{ ticket.firstname }} {{ ticket.lastname }}</strong></h3>
-              <p>{{ ticket.azienda }}</p>
+              <h3><strong>{{ ticket.firstName }} {{ ticket.lastName }}</strong></h3>
+              <p>{{ ticket.company }}</p>
             </section>
             <section class="ticket_section">
               <h3><strong>Foresight 2022</strong></h3>
@@ -48,20 +48,29 @@ import {
   IonContent,
   IonPage,
 } from '@ionic/vue'
-// import QrcodeVue from 'qrcode.vue'
 import { ref } from 'vue'
 import { MD5 } from 'crypto-js'
 import Tilt from 'vanilla-tilt-vue'
+import axios from 'axios';
 
 const ticket = ref({
   id: MD5(window.location.href.split('/')[5] || '').toString(),
-  firstname: 'John',
-  lastname: 'Doe',
+  firstName: 'John',
+  lastName: 'Doe',
   email: window.location.href.split('/')[5] || '',
-  azienda: 'Foresight',
+  company: 'Foresight',
 })
+
+axios.get(`http://localhost:5000/guests/${ticket.value.id}`).then((res) => {
+ticket.value.firstName = res.data.firstName
+ticket.value.lastName = res.data.lastName
+ticket.value.company = res.data.company
+}).catch((err) => {
+console.log(err)
+})
+
 const qrResult = ref('')
-qrResult.value = `http://localhost:5000/guests/qr/${window.location.href.split('/')[4]}/${window.location.href.split('/')[5]}`
+qrResult.value = `http://localhost:5000/guests/qr/${ticket.value.id}`
 const qrcode = ref('')
 qrcode.value = ticket.value.id
 console.log(qrcode.value)

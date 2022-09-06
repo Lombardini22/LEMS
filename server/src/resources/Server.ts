@@ -1,4 +1,5 @@
 import express, { ErrorRequestHandler } from 'express'
+import cors from 'cors'
 import { Result } from '../../../shared/Result'
 import { env } from './env'
 import { Router } from '../routing/Router'
@@ -16,6 +17,7 @@ export class Server extends Resource<express.Express> {
       const app = express()
         .use(express.json())
         .use(express.urlencoded({ extended: true }))
+        .use(cors())
 
       const appWithRouters = this.routers
         .reduce((app, router) => router.attachTo(app), app)

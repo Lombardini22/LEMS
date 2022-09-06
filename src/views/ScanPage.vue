@@ -15,19 +15,12 @@
 
       <div id="container">
         <strong>Please Scan A QRCode to Checkin</strong>
-        <ion-input
-            rounded
-            outlined
-            v-model="qrString"
-            placeholder="Scan Your QRCode Using the Scanners"
-            autofocus
-            ref="qrInput"
-            v-on:focusout="onFocusOut"
-        ></ion-input>
+        <ion-input rounded outlined v-model="qrString" placeholder="Scan Your QRCode Using the Scanners" autofocus
+          ref="qrInput" v-on:focusout="onFocusOut"></ion-input>
         <p>
-          <!-- <ion-button @click="presentAlert">
+          <ion-button @click="presentAlert">
             <ion-icon :icon="qrCodeOutline" /> Scan
-          </ion-button> -->
+          </ion-button>
         </p>
       </div>
     </ion-content>
@@ -36,34 +29,49 @@
 
 <script lang="ts" setup>
 import {
-  IonContent,
-  IonHeader,
-  IonPage,
-  IonTitle,
-  IonToolbar,
-  alertController,
-  IonInput,
+IonContent,
+IonHeader,
+IonPage,
+IonTitle,
+IonToolbar,
+alertController,
+IonInput,
 } from '@ionic/vue'
 import { ref } from 'vue'
-// import { qrCodeOutline } from 'ionicons/icons'
+import { qrCodeOutline } from 'ionicons/icons'
+import axios from 'axios';
 const qrString = ref('')
 const qrInput = ref<HTMLInputElement>()
-  
-const onFocusOut = () => {
-  if (qrInput.value) {
-    qrInput.value.focus()
-  }
-}
-// const presentAlert = async () => {
-//   const alert = await alertController.create({
-//     header: 'Alert',
-//     subHeader: 'Important message',
-//     message: 'Thanks for checking in!',
-//     buttons: ['OK'],
-//   })
 
-//   await alert.present()
-// }
+const onFocusOut = () => {
+if (qrInput.value) {
+// qrInput.value.focus()
+console.log('focusout')
+}
+}
+const presentAlert = async () => {
+const guest = {
+firstname: '',
+lastname: '',
+email: '',
+company: ''
+}
+await axios.get('http://localhost:5000/guests/' + qrString.value).then(res => {
+guest.firstname = res.data.firstName
+guest.lastname = res.data.lastName
+guest.email = res.data.email
+guest.company = res.data.company
+})
+
+const alert = await alertController.create({
+header: 'Printing...',
+subHeader: `${guest.firstname} ${guest.lastname}`,
+message: `${guest.company}`,
+buttons: ['PRINT'],
+})
+
+await alert.present()
+}
 </script>
 
 <style scoped>
