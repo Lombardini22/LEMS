@@ -74,9 +74,7 @@ export function addGuestThroughMailChimp(
           : {}),
       }
 
-      const existingGuestResult = await guestsCollection.findOne({
-        email: mcGuest.email_address,
-      })
+      const existingGuestResult = await guestsCollection.findOne({ emailHash })
 
       return existingGuestResult.fold<Result<ServerError, WithId<Guest>>>(
         error => {
@@ -86,7 +84,7 @@ export function addGuestThroughMailChimp(
             return existingGuestResult
           }
         },
-        guest => guestsCollection.update(guest._id, guestData),
+        guest => guestsCollection.update({ _id: guest._id }, guestData),
       )
     })
 

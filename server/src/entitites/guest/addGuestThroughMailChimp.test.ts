@@ -1,7 +1,9 @@
 import { addGuestThroughMailChimp } from './addGuestThroughMailChimp'
 import { expectResult } from '../../../../shared/testUtils'
 import { ObjectId } from 'mongodb'
-import { hashGuestEmail } from '../../../../shared/models/Guest'
+import { Guest, hashGuestEmail } from '../../../../shared/models/Guest'
+import { guestsCollection } from './guestsCollection'
+import { expectT } from '../../testUtils'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getListMember = jest.fn((_listId: string, _emailHash: string) =>
@@ -53,5 +55,33 @@ describe('addGuestThroughMailChimp', () => {
       emailHash,
       companyName: 'Company name',
     })
+  })
+
+  it('should handle existing guests', async () => {
+    const data: Guest = {
+      email: 'email.address@example.com',
+      emailHash: hashGuestEmail('email.address@example.com'),
+      firstName: 'John',
+      lastName: 'Doe',
+      companyName: 'ACME Inc.',
+    }
+
+    const insertionResult = await guestsCollection.insert(data)
+
+    expectResult(insertionResult).toHaveSucceeded()
+
+    const result = await addGuestThroughMailChimp({
+      params: {
+        listId: 'listId',
+        email: 'email',
+      },
+      query: {},
+      body: {},
+    })
+
+    expectResult(result).toHaveSucceeded()
+    expectT(result.unsafeGetValue().firstName).toEqual('First name')
+    expectT(result.unsafeGetValue().lastName).toEqual('Last name')
+    expectT(result.unsafeGetValue().companyName).toEqual('Company name')
   })
 })
