@@ -16,12 +16,13 @@ export interface Request<Params = unknown, Query = unknown, Body = unknown> {
   body: Body
 }
 
-interface RouterHandler<
+interface RestfulHandler<
   Params = unknown,
   Query = unknown,
   Body = unknown,
   Output = unknown,
 > {
+  readonly _tag: 'Restful'
   method: RouterMethod
   path: Path<Params>
   handler: (
@@ -30,28 +31,35 @@ interface RouterHandler<
 }
 
 interface CustomHandler<Params = unknown, Query = unknown, Body = unknown> {
+  readonly _tag: 'Custom'
   method: RouterMethod
   path: Path
   handler: RequestHandler<Params, Promise<void>, Body, Query>
 }
 
+type RouterHandler<
+  Params = unknown,
+  Query = unknown,
+  Body = unknown,
+  Output = unknown,
+> =
+  | RestfulHandler<Params, Query, Body, Output>
+  | CustomHandler<Params, Query, Body>
+
 export class Router {
   private readonly path: string
-  private readonly restfulHandlers: RouterHandler[]
-  private readonly customHandlers: CustomHandler[]
+  private readonly handlers: RouterHandler[]
 
   private constructor(
     path: string,
-    restfulHandlers: RouterHandler<any, any, any, any>[],
-    customHandlers: CustomHandler<any, any, any>[],
+    handlers: RouterHandler<any, any, any, any>[],
   ) {
     this.path = path
-    this.restfulHandlers = restfulHandlers
-    this.customHandlers = customHandlers
+    this.handlers = handlers
   }
 
   static make(path: string) {
-    return new Router(path, [], [])
+    return new Router(path, [])
   }
 
   get<Output, P extends Path<never, never>>(
@@ -70,16 +78,13 @@ export class Router {
       unknown,
       Output
     > = {
+      _tag: 'Restful',
       method: 'GET',
       path,
       handler,
     }
 
-    return new Router(
-      this.path,
-      [...this.restfulHandlers, newHandler],
-      this.customHandlers,
-    )
+    return new Router(this.path, [...this.handlers, newHandler])
   }
 
   post<Output, Body, P extends Path<unknown>>(
@@ -98,16 +103,13 @@ export class Router {
       Body,
       Output
     > = {
+      _tag: 'Restful',
       method: 'POST',
       path,
       handler,
     }
 
-    return new Router(
-      this.path,
-      [...this.restfulHandlers, newHandler],
-      this.customHandlers,
-    )
+    return new Router(this.path, [...this.handlers, newHandler])
   }
 
   put<Output, Body, P extends Path<unknown>>(
@@ -126,16 +128,13 @@ export class Router {
       Body,
       Output
     > = {
+      _tag: 'Restful',
       method: 'PUT',
       path,
       handler,
     }
 
-    return new Router(
-      this.path,
-      [...this.restfulHandlers, newHandler],
-      this.customHandlers,
-    )
+    return new Router(this.path, [...this.handlers, newHandler])
   }
 
   delete<Output, P extends Path<unknown>>(
@@ -154,16 +153,13 @@ export class Router {
       unknown,
       Output
     > = {
+      _tag: 'Restful',
       method: 'DELETE',
       path,
       handler,
     }
 
-    return new Router(
-      this.path,
-      [...this.restfulHandlers, newHandler],
-      this.customHandlers,
-    )
+    return new Router(this.path, [...this.handlers, newHandler])
   }
 
   custom<Body, P extends Path<unknown>>(
@@ -180,59 +176,59 @@ export class Router {
       P extends Path<infer Params> ? Params : never,
       Body,
       P extends Path<any, infer Query> ? Query : never
-    > = { method, path, handler }
+    > = { _tag: 'Custom', method, path, handler }
 
-    return new Router(this.path, this.restfulHandlers, [
-      ...this.customHandlers,
-      newHandler,
-    ])
+    return new Router(this.path, [...this.handlers, newHandler])
   }
 
   attachTo(app: express.Express): express.Express {
-    const withRestfulHandlers = this.restfulHandlers.reduce((app, handler) => {
+    const withHandlers = this.handlers.reduce((app, handler) => {
       const path = handler.path.toString()
 
-      const handlerFn = async (req: ExpressRequest, res: Response) => {
-        try {
-          const result = await handler.handler(req)
+      switch (handler._tag) {
+        case 'Restful': {
+          const handlerFn = async (req: ExpressRequest, res: Response) => {
+            try {
+              const result = await handler.handler(req)
 
-          return result.fold(
-            error => Router.handleError(error, res),
-            value => res.json(value),
-          )
-        } catch (error) {
-          return Router.handleError(error as Error, res)
+              return result.fold(
+                error => Router.handleError(error, res),
+                value => res.json(value),
+              )
+            } catch (error) {
+              return Router.handleError(error as Error, res)
+            }
+          }
+
+          switch (handler.method) {
+            case 'GET':
+              return app.get(path, handlerFn)
+            case 'POST':
+              return app.post(path, handlerFn)
+            case 'PUT':
+              return app.put(path, handlerFn)
+            case 'DELETE':
+              return app.delete(path, handlerFn)
+          }
+
+          break
         }
-      }
-
-      switch (handler.method) {
-        case 'GET':
-          return app.get(path, handlerFn)
-        case 'POST':
-          return app.post(path, handlerFn)
-        case 'PUT':
-          return app.put(path, handlerFn)
-        case 'DELETE':
-          return app.delete(path, handlerFn)
+        case 'Custom': {
+          switch (handler.method) {
+            case 'GET':
+              return app.get(path, handler.handler)
+            case 'POST':
+              return app.post(path, handler.handler)
+            case 'PUT':
+              return app.put(path, handler.handler)
+            case 'DELETE':
+              return app.delete(path, handler.handler)
+          }
+        }
       }
     }, ExpressRouter())
 
-    const withCustomHandlers = this.customHandlers.reduce((res, handler) => {
-      const path = handler.path.toString()
-
-      switch (handler.method) {
-        case 'GET':
-          return res.get(path, handler.handler)
-        case 'POST':
-          return res.post(path, handler.handler)
-        case 'PUT':
-          return res.put(path, handler.handler)
-        case 'DELETE':
-          return res.delete(path, handler.handler)
-      }
-    }, withRestfulHandlers)
-
-    return app.use(this.path, withCustomHandlers)
+    return app.use(this.path, withHandlers)
   }
 
   static handleError(error: Error, res: Response): Response {
