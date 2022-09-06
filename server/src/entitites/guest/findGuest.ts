@@ -6,12 +6,14 @@ import { Request } from '../../routing/Router'
 import { ServerError } from '../../ServerError'
 import { guestsCollection } from './guestsCollection'
 
-type UpdateGuestPath = { emailHash: string }
+type FindGuestParams = {
+  emailHash: string
+}
 
-export const updateGuestPath = Path.start().param<UpdateGuestPath>('emailHash')
+export const findGuestPath = Path.start().param<FindGuestParams>('emailHash')
 
-export async function updateGuest(
-  req: Request<UpdateGuestPath, unknown, Guest>,
+export async function findGuest(
+  req: Request<FindGuestParams>,
 ): Promise<Result<ServerError, WithId<Guest>>> {
-  return guestsCollection.update({ emailHash: req.params.emailHash }, req.body)
+  return guestsCollection.findOne({ emailHash: req.params.emailHash })
 }

@@ -1,3 +1,4 @@
+import { hashGuestEmail } from '../../../../shared/models/Guest'
 import { Result } from '../../../../shared/Result'
 import { expectResult } from '../../../../shared/testUtils'
 import { ServerError } from '../../ServerError'
@@ -15,11 +16,13 @@ describe('findGuests', () => {
               firstName: 'John',
               lastName: 'Doe',
               email: 'john.doe@example.com',
+              emailHash: hashGuestEmail('john.doe@example.com'),
             },
             {
               firstName: 'Jane',
               lastName: 'Doe',
               email: 'jane.doe@example.com',
+              emailHash: hashGuestEmail('jane.doe@example.com'),
             },
           ]),
         () => new ServerError(500, 'Failed to insert test data'),

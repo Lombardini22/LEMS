@@ -1,7 +1,7 @@
 import { addGuestThroughMailChimp } from './addGuestThroughMailChimp'
-import { MD5 } from 'crypto-js'
 import { expectResult } from '../../../../shared/testUtils'
 import { ObjectId } from 'mongodb'
+import { hashGuestEmail } from '../../../../shared/models/Guest'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getListMember = jest.fn((_listId: string, _emailHash: string) =>
@@ -40,17 +40,17 @@ describe('addGuestThroughMailChimp', () => {
       body: {},
     })
 
+    const emailHash = hashGuestEmail('email')
+
     expect(getListMember).toHaveBeenCalledTimes(1)
-    expect(getListMember).toHaveBeenCalledWith(
-      'listId',
-      MD5('email'.toLowerCase()).toString(),
-    )
+    expect(getListMember).toHaveBeenCalledWith('listId', emailHash)
 
     expectResult(result).toHaveSucceededWith({
       _id: expect.any(ObjectId),
       firstName: 'First name',
       lastName: 'Last name',
       email: 'email.address@example.com',
+      emailHash,
       companyName: 'Company name',
     })
   })
