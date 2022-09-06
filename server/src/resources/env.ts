@@ -12,6 +12,7 @@ const Env = z.object({
   MONGO_DB_NAME: z.string(),
   MAILCHIMP_API_KEY: z.string(),
   MAILCHIMP_SERVER_PREFIX: z.string(),
+  CLIENT_URL: z.string(),
 })
 type Env = z.infer<typeof Env>
 
