@@ -12,7 +12,7 @@ export class Server extends Resource<express.Express> {
   private server: HttpServer | null = null
 
   protected constructor(routers: Router[]) {
-    const acquire = (): Promise<Result<ServerError, express.Express>> => {
+    const acquire = async (): Promise<Result<ServerError, express.Express>> => {
       const app = express()
         .use(express.json())
         .use(express.urlencoded({ extended: true }))
@@ -21,13 +21,19 @@ export class Server extends Resource<express.Express> {
         .reduce((app, router) => router.attachTo(app), app)
         .use(Server.errorHandler)
 
-      return env.use(env => {
+      const result = await env.use(env => {
         if (!this.server) {
           this.server = appWithRouters.listen(env.SERVER_PORT)
         }
 
         return Result.success(() => appWithRouters)
       })
+
+      if (result.isSuccess()) {
+        return result
+      } else {
+        throw result.unsafeGetError()
+      }
     }
 
     const release = (): Promise<Result<ServerError, void>> => {
