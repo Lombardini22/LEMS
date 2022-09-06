@@ -34,12 +34,12 @@ const routes: Array<RouteRecordRaw> = [
         component: QuasarPage,
         // beforeEnter: authCheck,
       },
-      {
-        path: "Ticket/:listId/:email",
-        component: TicketPage,
-        // beforeEnter: authCheck,
-      },
+
     ],
+  },
+  {
+    path: "/ticket/:listId/:email",
+    component: TicketPage,
   },
 ]
 

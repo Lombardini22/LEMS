@@ -1,17 +1,6 @@
 <template>
   <ion-page>
-    <ion-header :translucent="true">
-      <ion-toolbar>
-        <ion-title>Scan</ion-title>
-      </ion-toolbar>
-    </ion-header>
-
     <ion-content>
-      <ion-header collapse="condense">
-        <ion-toolbar>
-          <ion-title size="large">Scan</ion-title>
-        </ion-toolbar>
-      </ion-header>
       <div id="block">
         <Tilt class="ticket" data-tilt data-tilt-full-page-listening>
           <header class="ticket_wrapper">
@@ -32,7 +21,7 @@
           </div>
           <div class="ticket_body">
             <section class="ticket_section">
-              <h3><strong>{{ ticket.firstname }} {{ticket.lastname}}</strong></h3>
+              <h3><strong>{{ ticket.firstname }} {{ ticket.lastname }}</strong></h3>
               <p>{{ ticket.azienda }}</p>
             </section>
             <section class="ticket_section">
@@ -50,16 +39,13 @@
 
     </ion-content>
   </ion-page>
-  
+
 </template>
 
 <script lang="ts" setup>
 import {
   IonContent,
-  IonHeader,
   IonPage,
-  IonTitle,
-  IonToolbar,
 } from '@ionic/vue'
 import QrcodeVue from 'qrcode.vue'
 import { ref } from 'vue'
@@ -135,15 +121,19 @@ console.log(qrcode.value)
   20% {
     border-color: #bf59ee;
   }
+
   40% {
     border-color: #4FF3FD;
   }
+
   60% {
     border-color: #02D3DE;
   }
+
   80% {
     border-color: #DBA3F5;
   }
+
   100% {
     border-color: #4FF3FD;
   }
