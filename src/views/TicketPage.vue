@@ -8,7 +8,8 @@
 
               <div id="header_block">
                 <img src="../../public/assets/logos/logo-foresight-bk.png" alt="logo" height="100" paddingBottom="10" />
-                <qrcode-vue :value="qrcode"></qrcode-vue>
+                <!-- <qrcode-vue :value="qrcode"></qrcode-vue> -->
+                <img :src="qrResult" alt="QR Code" height="100" paddingBottom="10" />
               </div>
               <div id="header_block">
                 <h3>Voucher</h3> 🎟️#{{ (Math.random() * 1000000).toFixed(0) }}
@@ -47,7 +48,7 @@ import {
   IonContent,
   IonPage,
 } from '@ionic/vue'
-import QrcodeVue from 'qrcode.vue'
+// import QrcodeVue from 'qrcode.vue'
 import { ref } from 'vue'
 import { MD5 } from 'crypto-js'
 import Tilt from 'vanilla-tilt-vue'
@@ -59,7 +60,8 @@ const ticket = ref({
   email: window.location.href.split('/')[5] || '',
   azienda: 'Foresight',
 })
-
+const qrResult = ref('')
+qrResult.value = `http://localhost:5000/guests/qr/${window.location.href.split('/')[4]}/${window.location.href.split('/')[5]}`
 const qrcode = ref('')
 qrcode.value = ticket.value.id
 console.log(qrcode.value)
