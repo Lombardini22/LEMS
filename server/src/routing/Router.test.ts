@@ -21,17 +21,17 @@ type Data = {
 
 describe('Router', () => {
   it('should handle get requests', async () => {
-    const path = Path.start().literal('get').param<Params>('test')
+    const path = Path.start()
+      .literal('get')
+      .param<Params>('test')
+      .withQuery<Data>()
 
-    const router = Router.make('/test').get<Output, Data, typeof path>(
-      path,
-      req => {
-        return Result.success(() => ({
-          test: req.params.test,
-          count: parseInt(req.query.count),
-        }))
-      },
-    )
+    const router = Router.make('/test').get<Output, typeof path>(path, req => {
+      return Result.success(() => ({
+        test: req.params.test,
+        count: parseInt(req.query.count),
+      }))
+    })
 
     const app = router.attachTo(express())
     const result = await sendHttpRequest<Output>(
@@ -101,9 +101,12 @@ describe('Router', () => {
   })
 
   it('should handle delete requests', async () => {
-    const path = Path.start().literal('delete').param<Params>('test')
+    const path = Path.start()
+      .literal('delete')
+      .param<Params>('test')
+      .withQuery<Data>()
 
-    const router = Router.make('/test').delete<Output, Data, typeof path>(
+    const router = Router.make('/test').delete<Output, typeof path>(
       path,
       req => {
         return Result.success(() => ({

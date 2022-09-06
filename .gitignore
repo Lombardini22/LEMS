@@ -35,3 +35,4 @@ tests/e2e/screenshots/
 tests/e2e/videos/
 .env*
 !.env.example
+todo.md

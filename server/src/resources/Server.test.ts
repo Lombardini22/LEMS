@@ -12,7 +12,7 @@ describe('Server', () => {
     }
 
     const router = Router.make('/')
-      .get<Data, any, any>(Path.start().literal('get'), () =>
+      .get<Data, any>(Path.start().literal('get'), () =>
         Result.success(() => ({
           test: true,
         })),
