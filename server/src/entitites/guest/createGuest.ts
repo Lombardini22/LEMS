@@ -18,6 +18,7 @@ export async function createGuest(
   const result = await guestsCollection.insert({
     ...req.body,
     emailHash: hashGuestEmail(req.body.email),
+    source: 'MANUAL',
   })
 
   return result.mapError(e => {

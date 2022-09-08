@@ -71,6 +71,7 @@ describe('addGuestThroughMailChimp', () => {
       email: 'email.address@example.com',
       emailHash,
       companyName: 'Company name',
+      source: 'RSVP',
     })
 
     expect(trigger).toHaveBeenCalledTimes(1)
@@ -93,6 +94,7 @@ describe('addGuestThroughMailChimp', () => {
       firstName: 'John',
       lastName: 'Doe',
       companyName: 'ACME Inc.',
+      source: 'RSVP',
     }
 
     const insertionResult = await guestsCollection.insert(data)
