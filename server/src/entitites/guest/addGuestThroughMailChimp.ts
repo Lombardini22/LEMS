@@ -10,6 +10,7 @@ import { guestsCollection } from './guestsCollection'
 import { WithId } from 'mongodb'
 import { Guest, hashGuestEmail } from '../../../../shared/models/Guest'
 import { Path } from '../../routing/Path'
+import { env } from '../../resources/env'
 
 type AddGuestThroughMailChimpParams = {
   listId: string
@@ -66,6 +67,7 @@ export function addGuestThroughMailChimp(
           lastName: mcGuest.merge_fields['LNAME'],
           email: mcGuest.email_address,
           emailHash,
+          source: 'RSVP',
         },
         ...(mcGuest.merge_fields['MMERGE8']
           ? {
@@ -79,7 +81,29 @@ export function addGuestThroughMailChimp(
       return existingGuestResult.fold<Result<ServerError, WithId<Guest>>>(
         error => {
           if (error.status === 404) {
-            return guestsCollection.insert(guestData)
+            return env.use(async env => {
+              const triggerResult = await Result.tryCatch(
+                () =>
+                  // This is not typed within the MailChimp library, but it exists
+                  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                  // @ts-ignore
+                  mailchimp.customerJourneys.trigger(
+                    env.MAILCHIMP_JOURNEY_ID,
+                    env.MAILCHIMP_JOURNEY_TRIGGER_STEP_ID,
+                    { email_address: guestData.email },
+                  ),
+                error =>
+                  new ServerError(
+                    500,
+                    'Unable to trigger start of customer journey in MailChimp',
+                    { error },
+                  ),
+              )
+
+              return triggerResult.flatMap(() =>
+                guestsCollection.insert(guestData),
+              )
+            })
           } else {
             return existingGuestResult
           }

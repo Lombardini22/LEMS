@@ -32,6 +32,7 @@ describe('guestRouter', () => {
           email: 'john.doe@example.com',
           emailHash: hashGuestEmail('john.doe@example.com'),
           companyName: 'ACME Inc.',
+          source: 'MANUAL',
         }
 
         const insertionResult = await sendHttpRequest<Guest, GuestResult>(
@@ -57,8 +58,9 @@ describe('guestRouter', () => {
           emailHash,
         )
 
-        const guest = {
-          ...findOneResult.unsafeGetValue().data,
+        const guest: Guest = {
+          // Not true, but YOLO
+          ...(findOneResult.unsafeGetValue().data as unknown as Guest),
           _id: new ObjectId(findOneResult.unsafeGetValue().data._id),
         }
 

@@ -10,15 +10,37 @@ import { Request } from '../../routing/Router'
 import { ServerError } from '../../ServerError'
 import { guestsCollection } from './guestsCollection'
 
-export const createGuestPath = Path.start()
+type CreateGuestQuery = {
+  referrerEmail?: string
+}
+
+export const createGuestPath = Path.start().withQuery<CreateGuestQuery>()
 
 export async function createGuest(
-  req: Request<unknown, unknown, GuestCreationInput>,
+  req: Request<unknown, CreateGuestQuery, GuestCreationInput>,
 ): Promise<Result<ServerError, WithId<Guest>>> {
-  const result = await guestsCollection.insert({
-    ...req.body,
-    emailHash: hashGuestEmail(req.body.email),
-  })
+  const referrerEmail = req.query.referrerEmail
+
+  const result = await (async () => {
+    if (referrerEmail) {
+      const referrer = await guestsCollection.findOne({ email: referrerEmail })
+
+      return referrer.flatMap(referrer =>
+        guestsCollection.insert({
+          ...req.body,
+          emailHash: hashGuestEmail(req.body.email),
+          source: 'REFERRER',
+          referrerId: referrer._id,
+        }),
+      )
+    } else {
+      return guestsCollection.insert({
+        ...req.body,
+        emailHash: hashGuestEmail(req.body.email),
+        source: 'MANUAL',
+      })
+    }
+  })()
 
   return result.mapError(e => {
     if (e.extra['error']['code']) {
