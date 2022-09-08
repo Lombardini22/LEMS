@@ -23,7 +23,6 @@ export type Guest = Referree | Subscriber
 
 interface SubscriberCreationInput {
   email: string
-  emailHash: string
   firstName: string
   lastName: string
   companyName?: string
