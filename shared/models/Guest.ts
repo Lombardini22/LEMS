@@ -21,18 +21,12 @@ interface Subscriber extends GuestCommonData {
 
 export type Guest = Referree | Subscriber
 
-interface SubscriberCreationInput {
+export interface GuestCreationInput {
   email: string
   firstName: string
   lastName: string
   companyName?: string
 }
-
-interface ReferreeCreationInput extends SubscriberCreationInput {
-  referrerEmail: string
-}
-
-export type GuestCreationInput = SubscriberCreationInput | ReferreeCreationInput
 
 export function hashGuestEmail(email: string): string {
   return MD5(email.toLowerCase()).toString()

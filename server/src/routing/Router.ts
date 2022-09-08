@@ -92,14 +92,14 @@ export class Router {
     handler: (
       req: Request<
         P extends Path<infer Params> ? Params : never,
-        unknown,
+        P extends Path<any, infer Query> ? Query : never,
         Body
       >,
     ) => Promise<Result<ServerError, Output>>,
   ): Router {
     const newHandler: RouterHandler<
       P extends Path<infer Params> ? Params : never,
-      unknown,
+      P extends Path<any, infer Query> ? Query : never,
       Body,
       Output
     > = {
@@ -117,14 +117,14 @@ export class Router {
     handler: (
       req: Request<
         P extends Path<infer Params> ? Params : never,
-        unknown,
+        P extends Path<any, infer Query> ? Query : never,
         Body
       >,
     ) => Promise<Result<ServerError, Output>>,
   ): Router {
     const newHandler: RouterHandler<
       P extends Path<infer Params> ? Params : never,
-      unknown,
+      P extends Path<any, infer Query> ? Query : never,
       Body,
       Output
     > = {
