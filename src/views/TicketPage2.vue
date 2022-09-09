@@ -51,8 +51,8 @@
 
 <script lang="ts" setup>
 import {
-IonContent,
-IonPage,
+  IonContent,
+  IonPage,
 } from '@ionic/vue'
 import { ref } from 'vue'
 import { MD5 } from 'crypto-js'
@@ -62,24 +62,24 @@ import AddToCalendar from './components/AddToCalendar.vue';
 
 
 const ticket = ref({
-id: MD5(window.location.href.split('/')[5] || '').toString(),
-firstName: 'Test',
-lastName: 'Test',
-email: window.location.href.split('/')[5] || '',
-company: 'Test SPA',
+  id: MD5(window.location.href.split('/')[5] || '').toString(),
+  firstName: 'Test',
+  lastName: 'Test',
+  email: window.location.href.split('/')[5] || '',
+  company: 'Test SPA',
 })
 
-axios.get(`http://localhost:5000/guests/${ticket.value.id}`).then((res) => {
-ticket.value.firstName = res.data.firstName
-ticket.value.lastName = res.data.lastName
-ticket.value.company = res.data.company
+axios.get(`http://localhost:5000/api/guests/${ticket.value.id}`).then((res) => {
+  ticket.value.firstName = res.data.firstName
+  ticket.value.lastName = res.data.lastName
+  ticket.value.company = res.data.company
 }).catch((err) => {
-console.log(err)
+  console.log(err)
 })
 
 
 const qrResult = ref('')
-qrResult.value = `http://localhost:5000/guests/qr/${ticket.value.id}`
+qrResult.value = `http://localhost:5000/api/guests/qr/${ticket.value.id}`
 const qrcode = ref('')
 qrcode.value = ticket.value.id
 console.log(qrcode.value)
@@ -115,7 +115,6 @@ body {
   background-repeat: no-repeat;
   background-position: top;
   background-size: 100%;
-  background-color: #04030C;
   width: 700px;
   height: 300px;
   border-radius: 15px;
@@ -163,7 +162,6 @@ body {
 }
 
 .location::before {
-  background-image: "../../public/assets/logos/logo-foresight-bk.png";
   background-size: 110px 110px;
   width: 110px;
   height: 110px;
@@ -208,7 +206,7 @@ body {
 }
 
 .ticket-1 {
-  background-image: url(https://mcusercontent.com/37939db51ed309bab9ee19366/images/c4370b25-4a66-5fa7-a655-c39545046902.jpg);
+  background-image: url("../../public/assets/media/bg-rotate.png");
 }
 
 .upper_block {
@@ -354,7 +352,8 @@ h2#believers {
   }
 
   .ticket-1 {
-    background-image: url(https://mcusercontent.com/37939db51ed309bab9ee19366/images/c4370b25-4a66-5fa7-a655-c39545046902.jpg);
+    background-image: url("../../public/assets/media/bg.png");
+    background-position: center;
   }
 
   .upper_block {
