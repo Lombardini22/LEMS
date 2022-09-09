@@ -31,7 +31,7 @@ export class Server extends Resource<express.Express> {
 
       const result = await env.use(env => {
         if (!this.server) {
-          this.server = app.listen(env.SERVER_PORT)
+          this.server = app.listen(env.PORT)
         }
 
         return Result.success(() => app)

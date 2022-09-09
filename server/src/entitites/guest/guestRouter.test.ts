@@ -37,7 +37,7 @@ describe('guestRouter', () => {
 
         const insertionResult = await sendHttpRequest<Guest, GuestResult>(
           'POST',
-          '/guests',
+          '/api/guests',
           data,
         )
 
@@ -50,7 +50,7 @@ describe('guestRouter', () => {
 
         const findOneResult = await sendHttpRequest<GuestResult>(
           'GET',
-          `/guests/${emailHash}`,
+          `/api/guests/${emailHash}`,
         )
 
         expectResult(findOneResult).toHaveSucceeded()
@@ -66,7 +66,7 @@ describe('guestRouter', () => {
 
         const findresult = await sendHttpRequest<Cursor<GuestResult>>(
           'GET',
-          '/guests/?order=ASC&query=john+doe&first=1',
+          '/api/guests/?order=ASC&query=john+doe&first=1',
         )
 
         expectResult(findresult).toHaveSucceeded()
@@ -77,7 +77,7 @@ describe('guestRouter', () => {
 
         const updateResult = await sendHttpRequest<Guest, GuestResult>(
           'PUT',
-          `/guests/${emailHash}`,
+          `/api/guests/${emailHash}`,
           {
             ...guest,
             firstName: 'Updated First Name',
@@ -95,7 +95,7 @@ describe('guestRouter', () => {
 
         const deletionResult = await sendHttpRequest<GuestResult>(
           'DELETE',
-          `/guests/${emailHash}`,
+          `/api/guests/${emailHash}`,
         )
 
         expectResult(deletionResult).toHaveSucceeded()
