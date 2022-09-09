@@ -181,7 +181,11 @@ export class Router {
     return new Router(this.path, [...this.handlers, newHandler])
   }
 
-  attachTo(app: express.Express): express.Express {
+  attachTo(app: express.Express): express.Express
+  attachTo(router: ExpressRouter): ExpressRouter
+  attachTo(
+    source: express.Express | ExpressRouter,
+  ): express.Express | ExpressRouter {
     const withHandlers = this.handlers.reduce((app, handler) => {
       const path = handler.path.toString()
 
@@ -228,7 +232,7 @@ export class Router {
       }
     }, ExpressRouter())
 
-    return app.use(this.path, withHandlers)
+    return source.use(this.path, withHandlers as express.Express)
   }
 
   static handleError(error: Error, res: Response): Response {
