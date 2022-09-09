@@ -94,6 +94,16 @@ describe('guestRouter', () => {
           'Updated Last Name',
         )
 
+        const checkInResult = await sendHttpRequest<GuestResult>(
+          'GET',
+          `/api/guests/${emailHash}/check-in`,
+        )
+
+        expectResult(checkInResult).toHaveSucceeded()
+        expectT(checkInResult.unsafeGetValue().data.status).toEqual(
+          'CHECKED_IN',
+        )
+
         const deletionResult = await sendHttpRequest<GuestResult>(
           'DELETE',
           `/api/guests/${emailHash}`,

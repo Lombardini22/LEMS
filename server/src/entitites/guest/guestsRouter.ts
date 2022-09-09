@@ -3,6 +3,7 @@ import {
   addGuestThroughMailChimp,
   addGuestThroughMailChimpPath,
 } from './addGuestThroughMailChimp'
+import { checkInGuest, checkInGuestPath } from './checkInGuest'
 import { createGuest, createGuestPath } from './createGuest'
 import { deleteGuest, deleteGuestPath } from './deleteGuest'
 import { findGuest, findGuestPath } from './findGuest'
@@ -14,6 +15,7 @@ export const guestsRouter = Router.make('/guests')
   .post(createGuestPath, createGuest)
   .get(findGuestsPath, findGuests)
   .get(findGuestPath, findGuest)
+  .get(checkInGuestPath, checkInGuest)
   .put(updateGuestPath, updateGuest)
   .delete(deleteGuestPath, deleteGuest)
   .custom('GET', sendQrCodePath, sendQrCode)
