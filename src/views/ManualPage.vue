@@ -98,6 +98,7 @@ import {
   IonAlert
 } from '@ionic/vue'
 import { printOutline, addOutline } from 'ionicons/icons'
+ 
 
 const data = ref([] as any[])
 const search = ref()
@@ -127,7 +128,7 @@ const submit = async () => {
 
   console.log(newGuest)
   await axios
-    .post('http://localhost:5000/guests', newGuest)
+    .post('http://localhost:5000/api/guests', newGuest)
     .then(res => {
       console.log(res)
     })
@@ -141,7 +142,7 @@ const submit = async () => {
   setOpen(false)
 }
 
-axios.get('http://localhost:5000/guests/?order=ASC&first=1000').then(res => {
+axios.get('http://localhost:5000/api/guests/?order=ASC&first=1000').then(res => {
   data.value = res.data.edges
   console.table(data.value)
 })
