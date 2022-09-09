@@ -13,7 +13,6 @@
     "test:server": "jest -c server/jest.config.js --runInBand",
     "test:unit": "vue-cli-service test:unit",
     "test": "vue-cli-service test:unit && vue-cli-service test:e2e --headless && jest -c server/jest.config.js",
-    "predeploy": "yarn build",
     "deploy": "node server/build/server/src/index.js",
     "heroku-logs-staging": "heroku logs --tail -a lems-staging"
   },
