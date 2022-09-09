@@ -28,12 +28,41 @@ describe('createGuest', () => {
     expectT(result.unsafeGetValue().source).toEqual('MANUAL')
   })
 
+  it('should update a guest if it already exists', async () => {
+    const insertionResult = await guestsCollection.insert({
+      firstName: 'First name',
+      lastName: 'Last name',
+      email: 'email@example.com',
+      emailHash: hashGuestEmail('email@example.com'),
+      source: 'MANUAL',
+      status: 'RSVP',
+    })
+
+    expectResult(insertionResult).toHaveSucceeded()
+
+    const data: GuestCreationInput = {
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john.doe@example.com',
+      companyName: 'ACME Inc.',
+    }
+
+    const result = await createGuest({
+      params: {},
+      query: {},
+      body: data,
+    })
+
+    expectResult(result).toHaveSucceeded()
+    expect(result.unsafeGetValue()).toMatchObject(data)
+  })
+
   it('should create a guest with a referrer', async () => {
     const referrerData: Guest = {
       firstName: 'Referrer first name',
       lastName: 'Referrer last name',
-      email: 'referrer@example.com',
-      emailHash: hashGuestEmail('referrer@example.com'),
+      email: 'create-referrer-test@example.com',
+      emailHash: hashGuestEmail('create-referrer-test@example.com'),
       source: 'RSVP',
       status: 'RSVP',
     }
@@ -66,6 +95,60 @@ describe('createGuest', () => {
       },
     )
 
+    expectT(referree.source).toEqual('REFERRER')
+    expectT(referree.referrerId).toEqual(referrerId)
+  })
+
+  it('should update a guest with a referrer if it already exists', async () => {
+    const insertionResult = await guestsCollection.insert({
+      firstName: 'First name',
+      lastName: 'Last name',
+      email: 'email@example.com',
+      emailHash: hashGuestEmail('email@example.com'),
+      source: 'MANUAL',
+      status: 'RSVP',
+    })
+
+    expectResult(insertionResult).toHaveSucceeded()
+
+    const referrerData: Guest = {
+      firstName: 'Referrer first name',
+      lastName: 'Referrer last name',
+      email: 'update-referrer-test@example.com',
+      emailHash: hashGuestEmail('update-referrer-test@example.com'),
+      source: 'RSVP',
+      status: 'RSVP',
+    }
+
+    const referrer = await guestsCollection.insert(referrerData)
+
+    expectResult(referrer).toHaveSucceeded()
+    const referrerId = referrer.unsafeGetValue()._id
+
+    const data: GuestCreationInput = {
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john.doe@example.com',
+      companyName: 'ACME Inc.',
+    }
+
+    const result = await createGuest({
+      params: {},
+      query: { referrerEmail: referrerData.email },
+      body: data,
+    })
+
+    expectResult(result).toHaveSucceeded()
+
+    const referree = foldGuestBySource(
+      result.unsafeGetValue(),
+      _ => _,
+      () => {
+        throw new Error('Received subscriber when expecting referree')
+      },
+    )
+
+    expect(referree).toMatchObject(data)
     expectT(referree.source).toEqual('REFERRER')
     expectT(referree.referrerId).toEqual(referrerId)
   })

@@ -19,39 +19,55 @@ export const createGuestPath = Path.start().withQuery<CreateGuestQuery>()
 export async function createGuest(
   req: Request<unknown, CreateGuestQuery, GuestCreationInput>,
 ): Promise<Result<ServerError, WithId<Guest>>> {
+  const guestEmailHash = hashGuestEmail(req.body.email)
   const referrerEmail = req.query.referrerEmail
 
-  const result = await (async () => {
-    if (referrerEmail) {
-      const referrer = await guestsCollection.findOne({ email: referrerEmail })
+  if (referrerEmail) {
+    const referrer = await guestsCollection.findOne({ email: referrerEmail })
 
-      return referrer.flatMap(referrer =>
-        guestsCollection.insert({
+    return referrer.flatMap(async referrer => {
+      const guest = await guestsCollection.findOne({
+        emailHash: guestEmailHash,
+      })
+
+      if (guest.isSuccess()) {
+        return guestsCollection.update(
+          { emailHash: guestEmailHash },
+          {
+            ...guest.unsafeGetValue(),
+            ...req.body,
+            source: 'REFERRER',
+            referrerId: referrer._id,
+          },
+        )
+      } else {
+        return guestsCollection.insert({
           ...req.body,
-          emailHash: hashGuestEmail(req.body.email),
+          emailHash: guestEmailHash,
           source: 'REFERRER',
           referrerId: referrer._id,
           status: 'RSVP',
-        }),
+        })
+      }
+    })
+  } else {
+    const guest = await guestsCollection.findOne({ emailHash: guestEmailHash })
+
+    if (guest.isSuccess()) {
+      return guestsCollection.update(
+        { emailHash: guestEmailHash },
+        {
+          ...guest.unsafeGetValue(),
+          ...req.body,
+        },
       )
     } else {
       return guestsCollection.insert({
         ...req.body,
-        emailHash: hashGuestEmail(req.body.email),
+        emailHash: guestEmailHash,
         source: 'MANUAL',
         status: 'RSVP',
       })
     }
-  })()
-
-  return result.mapError(e => {
-    if (e.extra['error']['code']) {
-      return new ServerError(
-        409,
-        'A guest with the same email address already exists',
-      )
-    } else {
-      return e
-    }
-  })
+  }
 }
