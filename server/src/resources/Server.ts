@@ -28,6 +28,7 @@ export class Server extends Resource<express.Express> {
 
       app.use('/api', apiRouter)
       app.use('/', express.static(`${process.cwd()}/dist`))
+      app.use('*', express.static(`${process.cwd()}/dist/index.html`))
 
       const result = await env.use(env => {
         if (!this.server) {
