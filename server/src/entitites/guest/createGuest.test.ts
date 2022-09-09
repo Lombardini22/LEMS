@@ -16,6 +16,7 @@ describe('createGuest', () => {
       lastName: 'Doe',
       email: 'john.doe@example.com',
       companyName: 'ACME Inc.',
+      accountManager: null,
     }
 
     const result = await createGuest({
@@ -36,6 +37,7 @@ describe('createGuest', () => {
       emailHash: hashGuestEmail('email@example.com'),
       source: 'MANUAL',
       status: 'RSVP',
+      accountManager: null,
     })
 
     expectResult(insertionResult).toHaveSucceeded()
@@ -45,6 +47,7 @@ describe('createGuest', () => {
       lastName: 'Doe',
       email: 'john.doe@example.com',
       companyName: 'ACME Inc.',
+      accountManager: null,
     }
 
     const result = await createGuest({
@@ -65,6 +68,7 @@ describe('createGuest', () => {
       emailHash: hashGuestEmail('create-referrer-test@example.com'),
       source: 'RSVP',
       status: 'RSVP',
+      accountManager: null,
     }
 
     const referrer = await guestsCollection.insert(referrerData)
@@ -77,6 +81,7 @@ describe('createGuest', () => {
       lastName: 'Doe',
       email: 'john.doe@example.com',
       companyName: 'ACME Inc.',
+      accountManager: null,
     }
 
     const result = await createGuest({
@@ -107,6 +112,7 @@ describe('createGuest', () => {
       emailHash: hashGuestEmail('email@example.com'),
       source: 'MANUAL',
       status: 'RSVP',
+      accountManager: null,
     })
 
     expectResult(insertionResult).toHaveSucceeded()
@@ -118,6 +124,7 @@ describe('createGuest', () => {
       emailHash: hashGuestEmail('update-referrer-test@example.com'),
       source: 'RSVP',
       status: 'RSVP',
+      accountManager: null,
     }
 
     const referrer = await guestsCollection.insert(referrerData)
@@ -130,6 +137,7 @@ describe('createGuest', () => {
       lastName: 'Doe',
       email: 'john.doe@example.com',
       companyName: 'ACME Inc.',
+      accountManager: null,
     }
 
     const result = await createGuest({

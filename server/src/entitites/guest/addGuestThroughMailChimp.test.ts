@@ -73,6 +73,7 @@ describe('addGuestThroughMailChimp', () => {
       companyName: 'Company name',
       source: 'RSVP',
       status: 'RSVP',
+      accountManager: null,
     })
 
     expect(trigger).toHaveBeenCalledTimes(1)
@@ -97,6 +98,7 @@ describe('addGuestThroughMailChimp', () => {
       companyName: 'ACME Inc.',
       source: 'RSVP',
       status: 'RSVP',
+      accountManager: null,
     }
 
     const insertionResult = await guestsCollection.insert(data)

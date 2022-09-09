@@ -34,6 +34,7 @@ describe('guestRouter', () => {
           companyName: 'ACME Inc.',
           source: 'MANUAL',
           status: 'RSVP',
+          accountManager: null,
         }
 
         const insertionResult = await sendHttpRequest<Guest, GuestResult>(

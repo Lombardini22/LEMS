@@ -9,6 +9,7 @@ interface GuestCommonData {
   lastName: string
   companyName?: string
   status: GuestStatus
+  accountManager: string | null
 }
 
 interface Referree extends GuestCommonData {
@@ -29,6 +30,7 @@ export interface GuestCreationInput {
   firstName: string
   lastName: string
   companyName?: string
+  accountManager: string | null
 }
 
 export function hashGuestEmail(email: string): string {
