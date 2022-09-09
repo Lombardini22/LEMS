@@ -36,3 +36,4 @@ tests/e2e/videos/
 .env*
 !.env.example
 todo.md
+server/build/

@@ -35,6 +35,7 @@ export const sendQrCode: RequestHandler<
         await toFileStream(stream, env.CLIENT_URL, {
           type: 'png',
           width: 200,
+          margin: 1,
         })
 
         stream.pipe(res)

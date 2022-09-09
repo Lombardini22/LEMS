@@ -1,4 +1,4 @@
-import express, { ErrorRequestHandler } from 'express'
+import express, { Router as ExpressRouter, ErrorRequestHandler } from 'express'
 import cors from 'cors'
 import { Result } from '../../../shared/Result'
 import { env } from './env'
@@ -19,16 +19,23 @@ export class Server extends Resource<express.Express> {
         .use(express.urlencoded({ extended: true }))
         .use(cors())
 
-      const appWithRouters = this.routers
-        .reduce((app, router) => router.attachTo(app), app)
+      const apiRouter = this.routers
+        .reduce(
+          (apiRouter, router) => router.attachTo(apiRouter),
+          ExpressRouter(),
+        )
         .use(Server.errorHandler)
+
+      app.use('/api', apiRouter)
+      app.use('/', express.static(`${process.cwd()}/dist`))
+      app.use('*', express.static(`${process.cwd()}/dist/index.html`))
 
       const result = await env.use(env => {
         if (!this.server) {
-          this.server = appWithRouters.listen(env.SERVER_PORT)
+          this.server = app.listen(env.PORT)
         }
 
-        return Result.success(() => appWithRouters)
+        return Result.success(() => app)
       })
 
       if (result.isSuccess()) {

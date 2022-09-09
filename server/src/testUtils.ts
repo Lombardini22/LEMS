@@ -43,13 +43,13 @@ export async function sendHttpRequest<O>(
   return env.use(
     env =>
       new Promise(done => {
-        const server = app?.listen(env.SERVER_PORT)
+        const server = app?.listen(env.PORT)
 
         const request = http.request(
           {
             method,
             host: 'localhost',
-            port: env.SERVER_PORT,
+            port: env.PORT,
             path,
             headers: data
               ? {

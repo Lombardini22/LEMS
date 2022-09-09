@@ -7,7 +7,7 @@ import { Resource } from './Resource'
 config()
 
 const Env = z.object({
-  SERVER_PORT: z.string(),
+  PORT: z.string(),
   MONGO_URI: z.string(),
   MONGO_DB_NAME: z.string(),
   MAILCHIMP_API_KEY: z.string(),
