@@ -33,6 +33,7 @@ describe('guestRouter', () => {
           emailHash: hashGuestEmail('john.doe@example.com'),
           companyName: 'ACME Inc.',
           source: 'MANUAL',
+          status: 'RSVP',
         }
 
         const insertionResult = await sendHttpRequest<Guest, GuestResult>(

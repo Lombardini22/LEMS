@@ -8,6 +8,7 @@ interface GuestCommonData {
   firstName: string
   lastName: string
   companyName?: string
+  status: GuestStatus
 }
 
 interface Referree extends GuestCommonData {
@@ -18,6 +19,8 @@ interface Referree extends GuestCommonData {
 interface Subscriber extends GuestCommonData {
   source: 'MANUAL' | 'RSVP'
 }
+
+type GuestStatus = 'RSVP' | 'CHECKED_IN'
 
 export type Guest = Referree | Subscriber
 

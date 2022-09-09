@@ -68,6 +68,7 @@ export function addGuestThroughMailChimp(
           email: mcGuest.email_address,
           emailHash,
           source: 'RSVP',
+          status: 'RSVP',
         },
         ...(mcGuest.merge_fields['MMERGE8']
           ? {

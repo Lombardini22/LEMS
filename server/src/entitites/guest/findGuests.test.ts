@@ -18,6 +18,7 @@ describe('findGuests', () => {
               email: 'john.doe@example.com',
               emailHash: hashGuestEmail('john.doe@example.com'),
               source: 'MANUAL',
+              status: 'RSVP',
             },
             {
               firstName: 'Jane',
@@ -25,6 +26,7 @@ describe('findGuests', () => {
               email: 'jane.doe@example.com',
               emailHash: hashGuestEmail('jane.doe@example.com'),
               source: 'MANUAL',
+              status: 'RSVP',
             },
           ]),
         () => new ServerError(500, 'Failed to insert test data'),

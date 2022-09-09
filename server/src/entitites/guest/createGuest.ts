@@ -31,6 +31,7 @@ export async function createGuest(
           emailHash: hashGuestEmail(req.body.email),
           source: 'REFERRER',
           referrerId: referrer._id,
+          status: 'RSVP',
         }),
       )
     } else {
@@ -38,6 +39,7 @@ export async function createGuest(
         ...req.body,
         emailHash: hashGuestEmail(req.body.email),
         source: 'MANUAL',
+        status: 'RSVP',
       })
     }
   })()

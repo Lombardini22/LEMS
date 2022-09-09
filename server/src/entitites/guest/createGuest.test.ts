@@ -35,6 +35,7 @@ describe('createGuest', () => {
       email: 'referrer@example.com',
       emailHash: hashGuestEmail('referrer@example.com'),
       source: 'RSVP',
+      status: 'RSVP',
     }
 
     const referrer = await guestsCollection.insert(referrerData)
