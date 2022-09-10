@@ -16,13 +16,13 @@
           <ion-icon :icon="atCircle" />
           <ion-label>Quasar</ion-label>
         </ion-tab-button>
+        <!-- <ion-tab-button tab="tab4" href="ticket/4cdec2dac7/info@l22.it">
+          <ion-icon :icon="ticketOutline" />
+          <ion-label>Ticket</ion-label>
+        </ion-tab-button> -->
         <ion-tab-button tab="tab4" href="ticket/4cdec2dac7/info@l22.it">
           <ion-icon :icon="ticketOutline" />
           <ion-label>Ticket</ion-label>
-        </ion-tab-button>
-        <ion-tab-button tab="tab5" href="ticket2/4cdec2dac7/info@l22.it">
-          <ion-icon :icon="ticketOutline" />
-          <ion-label>Ticket2</ion-label>
         </ion-tab-button>
       </ion-tab-bar>
     </ion-tabs>

@@ -1,6 +1,6 @@
 <template>
     <p
-        style="font-family:helvetica neue,helvetica,arial,verdana,sans-serif;margin:0px 0px 10px 0px;text-align:center;font-size:13px;line-height:150%;color:#00000;font-weight:bold;">
+        style="font-family:helvetica neue,helvetica,arial,verdana,sans-serif;margin:0px 0px 10px 0px;text-align:center;font-size:13px;line-height:150%;color:#fff;font-weight:bold;">
         Aggiungi al calendario</p>
     <p style="margin:0px 0px 10px 0px;text-align:center;font-size:0px;"> <a
             href="https://www.addevent.com/event/uF14363456+apple" title="Apple" target="_blank"
