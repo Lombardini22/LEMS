@@ -280,7 +280,7 @@ h2#believers {
  Responsive design
  */
 
-@media (max-width: 500px) {
+@media (max-width: 700px) {
   .ticket {
     font-family: sans-serif;
     background-repeat: no-repeat;
