@@ -2,7 +2,7 @@
   <ion-page>
     <ion-content>
       <div id="block">
-        <!-- <Tilt data-tilt data-tilt-full-page-listening gyroscope="false"> -->
+        <Tilt data-tilt data-tilt-full-page-listening gyroscope="false">
         <div class="ticket ticket-1">
           <div class="details-block">
             <div class="logos-block">
@@ -52,7 +52,7 @@
             </div>
           </div>
         </div>
-        <!-- </Tilt> -->
+        </Tilt>
         <AddToCalendar />
         <h2 id="believers">Our Believers</h2>
         <img
@@ -68,7 +68,7 @@
 import { IonContent, IonPage } from '@ionic/vue'
 import { ref } from 'vue'
 import { MD5 } from 'crypto-js'
-// import Tilt from 'vanilla-tilt-vue'
+import Tilt from 'vanilla-tilt-vue'
 import axios from 'axios'
 import AddToCalendar from './components/AddToCalendar.vue'
 
