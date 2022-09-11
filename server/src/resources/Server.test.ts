@@ -12,7 +12,7 @@ describe('Server', () => {
     }
 
     const router = Router.make('/')
-      .get<Data, any, any>(Path.start().literal('get'), () =>
+      .get<Data, any>(Path.start().literal('get'), () =>
         Result.success(() => ({
           test: true,
         })),
@@ -23,7 +23,7 @@ describe('Server', () => {
 
     await Promise.all([
       server.use(async () => {
-        const getResult = await sendHttpRequest<Data>('GET', '/get')
+        const getResult = await sendHttpRequest<Data>('GET', '/api/get')
         await server.release()
 
         return expectResult(
@@ -36,9 +36,13 @@ describe('Server', () => {
           message: string
         }
 
-        const getResult = await sendHttpRequest<Body, Body>('POST', '/post', {
-          message: 'Hello!',
-        })
+        const getResult = await sendHttpRequest<Body, Body>(
+          'POST',
+          '/api/post',
+          {
+            message: 'Hello!',
+          },
+        )
         await server.release()
 
         return expectResult(

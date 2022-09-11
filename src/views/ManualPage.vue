@@ -27,17 +27,15 @@
 
       <ion-content
         :scroll-events="true"
-        @ionScrollStart="logScrollStart()"
-        @ionScrollEnd="logScrollEnd()"
       >
         <div>
           <!-- List of Input Items -->
           <ion-list>
-            <ion-item v-for="item in data" :key="item.id">
+            <ion-item v-for="item in data" :key="item.node._id">
               <ion-label
-                >{{ item.name.firstname }} {{ item.name.lastname }}</ion-label
+                >{{ item.node.firstName }} {{ item.node.lastName }}</ion-label
               >
-              <ion-button slot="end" @click="print(item)">
+              <ion-button slot="end" @click="print(item.node)">
                 Print
                 <ion-icon :icon="printOutline" />
               </ion-button>
@@ -67,8 +65,8 @@
             </ion-toolbar>
           </ion-header>
           <ion-content class="ion-padding">
-            <ion-input v-model="firstname" placeholder="First Name"></ion-input>
-            <ion-input v-model="lastname" placeholder="Last Name"></ion-input>
+            <ion-input v-model="firstName" placeholder="First Name"></ion-input>
+            <ion-input v-model="lastName" placeholder="Last Name"></ion-input>
             <ion-input v-model="email" placeholder="Email"></ion-input>
             <ion-input v-model="phone" placeholder="Phone"></ion-input>
             <ion-input v-model="company" placeholder="Company"></ion-input>
@@ -100,6 +98,7 @@ import {
   IonAlert
 } from '@ionic/vue'
 import { printOutline, addOutline } from 'ionicons/icons'
+ 
 
 const data = ref([] as any[])
 const search = ref()
@@ -111,24 +110,25 @@ const alertTitle = ref()
 const alertSubTitle = ref()
 
 // Form
-const firstname = ref('')
-const lastname = ref('')
+const firstName = ref('')
+const lastName = ref('')
 const email = ref('')
 const phone = ref('')
 const company = ref('')
 
 const submit = async () => {
   console.log('submit')
+
   const newGuest = {
-    firstname: firstname.value,
-    lastname: lastname.value,
+    firstName: firstName.value,
+    lastName: lastName.value,
     email: email.value,
-    phone: phone.value,
     company: company.value,
   }
+
   console.log(newGuest)
   await axios
-    .post('http://localhost:3000/guests', newGuest)
+    .post('http://localhost:5000/api/guests', newGuest)
     .then(res => {
       console.log(res)
     })
@@ -137,30 +137,32 @@ const submit = async () => {
     })
     .finally(() => {
       setOpen(false)
+      console.log(newGuest)
     })
   setOpen(false)
 }
 
-axios.get('https://fakestoreapi.com/users').then(res => {
-  data.value = res.data
+axios.get('http://localhost:5000/api/guests/?order=ASC&first=1000').then(res => {
+  data.value = res.data.edges
+  console.table(data.value)
 })
 
 const print = (item: any) => {
   console.log(item)
   setAlertStatus(true)
-  alertMsg.value = `${item.name.firstname} ${item.name.lastname}`
+  alertMsg.value = `${item.firstName} ${item.lastName}`
   alertTitle.value = 'Print'
   alertSubTitle.value = 'Print this guest?'
 }
 
 
-const logScrollStart = () => {
-  console.log('scrolling started')
-}
+// const logScrollStart = () => {
+//   console.log('scrolling started')
+// }
 
-const logScrollEnd = () => {
-  console.log('scrolling ended')
-}
+// const logScrollEnd = () => {
+//   console.log('scrolling ended')
+// }
 
 const setOpen = (value: boolean) => {
   isOpen.value = value

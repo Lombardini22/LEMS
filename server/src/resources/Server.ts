@@ -1,4 +1,5 @@
-import express, { ErrorRequestHandler } from 'express'
+import express, { Router as ExpressRouter, ErrorRequestHandler } from 'express'
+import cors from 'cors'
 import { Result } from '../../../shared/Result'
 import { env } from './env'
 import { Router } from '../routing/Router'
@@ -12,22 +13,36 @@ export class Server extends Resource<express.Express> {
   private server: HttpServer | null = null
 
   protected constructor(routers: Router[]) {
-    const acquire = (): Promise<Result<ServerError, express.Express>> => {
+    const acquire = async (): Promise<Result<ServerError, express.Express>> => {
       const app = express()
         .use(express.json())
         .use(express.urlencoded({ extended: true }))
+        .use(cors())
 
-      const appWithRouters = this.routers
-        .reduce((app, router) => router.attachTo(app), app)
+      const apiRouter = this.routers
+        .reduce(
+          (apiRouter, router) => router.attachTo(apiRouter),
+          ExpressRouter(),
+        )
         .use(Server.errorHandler)
 
-      return env.use(env => {
+      app.use('/api', apiRouter)
+      app.use('/', express.static(`${process.cwd()}/dist`))
+      app.use('*', express.static(`${process.cwd()}/dist/index.html`))
+
+      const result = await env.use(env => {
         if (!this.server) {
-          this.server = appWithRouters.listen(env.SERVER_PORT)
+          this.server = app.listen(env.PORT)
         }
 
-        return Result.success(() => appWithRouters)
+        return Result.success(() => app)
       })
+
+      if (result.isSuccess()) {
+        return result
+      } else {
+        throw result.unsafeGetError()
+      }
     }
 
     const release = (): Promise<Result<ServerError, void>> => {

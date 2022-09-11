@@ -6,6 +6,7 @@ import {
   Collection as MongoCollection,
   Filter,
   Document,
+  MatchKeysAndValues,
 } from 'mongodb'
 import { ServerError } from '../ServerError'
 import { database } from '../resources/database'
@@ -14,13 +15,32 @@ import { constant } from '../../../shared/utils'
 
 export class Collection<I extends { _id?: ObjectId }> {
   readonly name: string
+  private init:
+    | ((collection: MongoCollection<I>) => Promise<Result<ServerError, void>>)
+    | null
 
-  constructor(name: string) {
+  constructor(
+    name: string,
+    init?: (
+      collection: MongoCollection<I>,
+    ) => Promise<Result<ServerError, void>>,
+  ) {
     this.name = name
+    this.init = init || null
   }
 
   protected getCollection(): Promise<Result<ServerError, MongoCollection<I>>> {
-    return database.use(db => Result.success(() => db.collection(this.name)))
+    return database.use(async db => {
+      const collection = db.collection<I>(this.name)
+
+      if (this.init) {
+        const initResult = await this.init(collection)
+        this.init = null
+        return initResult.map(() => collection)
+      } else {
+        return Result.success(() => collection)
+      }
+    })
   }
 
   async raw<T>(
@@ -131,11 +151,11 @@ export class Collection<I extends { _id?: ObjectId }> {
     })
   }
 
-  getById(_id: ObjectId): Promise<Result<ServerError, WithId<I>>> {
+  findById(_id: ObjectId): Promise<Result<ServerError, WithId<I>>> {
     return this.findOne({ _id } as Filter<I>)
   }
 
-  find<T = I>(
+  find<T = WithId<I>>(
     searchField: string,
     initialFilters: Document[] = [],
   ): (query: CursorQuery) => Promise<Result<ServerError, Cursor<T>>> {
@@ -290,7 +310,9 @@ export class Collection<I extends { _id?: ObjectId }> {
     }
   }
 
-  async aggregate<T>(pipeline: Document[]): Promise<Result<ServerError, T[]>> {
+  async aggregate<T extends Document>(
+    pipeline: Document[],
+  ): Promise<Result<ServerError, T[]>> {
     const collection = await this.getCollection()
 
     return collection.flatMap(c =>
@@ -307,24 +329,32 @@ export class Collection<I extends { _id?: ObjectId }> {
   }
 
   async update(
-    _id: ObjectId,
+    filter: Filter<I>,
     doc: OptionalUnlessRequiredId<I>,
   ): Promise<Result<ServerError, WithId<I>>> {
     const collection = await this.getCollection()
 
     const result = await collection.flatMap(c =>
       Result.tryCatch(
-        () =>
-          c.findOneAndUpdate(
-            { _id } as Filter<I>,
-            { $set: doc },
+        () => {
+          return c.findOneAndUpdate(
+            filter,
+            {
+              $set: Object.entries(doc)
+                .filter(([key]) => key !== '_id')
+                .reduce(
+                  (res, [key, value]) => ({ ...res, [key]: value }),
+                  {} as MatchKeysAndValues<I>,
+                ),
+            },
             { returnDocument: 'after' },
-          ),
+          )
+        },
         error =>
           new ServerError(
             500,
             `Unable to update a document in collection ${this.name}`,
-            { error, _id, doc },
+            { error, filter, doc },
           ),
       ),
     )
@@ -338,17 +368,17 @@ export class Collection<I extends { _id?: ObjectId }> {
     })
   }
 
-  async delete(_id: ObjectId): Promise<Result<ServerError, WithId<I>>> {
+  async delete(filter: Filter<I>): Promise<Result<ServerError, WithId<I>>> {
     const collection = await this.getCollection()
 
     const result = await collection.flatMap(c =>
       Result.tryCatch(
-        () => c.findOneAndDelete({ _id } as Filter<I>),
+        () => c.findOneAndDelete(filter),
         error =>
           new ServerError(
             500,
             `Unable to delete a document in collection ${this.name}`,
-            { error, _id },
+            { error, filter },
           ),
       ),
     )

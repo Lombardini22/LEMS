@@ -7,11 +7,14 @@ import { Resource } from './Resource'
 config()
 
 const Env = z.object({
-  SERVER_PORT: z.string(),
+  PORT: z.string(),
   MONGO_URI: z.string(),
   MONGO_DB_NAME: z.string(),
   MAILCHIMP_API_KEY: z.string(),
   MAILCHIMP_SERVER_PREFIX: z.string(),
+  MAILCHIMP_JOURNEY_ID: z.string(),
+  MAILCHIMP_JOURNEY_TRIGGER_STEP_ID: z.string(),
+  CLIENT_URL: z.string(),
 })
 type Env = z.infer<typeof Env>
 
