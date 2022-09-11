@@ -2,56 +2,57 @@
   <ion-page>
     <ion-content>
       <div id="block">
+        <h1 class="title">Grazie per esserti registrato, Ti aspettiamo!</h1>
         <Tilt data-tilt data-tilt-full-page-listening gyroscope="false">
-        <div class="ticket ticket-1">
-          <div class="details-block">
-            <div class="logos-block">
-              <img
-                src="../../public/assets/logos/logo-foresight.png"
-                class="logo-img"
-              />
+          <div class="ticket ticket-1">
+            <div class="details-block">
+              <div class="logos-block">
+                <img
+                  src="../../public/assets/logos/logo-foresight.png"
+                  class="logo-img"
+                />
+                <img
+                  src="../../public/assets/logos/Lombardini22.png"
+                  class="logo-lomb"
+                />
+              </div>
+
+              <div class="guest">
+                <span class="name">
+                  {{ ticket.firstName }} {{ ticket.lastName }}</span
+                >
+                <br />
+                <span class="company small">{{ ticket.company }}</span>
+              </div>
+
+              <div class="location-block">
+                <span class="location">05. 10. 2022 ore 9:00</span>
+                <br />
+                <span class="location"
+                  >Auditorium Fondazione Cariplo Largo G. Mahler, Milano</span
+                >
+              </div>
               <img
                 src="../../public/assets/logos/Lombardini22.png"
-                class="logo-lomb"
+                class="logo-lomb-mob"
               />
-            </div>
 
-            <div class="guest">
-              <span class="name">
-                {{ ticket.firstName }} {{ ticket.lastName }}</span
-              >
-              <br />
-              <span class="company small">{{ ticket.company }}</span>
+              <!-- <div class="rip"></div> -->
             </div>
-
-            <div class="location-block">
-              <span class="location">05. 10. 2022 ore 9:00</span>
-              <br />
-              <span class="location"
-                >Auditorium Fondazione Cariplo Largo G. Mahler, Milano</span
-              >
-            </div>
-            <img
-              src="../../public/assets/logos/Lombardini22.png"
-              class="logo-lomb-mob"
-            />
-
-            <!-- <div class="rip"></div> -->
-          </div>
-          <div class="qr-block">
-            <div class="upper_block">
-              <img :src="qrResult" alt="QR Code" class="qr-img" />
-              <h3>
-                Biglietto <br />#{{ (Math.random() * 1000000).toFixed(0) }}
-              </h3>
-            </div>
-            <div class="lower_block">
-              <span class="disclaimer"
-                >Il biglietto e' strettamente personale</span
-              >
+            <div class="qr-block">
+              <div class="upper_block">
+                <img :src="qrResult" alt="QR Code" class="qr-img" />
+                <h3>
+                  Biglietto <br />#{{ (Math.random() * 1000000).toFixed(0) }}
+                </h3>
+              </div>
+              <div class="lower_block">
+                <span class="disclaimer"
+                  >Il biglietto e' strettamente personale</span
+                >
+              </div>
             </div>
           </div>
-        </div>
         </Tilt>
         <AddToCalendar />
         <h2 id="believers">Our Believers</h2>
@@ -71,14 +72,31 @@ import { MD5 } from 'crypto-js'
 import Tilt from 'vanilla-tilt-vue'
 import axios from 'axios'
 import AddToCalendar from './components/AddToCalendar.vue'
+const params = ref({
+  listId: window.location.href.split('/')[4] || '4cdec2dac7',
+  email: window.location.href.split('/')[5] || '',
+})
 
 const ticket = ref({
-  id: MD5(window.location.href.split('/')[5] || '').toString(),
+  id: MD5(params.value.email).toString(),
   firstName: 'Test',
   lastName: 'Test',
-  email: window.location.href.split('/')[5] || '',
+  email: params.value.email,
   company: 'Test SPA',
 })
+
+console.log(params.value)
+
+axios
+  .get(
+    `http://localhost:5000/api/guests/${params.value.listId}/${params.value.email}`,
+  )
+  .then(response => {
+    console.log('data:', response.data)
+  })
+  .catch(error => {
+    console.log(error)
+  })
 
 axios
   .get(`http://localhost:5000/api/guests/${ticket.value.id}`)
@@ -104,9 +122,14 @@ console.log(qrcode.value)
   box-sizing: border-box;
   margin: 0;
   /* text-shadow: 0px 0px 20px black; */
-  font-family:helvetica neue,helvetica,arial,verdana,sans-serif;
+  font-family: helvetica neue, helvetica, arial, verdana, sans-serif;
 }
-
+.title {
+  text-align: center;
+  font-size: 2rem;
+  margin: 1rem;
+  color: #fff;
+}
 #block {
   display: flex;
   align-items: center;
