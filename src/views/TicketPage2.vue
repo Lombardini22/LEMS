@@ -2,7 +2,7 @@
   <ion-page>
     <ion-content>
       <div id="block">
-        <h1 class="title">Grazie per esserti registrato, Ti aspettiamo!</h1>
+        <h1 class="title">Grazie per aver confermato la tua presenza allo spettacolo!</h1>
         <Tilt data-tilt data-tilt-full-page-listening gyroscope="false">
           <div class="ticket ticket-1">
             <div class="details-block">
@@ -29,7 +29,7 @@
             </div>
             <div class="qr-block">
               <div class="upper_block">
-                <img :src="qrResult" alt="QR Code" class="qr-img" />
+                <img :src="ticket.qrCode" alt="QR Code" class="qr-img" />
                 <h3>
                   Biglietto <br />#{{ tktNumber }}
                 </h3>
@@ -43,7 +43,8 @@
         <div class="footer">
           <AddToCalendar />
           <!-- <ManualAddGuest :refererEmail="params.email" /> -->
-          <ion-button class="btn" href="mailto:info@foresightmilano.it">Contattaci Via Mail </ion-button>
+          <ion-button class="btn" href="mailto:info@foresightmilano.it?subject=FORESIGHT 2022">Contattaci Via Mail
+          </ion-button>
         </div>
         <h2 id="believers" style="color:black">Our Believers</h2>
         <img src="../../public/assets/logos/foresight-supporters1.png" alt="believers" width="700" />
@@ -53,8 +54,8 @@
 </template>
 
 <script lang="ts" setup>
-import { IonContent, IonPage,IonButton } from '@ionic/vue'
-import { computed, reactive, ref } from 'vue'
+import { IonContent, IonPage, IonButton } from '@ionic/vue'
+import { reactive, ref } from 'vue'
 import { MD5 } from 'crypto-js'
 import Tilt from 'vanilla-tilt-vue'
 import axios from 'axios'
@@ -71,9 +72,9 @@ const ticket = reactive({
   lastName: '',
   email: params.value.email,
   company: '',
+  qrCode: '',
 })
 const tktNumber = ref(ticket.id.slice(0, 5).toUpperCase())
-
 axios
   .get(
     `/api/guests/${params.value.email}/rsvp/`,
@@ -83,6 +84,7 @@ axios
     ticket.lastName = response.data.lastName
     ticket.company = response.data.companyName
     ticket.id = response.data.emailHash
+    ticket.qrCode = `/api/guests/qr/${response.data.email}`
     console.log('data:', response.data)
   })
   .catch(error => {
@@ -99,10 +101,6 @@ axios
   .catch(err => {
     console.log(err)
   })
-
-const qrResult = computed(() => {
-  return `/api/guests/qr/${ticket.id}`
-})
 
 </script>
 
