@@ -1,5 +1,5 @@
 <template>
-    <ion-button @click="setOpen(true)">Aggiungi un +1</ion-button>
+    <ion-button @click="setOpen(true)">Invita un ospite</ion-button>
     <!-- Modal -->
     <ion-modal :is-open="isOpen">
         <ion-header>
