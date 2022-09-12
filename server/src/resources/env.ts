@@ -15,6 +15,7 @@ const Env = z.object({
   MAILCHIMP_JOURNEY_ID: z.string(),
   MAILCHIMP_JOURNEY_TRIGGER_STEP_ID: z.string(),
   CLIENT_URL: z.string(),
+  VUE_APP_SERVER_URL: z.string(),
 })
 type Env = z.infer<typeof Env>
 

@@ -10,7 +10,7 @@ import { guestsCollection } from './guestsCollection'
 import { WithId } from 'mongodb'
 import { Guest, hashGuestEmail } from '../../../../shared/models/Guest'
 import { Path } from '../../routing/Path'
-import { env } from '../../resources/env'
+// import { env } from '../../resources/env'
 
 type AddGuestThroughMailChimpParams = {
   listId: string
