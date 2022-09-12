@@ -4,9 +4,9 @@ import { ObjectId } from 'mongodb'
 import { Guest, hashGuestEmail } from '../../../../shared/models/Guest'
 import { guestsCollection } from './guestsCollection'
 import { expectT } from '../../testUtils'
-import { env } from '../../resources/env'
-import { Result } from '../../../../shared/Result'
-import { constVoid } from '../../../../shared/utils'
+// import { env } from '../../resources/env'
+// import { Result } from '../../../../shared/Result'
+// import { constVoid } from '../../../../shared/utils'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const getListMember = jest.fn((_listId: string, _emailHash: string) =>
@@ -48,7 +48,8 @@ describe('addGuestThroughMailChimp', () => {
   })
 
   it('should work', async () => {
-    expect.assertions(5)
+    // expect.assertions(5)
+    expect.assertions(3)
 
     const result = await addGuestThroughMailChimp({
       params: {
@@ -76,17 +77,17 @@ describe('addGuestThroughMailChimp', () => {
       accountManager: null,
     })
 
-    expect(trigger).toHaveBeenCalledTimes(1)
+    // expect(trigger).toHaveBeenCalledTimes(1)
 
-    await env.use(env => {
-      expect(trigger).toHaveBeenCalledWith(
-        env.MAILCHIMP_JOURNEY_ID,
-        env.MAILCHIMP_JOURNEY_TRIGGER_STEP_ID,
-        { email_address: 'email.address@example.com' },
-      )
+    // await env.use(env => {
+    //   expect(trigger).toHaveBeenCalledWith(
+    //     env.MAILCHIMP_JOURNEY_ID,
+    //     env.MAILCHIMP_JOURNEY_TRIGGER_STEP_ID,
+    //     { email_address: 'email.address@example.com' },
+    //   )
 
-      return Result.success(constVoid)
-    })
+    //   return Result.success(constVoid)
+    // })
   })
 
   it('should handle existing guests', async () => {
