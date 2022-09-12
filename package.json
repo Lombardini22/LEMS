@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "vue-cli-service serve",
+    "dev": "vue-cli-service serve --port 8080",
     "start": "nodemon --watch server/src --exec ts-node --swc server/src/index.ts",
     "lint": "vue-cli-service lint",
     "build:client": "vue-cli-service build",
