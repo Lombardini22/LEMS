@@ -15,6 +15,7 @@ const Env = z.object({
   MONGO_DB_NAME: z.string(),
   MONGO_URI: z.string(),
   PORT: z.string(),
+  VUE_APP_SERVER_URL: z.string(),
 })
 type Env = z.infer<typeof Env>
 
