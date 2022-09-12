@@ -76,7 +76,7 @@ const tktNumber = ref(ticket.id.slice(0, 5).toUpperCase())
 
 axios
   .get(
-    `http://localhost:5000/api/guests/${params.value.email}/rsvp/`,
+    `/api/guests/${params.value.email}/rsvp/`,
   )
   .then(response => {
     ticket.firstName = response.data.firstName
@@ -90,7 +90,7 @@ axios
   })
 
 axios
-  .get(`http://localhost:5000/api/guests/${ticket.id}`)
+  .get(`/api/guests/${ticket.id}`)
   .then(res => {
     ticket.firstName = res.data.firstName
     ticket.lastName = res.data.lastName
@@ -101,7 +101,7 @@ axios
   })
 
 const qrResult = computed(() => {
-  return `http://localhost:5000/api/guests/qr/${ticket.id}`
+  return `/api/guests/qr/${ticket.id}`
 })
 
 </script>

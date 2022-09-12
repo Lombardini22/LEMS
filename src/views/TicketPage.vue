@@ -61,7 +61,7 @@ const ticket = ref({
   company: 'Foresight',
 })
 
-axios.get(`http://localhost:5000/guests/${ticket.value.id}`).then((res) => {
+axios.get(`/guests/${ticket.value.id}`).then((res) => {
 ticket.value.firstName = res.data.firstName
 ticket.value.lastName = res.data.lastName
 ticket.value.company = res.data.company
@@ -70,7 +70,7 @@ console.log(err)
 })
 
 const qrResult = ref('')
-qrResult.value = `http://localhost:5000/guests/qr/${ticket.value.id}`
+qrResult.value = `/guests/qr/${ticket.value.id}`
 const qrcode = ref('')
 qrcode.value = ticket.value.id
 console.log(qrcode.value)

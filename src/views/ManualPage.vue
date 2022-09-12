@@ -98,7 +98,7 @@ import {
 } from '@ionic/vue'
 import { printOutline, addOutline } from 'ionicons/icons'
  
-const serverUrl = 'http://localhost:5000/'
+const serverUrl = '/'
 const data = ref([] as any[])
 const search = ref()
 const isOpen = ref(false)

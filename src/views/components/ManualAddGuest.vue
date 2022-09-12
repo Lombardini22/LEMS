@@ -31,7 +31,7 @@ import { ref, defineProps } from 'vue';
 import axios from 'axios';
 
 
-const serverUrl = 'http://localhost:5000/'
+const serverUrl = '/'
 
 // Print
 const alert = ref(false)
