@@ -57,10 +57,10 @@
             <ion-toolbar>
               <ion-title>Add Guest</ion-title>
               <ion-buttons slot="end">
-                <ion-button @click="setOpen(false)">Confirm</ion-button>
+                <ion-button @click="submit">Confirm</ion-button>
               </ion-buttons>
               <ion-buttons slot="start">
-                <ion-button @click="submit">Cancel</ion-button>
+                <ion-button @click="setOpen(false)">Cancel</ion-button>
               </ion-buttons>
             </ion-toolbar>
           </ion-header>
@@ -68,7 +68,6 @@
             <ion-input v-model="firstName" placeholder="First Name"></ion-input>
             <ion-input v-model="lastName" placeholder="Last Name"></ion-input>
             <ion-input v-model="email" placeholder="Email"></ion-input>
-            <ion-input v-model="phone" placeholder="Phone"></ion-input>
             <ion-input v-model="company" placeholder="Company"></ion-input>
           </ion-content>
         </ion-modal>
@@ -99,7 +98,7 @@ import {
 } from '@ionic/vue'
 import { printOutline, addOutline } from 'ionicons/icons'
  
-
+const serverUrl = 'http://localhost:5000/'
 const data = ref([] as any[])
 const search = ref()
 const isOpen = ref(false)
@@ -113,7 +112,6 @@ const alertSubTitle = ref()
 const firstName = ref('')
 const lastName = ref('')
 const email = ref('')
-const phone = ref('')
 const company = ref('')
 
 const submit = async () => {
@@ -128,21 +126,25 @@ const submit = async () => {
 
   console.log(newGuest)
   await axios
-    .post('http://localhost:5000/api/guests', newGuest)
+    .post(serverUrl+'api/guests', newGuest)
     .then(res => {
       console.log(res)
     })
     .catch(err => {
       console.log(err)
+      alertMsg.value = err
+      alertTitle.value = 'Error'
+      alertSubTitle.value = 'Error'
+      alert.value = true
     })
     .finally(() => {
-      setOpen(false)
-      console.log(newGuest)
+      setTimeout(() => {
+        setOpen(false)
+      }, 2000)
     })
-  setOpen(false)
 }
 
-axios.get('http://localhost:5000/api/guests/?order=ASC&first=1000').then(res => {
+axios.get(serverUrl+'api/guests/?order=ASC&first=1000').then(res => {
   data.value = res.data.edges
   console.table(data.value)
 })

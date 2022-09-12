@@ -7,20 +7,13 @@
           <div class="ticket ticket-1">
             <div class="details-block">
               <div class="logos-block">
-                <img
-                  src="../../public/assets/logos/logo-foresight.png"
-                  class="logo-img"
-                />
-                <img
-                  src="../../public/assets/logos/Lombardini22.png"
-                  class="logo-lomb"
-                />
+                <img src="../../public/assets/logos/logo-foresight.png" class="logo-img" />
+                <img src="../../public/assets/logos/Lombardini22.png" class="logo-lomb" />
               </div>
 
               <div class="guest">
                 <span class="name">
-                  {{ ticket.firstName }} {{ ticket.lastName }}</span
-                >
+                  {{ ticket.firstName }} {{ ticket.lastName }}</span>
                 <br />
                 <span class="company small">{{ ticket.company }}</span>
               </div>
@@ -28,14 +21,9 @@
               <div class="location-block">
                 <span class="location">05. 10. 2022 ore 9:00</span>
                 <br />
-                <span class="location"
-                  >Auditorium Fondazione Cariplo Largo G. Mahler, Milano</span
-                >
+                <span class="location">Auditorium Fondazione Cariplo Largo G. Mahler, Milano</span>
               </div>
-              <img
-                src="../../public/assets/logos/Lombardini22.png"
-                class="logo-lomb-mob"
-              />
+              <img src="../../public/assets/logos/Lombardini22.png" class="logo-lomb-mob" />
 
               <!-- <div class="rip"></div> -->
             </div>
@@ -43,23 +31,21 @@
               <div class="upper_block">
                 <img :src="qrResult" alt="QR Code" class="qr-img" />
                 <h3>
-                  Biglietto <br />#{{ (Math.random() * 1000000).toFixed(0) }}
+                  Biglietto <br />#{{ tktNumber }}
                 </h3>
               </div>
               <div class="lower_block">
-                <span class="disclaimer"
-                  >Il biglietto e' strettamente personale</span
-                >
+                <span class="disclaimer">Il biglietto e' strettamente personale</span>
               </div>
             </div>
           </div>
         </Tilt>
-        <AddToCalendar />
+        <div class="footer">
+          <AddToCalendar />
+          <ManualAddGuest :refererEmail="params.email" />
+        </div>
         <h2 id="believers">Our Believers</h2>
-        <img
-          src="../../public/assets/logos/foresight-supporters.png"
-          alt="believers"
-        />
+        <img src="../../public/assets/logos/foresight-supporters1.png" alt="believers" width="700" />
       </div>
     </ion-content>
   </ion-page>
@@ -72,10 +58,12 @@ import { MD5 } from 'crypto-js'
 import Tilt from 'vanilla-tilt-vue'
 import axios from 'axios'
 import AddToCalendar from './components/AddToCalendar.vue'
+import ManualAddGuest from './components/ManualAddGuest.vue'
 const params = ref({
   listId: window.location.href.split('/')[4] || '4cdec2dac7',
-  email: window.location.href.split('/')[5] || '',
+  email: window.location.href.split('/')[5]?.toLowerCase() || '',
 })
+
 
 const ticket = ref({
   id: MD5(params.value.email).toString(),
@@ -84,6 +72,7 @@ const ticket = ref({
   email: params.value.email,
   company: 'Test SPA',
 })
+const tktNumber = ref(ticket.value.id)
 
 console.log(params.value)
 
@@ -124,12 +113,21 @@ console.log(qrcode.value)
   /* text-shadow: 0px 0px 20px black; */
   font-family: helvetica neue, helvetica, arial, verdana, sans-serif;
 }
+
 .title {
   text-align: center;
   font-size: 2rem;
   margin: 1rem;
   color: #fff;
 }
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 1rem;
+}
+
 #block {
   display: flex;
   align-items: center;
@@ -164,15 +162,17 @@ body {
 
 .details-block {
   display: flex;
-  background-image: url('../../public/assets/media/bg.png');
+  background-image: url('../../public/assets/media/bg-1.png');
   border-radius: 20px;
   flex-direction: column;
-  background-position: right;
+  background-position: center;
+  background-size: cover;
   background-repeat: repeat;
   justify-content: space-between;
   height: 100%;
   width: 525px;
 }
+
 .logos-block {
   margin-top: 25px;
   display: inline-flex;
@@ -184,10 +184,12 @@ body {
   height: 100px;
   margin-left: 35px;
 }
+
 .logo-lomb {
   height: 35px;
   margin-right: 20px;
 }
+
 .logo-lomb-mob {
   display: none;
 }
@@ -204,6 +206,7 @@ body {
   font-size: 30px;
   text-transform: uppercase;
 }
+
 .company {
   font-size: 20px;
 }
@@ -235,6 +238,7 @@ body {
   /* -webkit-filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3)); */
 }
+
 .location {
   font-size: 16px;
   font-weight: 700;
@@ -325,16 +329,18 @@ h2#believers {
 
   .details-block {
     display: flex;
-    background-image: url('../../public/assets/media/bg.png');
+    background-image: url('../../public/assets/media/bg-1.png');
     border-radius: 20px;
     flex-direction: column;
-    background-position: right;
+    background-position: center;
     background-repeat: repeat;
+    background-size: cover;
     justify-content: flex-start;
     height: 75%;
     width: 100%;
     align-items: flex-start;
   }
+
   .logos-block {
     margin-top: 25px;
     display: inline-flex;
@@ -346,6 +352,7 @@ h2#believers {
     height: 100px;
     margin-left: 35px;
   }
+
   .logo-lomb {
     height: 35px;
     margin-right: 20px;
@@ -371,6 +378,7 @@ h2#believers {
     font-size: 30px;
     text-transform: uppercase;
   }
+
   .company {
     font-size: 20px;
   }
@@ -402,6 +410,7 @@ h2#believers {
     /* -webkit-filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3)); */
   }
+
   .location {
     font-size: 16px;
     font-weight: 700;
