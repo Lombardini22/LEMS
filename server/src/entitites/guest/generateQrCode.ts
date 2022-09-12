@@ -8,11 +8,11 @@ import { env } from '../../resources/env'
 import { Result } from '../../../../shared/Result'
 import { constVoid } from '../../../../shared/utils'
 
-type QrCodeParams = { emailHash: string }
+type QrCodeParams = { email: string }
 
 export const sendQrCodePath = Path.start()
   .literal('qr')
-  .param<QrCodeParams>('emailHash')
+  .param<QrCodeParams>('email')
 
 export const sendQrCode: RequestHandler<
   QrCodeParams,
@@ -22,7 +22,7 @@ export const sendQrCode: RequestHandler<
 > = (req, res) => {
   env.use(async env => {
     const guest = await guestsCollection.findOne({
-      emailHash: req.params.emailHash,
+      email: req.params.email,
     })
 
     await guest.fold(
