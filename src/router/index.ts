@@ -43,7 +43,7 @@ const routes: Array<RouteRecordRaw> = [
   //   component: TicketPage,
   // },
   {
-    path: "/ticket/:listId/:email",
+    path: "/ticket/:email",
     component: TicketPage2,
   },
 ]
