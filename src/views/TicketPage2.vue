@@ -19,7 +19,7 @@
               </div>
 
               <div class="location-block">
-                <span class="location">05. 10. 2022 ore 9:00</span>
+                <span class="location">05.10.2022 ore 9:00</span>
                 <br />
                 <span class="location">Auditorium Fondazione Cariplo Largo G. Mahler, Milano</span>
               </div>
@@ -35,16 +35,17 @@
                 </h3>
               </div>
               <div class="lower_block">
-                <span class="disclaimer">Il biglietto e' strettamente personale</span>
+                <span class="disclaimer">Il biglietto è strettamente personale</span>
               </div>
             </div>
           </div>
         </Tilt>
         <div class="footer">
           <AddToCalendar />
-          <ManualAddGuest :refererEmail="params.email" />
+          <!-- <ManualAddGuest :refererEmail="params.email" /> -->
+          <ion-button class="btn" href="mailto:info@foresightmilano.it">Contattaci Via Mail </ion-button>
         </div>
-        <h2 id="believers">Our Believers</h2>
+        <h2 id="believers" style="color:black">Our Believers</h2>
         <img src="../../public/assets/logos/foresight-supporters1.png" alt="believers" width="700" />
       </div>
     </ion-content>
@@ -52,13 +53,13 @@
 </template>
 
 <script lang="ts" setup>
-import { IonContent, IonPage } from '@ionic/vue'
+import { IonContent, IonPage,IonButton } from '@ionic/vue'
 import { computed, reactive, ref } from 'vue'
 import { MD5 } from 'crypto-js'
 import Tilt from 'vanilla-tilt-vue'
 import axios from 'axios'
 import AddToCalendar from './components/AddToCalendar.vue'
-import ManualAddGuest from './components/ManualAddGuest.vue'
+// import ManualAddGuest from './components/ManualAddGuest.vue'
 const params = ref({
   email: window.location.href.split('/').pop()?.toLowerCase() || '',
 })
@@ -290,7 +291,7 @@ body {
 }
 
 .disclaimer {
-  font-size: 9px;
+  font-size: 12px;
   margin-left: 15px;
   margin-right: 15px;
   text-align: center;
@@ -468,7 +469,7 @@ h2#believers {
   }
 
   .disclaimer {
-    font-size: 10px;
+    font-size: 12px;
     margin-left: 45px;
     margin-right: 15px;
     text-align: left;
