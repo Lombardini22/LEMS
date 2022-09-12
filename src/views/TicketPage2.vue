@@ -53,34 +53,35 @@
 
 <script lang="ts" setup>
 import { IonContent, IonPage } from '@ionic/vue'
-import { ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 import { MD5 } from 'crypto-js'
 import Tilt from 'vanilla-tilt-vue'
 import axios from 'axios'
 import AddToCalendar from './components/AddToCalendar.vue'
 import ManualAddGuest from './components/ManualAddGuest.vue'
 const params = ref({
-  listId: window.location.href.split('/')[4] || '4cdec2dac7',
-  email: window.location.href.split('/')[5]?.toLowerCase() || '',
+  email: window.location.href.split('/').pop()?.toLowerCase() || '',
 })
 
 
-const ticket = ref({
+const ticket = reactive({
   id: MD5(params.value.email).toString(),
-  firstName: 'Test',
-  lastName: 'Test',
+  firstName: '',
+  lastName: '',
   email: params.value.email,
-  company: 'Test SPA',
+  company: '',
 })
-const tktNumber = ref(ticket.value.id)
-
-console.log(params.value)
+const tktNumber = ref(ticket.id.slice(0, 5).toUpperCase())
 
 axios
   .get(
-    `http://localhost:5000/api/guests/${params.value.listId}/${params.value.email}`,
+    `http://localhost:5000/api/guests/${params.value.email}/rsvp/`,
   )
   .then(response => {
+    ticket.firstName = response.data.firstName
+    ticket.lastName = response.data.lastName
+    ticket.company = response.data.companyName
+    ticket.id = response.data.emailHash
     console.log('data:', response.data)
   })
   .catch(error => {
@@ -88,21 +89,20 @@ axios
   })
 
 axios
-  .get(`http://localhost:5000/api/guests/${ticket.value.id}`)
+  .get(`http://localhost:5000/api/guests/${ticket.id}`)
   .then(res => {
-    ticket.value.firstName = res.data.firstName
-    ticket.value.lastName = res.data.lastName
-    ticket.value.company = res.data.company
+    ticket.firstName = res.data.firstName
+    ticket.lastName = res.data.lastName
+    ticket.company = res.data.companyName
   })
   .catch(err => {
     console.log(err)
   })
 
-const qrResult = ref('')
-qrResult.value = `http://localhost:5000/api/guests/qr/${ticket.value.id}`
-const qrcode = ref('')
-qrcode.value = ticket.value.id
-console.log(qrcode.value)
+const qrResult = computed(() => {
+  return `http://localhost:5000/api/guests/qr/${ticket.id}`
+})
+
 </script>
 
 <style scoped>
