@@ -19,7 +19,7 @@ const getListMember = jest.fn(async (listId: string, _emailHash: string) => {
         merge_fields: {
           FNAME: 'First name',
           LNAME: 'Last name',
-          MMERGE8: 'Company name',
+          MMERGE7: 'Company name',
         },
       }))
     } else {
@@ -42,6 +42,7 @@ const addListMember = jest.fn((_listId: string, _data: AddListMemberBody) =>
     merge_fields: {
       FNAME: 'First name',
       LNAME: 'Last name',
+      MMERGE7: 'Company name',
     },
   }),
 )

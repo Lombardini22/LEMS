@@ -68,12 +68,14 @@ export async function createGuest(
           },
         )
       } else {
-        return guestsCollection.insert({
+        const guest = await guestsCollection.insert({
           ...req.body,
           emailHash: guestEmailHash,
           source: 'MANUAL',
           status: 'RSVP',
         })
+
+        return guest.flatMap(guest => subscribeGuest(guest))
       }
     }
   })()
