@@ -1,3 +1,4 @@
+import { AddListMemberBody } from '@mailchimp/mailchimp_marketing'
 import { WithId } from 'mongodb'
 import { Guest } from '../../../../../shared/models/Guest'
 import { Result } from '../../../../../shared/Result'
@@ -45,15 +46,10 @@ export async function subscribeGuest(
       } else {
         const subscriptionResult = await Result.tryCatch(
           () =>
-            mailchimp.lists.addListMember(destinationListId, {
-              email_address: guest.email,
-              status: 'subscribed',
-              merge_fields: {
-                FNAME: guest.firstName,
-                LNAME: guest.lastName,
-                // TODO: can we send the company to some MMERGEX field?
-              },
-            }),
+            mailchimp.lists.addListMember(
+              destinationListId,
+              guestToMailchimpListMember(guest),
+            ),
           error =>
             new ServerError(
               500,
@@ -79,4 +75,18 @@ export async function subscribeGuest(
       }
     }),
   )
+}
+
+export function guestToMailchimpListMember(
+  guest: Pick<Guest, 'firstName' | 'lastName' | 'email'>,
+): AddListMemberBody {
+  return {
+    email_address: guest.email,
+    status: 'subscribed',
+    merge_fields: {
+      FNAME: guest.firstName,
+      LNAME: guest.lastName,
+      // TODO: can we send the company to some MMERGEX field?
+    },
+  }
 }

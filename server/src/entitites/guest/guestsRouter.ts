@@ -10,9 +10,11 @@ import { findGuest, findGuestPath } from './findGuest'
 import { findGuests, findGuestsPath } from './findGuests'
 import { sendQrCode, sendQrCodePath } from './generateQrCode'
 import { updateGuest, updateGuestPath } from './updateGuest'
+import { uploadGuests, uploadGuestsPath } from './uploadGuests'
 
 export const guestsRouter = Router.make('/guests')
   .post(createGuestPath, createGuest)
+  .post(uploadGuestsPath, uploadGuests)
   .get(findGuestsPath, findGuests)
   .get(findGuestPath, findGuest)
   .get(checkInGuestPath, checkInGuest)
