@@ -9,33 +9,28 @@ import TicketPage2 from '../views/TicketPage2.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/',
-    redirect: '/home',
-  },
-  {
-    path: "/",
+    path: '/lems/management',
     component: TabsPage,
     children: [
       {
-        path: "/",
-        redirect: "/home",
+        path: '/lems/management',
+        redirect: '/lems/management/home',
       },
       {
-        path: "home",
-        name: "home",
+        path: 'home',
+        name: 'home',
         component: ScanPage,
       },
       {
-        path: "manual",
+        path: 'manual',
         component: ManualPage,
         // beforeEnter: authCheck,
       },
       {
-        path: "quasar",
+        path: 'quasar',
         component: QuasarPage,
         // beforeEnter: authCheck,
       },
-
     ],
   },
   // {
@@ -43,7 +38,7 @@ const routes: Array<RouteRecordRaw> = [
   //   component: TicketPage,
   // },
   {
-    path: "/ticket/:listId/:email",
+    path: '/ticket/:listId/:email',
     component: TicketPage2,
   },
 ]
