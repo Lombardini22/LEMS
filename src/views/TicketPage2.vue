@@ -43,11 +43,12 @@
         <div class="footer">
           <AddToCalendar />
           <!-- <ManualAddGuest :refererEmail="params.email" /> -->
-          <ion-button class="btn" href="mailto:info@foresightmilano.it?subject=FORESIGHT 2022">Contattaci Via Mail
+          <ion-button class="btn mar-20" href="mailto:info@foresightmilano.it?subject=FORESIGHT 2022">Contattaci Via Mail
           </ion-button>
-        </div>
-        <h2 id="believers" style="color:black">Our Believers</h2>
-        <img src="../../public/assets/logos/foresight-supporters1.png" alt="believers" width="700" />
+        </div> <h4 id="believers" style="color:black" class="pad-20">Sound Design and live performance</h4>
+        <img src="../../public/assets/logos/orchestra.png" alt="believers" width="100" class="pad-20" />
+        <h4 id="believers" style="color:black" class="pad-20">Our Believers</h4>
+        <img src="../../public/assets/logos/foresight-supporters1.png" alt="believers" width="700" class="pad-20" />
       </div>
     </ion-content>
   </ion-page>
@@ -118,14 +119,20 @@ console.log(qrCode)
   text-align: center;
   font-size: 2rem;
   margin: 1rem;
-  color: #fff;
+  color: black;
 }
 
 .footer {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   margin: 1rem;
+  flex-direction: column;
+  align-content: stretch;
+  justify-content: space-between;
+}
+.btn{
+  background:#a23cfd;
+  --background: #a23cfd;
 }
 
 #block {
@@ -141,6 +148,14 @@ console.log(qrCode)
 
 body {
   background-color: #436ea5;
+}
+
+.pad-20 {
+  padding-top:20px
+}
+
+.mar-20 {
+  margin-top:20px
 }
 
 .ticket {
