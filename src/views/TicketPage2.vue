@@ -29,7 +29,7 @@
             </div>
             <div class="qr-block">
               <div class="upper_block">
-                <img :src="ticket.qrCode" alt="QR Code" class="qr-img" />
+                <img :src="qrCode" alt="QR Code" class="qr-img" />
                 <h3>
                   Biglietto <br />#{{ tktNumber }}
                 </h3>
@@ -84,12 +84,12 @@ axios
     ticket.lastName = response.data.lastName
     ticket.company = response.data.companyName
     ticket.id = response.data.emailHash
-    ticket.qrCode = `/api/guests/qr/${response.data.email}`
     console.log('data:', response.data)
   })
   .catch(error => {
     console.log(error)
   })
+const qrCode = ref(`/api/guests/qr/${ticket.email}`)
 
 axios
   .get(`/api/guests/${ticket.id}`)
@@ -102,6 +102,7 @@ axios
     console.log(err)
   })
 
+console.log(qrCode)
 </script>
 
 <style scoped>
