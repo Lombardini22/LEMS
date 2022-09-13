@@ -1,4 +1,4 @@
-import { ObjectId } from 'mongodb'
+import { ObjectId, WithId } from 'mongodb'
 import { Cursor } from '../../../../shared/Cursor'
 import { Guest, hashGuestEmail } from '../../../../shared/models/Guest'
 import { Result } from '../../../../shared/Result'
@@ -11,6 +11,10 @@ import { guestsRouter } from './guestsRouter'
 interface GuestResult extends Omit<Guest, '_id'> {
   _id: string
 }
+
+jest.mock('./utils/subscribeGuest', () => ({
+  subscribeGuest: (guest: WithId<Guest>) => Result.success(() => guest),
+}))
 
 describe('guestRouter', () => {
   let server: Server

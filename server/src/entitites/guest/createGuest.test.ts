@@ -29,7 +29,7 @@ describe('createGuest', () => {
     )
   })
 
-  it('should create a guest with no referrer, without subscribing it', async () => {
+  it('should create a guest with no referrer, subscribing it', async () => {
     const data: GuestCreationInput = {
       firstName: 'John',
       lastName: 'Doe',
@@ -46,22 +46,10 @@ describe('createGuest', () => {
 
     expectResult(result).toHaveSucceeded()
     expectT(result.unsafeGetValue().source).toEqual('MANUAL')
-    expect(subscribeGuest).not.toHaveBeenCalled()
+    expect(subscribeGuest).toHaveBeenCalledTimes(1)
   })
 
   it('should update a guest if it already exists, without subscribing it', async () => {
-    const insertionResult = await guestsCollection.insert({
-      firstName: 'First name',
-      lastName: 'Last name',
-      email: 'email@example.com',
-      emailHash: hashGuestEmail('email@example.com'),
-      source: 'MANUAL',
-      status: 'RSVP',
-      accountManager: null,
-    })
-
-    expectResult(insertionResult).toHaveSucceeded()
-
     const data: GuestCreationInput = {
       firstName: 'John',
       lastName: 'Doe',
@@ -69,6 +57,16 @@ describe('createGuest', () => {
       companyName: 'ACME Inc.',
       accountManager: null,
     }
+
+    const insertionResult = await guestsCollection.insert({
+      ...data,
+      emailHash: hashGuestEmail(data.email),
+      source: 'MANUAL',
+      status: 'RSVP',
+      accountManager: null,
+    })
+
+    expectResult(insertionResult).toHaveSucceeded()
 
     const result = await createGuest({
       params: {},
