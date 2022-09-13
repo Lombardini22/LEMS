@@ -3,7 +3,7 @@
     <ion-tabs>
       <ion-router-outlet></ion-router-outlet>
       <ion-tab-bar slot="bottom">
-        <ion-tab-button tab="tab1" href="home">
+        <ion-tab-button tab="tab1" href="scan">
           <ion-icon :icon="qrCodeOutline" />
           <ion-label>QR Scan</ion-label>
         </ion-tab-button>
@@ -20,7 +20,7 @@
           <ion-icon :icon="ticketOutline" />
           <ion-label>Ticket</ion-label>
         </ion-tab-button> -->
-        <ion-tab-button tab="tab4" href="ticket/4cdec2dac7/info@l22.it">
+        <ion-tab-button tab="tab4" href="/ticket/info@l22.it">
           <ion-icon :icon="ticketOutline" />
           <ion-label>Ticket</ion-label>
         </ion-tab-button>
