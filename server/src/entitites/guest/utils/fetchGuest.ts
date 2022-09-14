@@ -1,4 +1,5 @@
 import { MembersSuccessResponse } from '@mailchimp/mailchimp_marketing'
+import { WithId } from 'mongodb'
 import { Guest } from '../../../../../shared/models/Guest'
 import { Result } from '../../../../../shared/Result'
 import { NoTimestamps } from '../../../database/Collection'
@@ -13,7 +14,7 @@ export function fetchGuest(
   mailchimpMemberToGuest: (
     mailchimpMember: MembersSuccessResponse,
   ) => NoTimestamps<Guest>,
-): Promise<Result<ServerError, Guest>> {
+): Promise<Result<ServerError, WithId<Guest>>> {
   return mailchimp.use(async mailchimp => {
     const localGuest = await guestsCollection.findOne({ emailHash })
 
