@@ -20,6 +20,8 @@ describe('findGuests', () => {
               source: 'MANUAL',
               status: 'RSVP',
               accountManager: null,
+              createdAt: new Date(),
+              updatedAt: new Date(),
             },
             {
               firstName: 'Jane',
@@ -29,6 +31,8 @@ describe('findGuests', () => {
               source: 'MANUAL',
               status: 'RSVP',
               accountManager: null,
+              createdAt: new Date(),
+              updatedAt: new Date(),
             },
           ]),
         () => new ServerError(500, 'Failed to insert test data'),

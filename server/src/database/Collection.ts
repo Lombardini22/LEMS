@@ -19,7 +19,7 @@ interface Doc {
   updatedAt: Date
 }
 
-type NoTimestamps<I> = OptionalUnlessRequiredId<
+export type NoTimestamps<I> = OptionalUnlessRequiredId<
   Omit<I, 'createdAt' | 'updatedAt'>
 >
 
