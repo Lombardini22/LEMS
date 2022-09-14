@@ -97,12 +97,16 @@ const plusOne = `mailto:?subject=Ti invito a FORESIGHT 2022 | 5 ottobre &body=FO
 Auditorium Fondazione Cariplo%0D%0A
 Largo Gustav Mahler, Milano%0D%0A
 %0D%0A
-Per iscriverti clicca https://iscrizioni.foresightmilano.it/plusOne/${ticket.email} %0D%0A
+%0D%0A
+Per iscriverti clicca https://iscrizioni.foresightmilano.it/plusOne %0D%0A
+%0D%0A
 %0D%0A
 FORESIGHT è lo spettacolo live di Lombardini22, unico e irripetibile, tra cultura e intrattenimento.%0D%0A
 In-Between è il tema di questa edizione, ovvero gli stati transitori, intermedi, i “tra”, quei luoghi ai margini dove nasce il confronto e si scatena il cambiamento.%0D%0A
 Ne parleremo in tre diversi atti scanditi dall’Orchestra Sinfonica di Milano, con personaggi, linguaggi, saperi, ed enfasi diverse, e con la partecipazione straordinaria di Alessandro Baricco.%0D%0A
 %0D%0A
+%0D%0A
+
 info@foresightmilano.it%0D%0A
 www.foresightmilano.it`
 

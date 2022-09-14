@@ -3,7 +3,7 @@
     <ion-content>
       <div id="block">
         <h1 class="title">Registrati ora e ricevi il tuo biglietto per lo spettacolo!</h1>
-        <iframe class="frame" src="http://eepurl.com/h-TZe9" ></iframe>
+        <iframe class="frame" src="https://eepurl.com/h-TZe9" ></iframe>
         <div class="footer">
           <AddToCalendar />
           <!-- <ManualAddGuest :refererEmail="params.email" /> -->
