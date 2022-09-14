@@ -78,7 +78,7 @@ export async function subscribeGuest(
 }
 
 export function guestToMailchimpListMember(
-  guest: Pick<Guest, 'firstName' | 'lastName' | 'email'>,
+  guest: Pick<Guest, 'firstName' | 'lastName' | 'email' | 'companyName'>,
 ): AddListMemberBody {
   return {
     email_address: guest.email,
@@ -86,7 +86,7 @@ export function guestToMailchimpListMember(
     merge_fields: {
       FNAME: guest.firstName,
       LNAME: guest.lastName,
-      // TODO: can we send the company to some MMERGEX field?
+      MMERGE3: guest.companyName,
     },
   }
 }
