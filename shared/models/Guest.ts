@@ -8,7 +8,7 @@ interface GuestCommonData {
   emailHash: string
   firstName: string
   lastName: string
-  companyName?: string
+  companyName: string | null
   status: GuestStatus
   accountManager: string | null
   createdAt: Date
@@ -62,7 +62,7 @@ const GuestItem = z.object({
   firstName: NonEmptyString,
   lastName: NonEmptyString,
   email: Email,
-  company: z.optional(NonEmptyString),
+  companyName: z.optional(NonEmptyString),
 })
 export type GuestItem = z.infer<typeof GuestItem>
 

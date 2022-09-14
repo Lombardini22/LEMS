@@ -69,6 +69,7 @@ export async function createGuest(
         const guest = await guestsCollection.insert({
           ...req.body,
           emailHash: guestEmailHash,
+          companyName: req.body.companyName || null,
           source: 'MANUAL',
           status: 'RSVP',
         })

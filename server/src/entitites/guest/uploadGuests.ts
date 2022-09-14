@@ -28,6 +28,7 @@ export function uploadGuests(
           data.data.map(
             (guest): NoTimestamps<Guest> => ({
               ...guest,
+              companyName: guest.companyName || null,
               emailHash: hashGuestEmail(guest.email),
               source: 'UPLOAD',
               status: 'RSVP',
@@ -43,7 +44,12 @@ export function uploadGuests(
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore
               mailchimp.lists.batchListMembers(env.MAILCHIMP_EVENT_LIST_ID, {
-                members: data.data.map(guestToMailchimpListMember),
+                members: data.data.map(guest =>
+                  guestToMailchimpListMember({
+                    ...guest,
+                    companyName: guest.companyName || null,
+                  }),
+                ),
                 update_existing: true,
               }),
             error =>

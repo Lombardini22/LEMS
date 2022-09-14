@@ -61,6 +61,7 @@ describe('createGuest', () => {
     const insertionResult = await guestsCollection.insert({
       ...data,
       emailHash: hashGuestEmail(data.email),
+      companyName: null,
       source: 'MANUAL',
       status: 'RSVP',
       accountManager: null,
@@ -85,6 +86,7 @@ describe('createGuest', () => {
       lastName: 'Referrer last name',
       email: 'create-referrer-test@example.com',
       emailHash: hashGuestEmail('create-referrer-test@example.com'),
+      companyName: null,
       source: 'RSVP' as const,
       status: 'RSVP' as const,
       accountManager: null,
@@ -137,6 +139,7 @@ describe('createGuest', () => {
     const insertionResult = await guestsCollection.insert({
       ...data,
       emailHash: hashGuestEmail(data.email),
+      companyName: null,
       source: 'MANUAL',
       status: 'RSVP',
     })
@@ -148,6 +151,7 @@ describe('createGuest', () => {
       lastName: 'Referrer last name',
       email: 'update-referrer-test@example.com',
       emailHash: hashGuestEmail('update-referrer-test@example.com'),
+      companyName: null,
       source: 'RSVP' as const,
       status: 'RSVP' as const,
       accountManager: null,
