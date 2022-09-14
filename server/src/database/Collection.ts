@@ -13,7 +13,17 @@ import { database } from '../resources/database'
 import { Result } from '../../../shared/Result'
 import { constant } from '../../../shared/utils'
 
-export class Collection<I extends { _id?: ObjectId }> {
+interface Doc {
+  _id?: ObjectId
+  createdAt: Date
+  updatedAt: Date
+}
+
+type NoTimestamps<I> = OptionalUnlessRequiredId<
+  Omit<I, 'createdAt' | 'updatedAt'>
+>
+
+export class Collection<I extends Doc> {
   readonly name: string
   private init:
     | ((collection: MongoCollection<I>) => Promise<Result<ServerError, void>>)
@@ -50,21 +60,29 @@ export class Collection<I extends { _id?: ObjectId }> {
     return collection.flatMap(op)
   }
 
+  async insert(doc: NoTimestamps<I>): Promise<Result<ServerError, WithId<I>>>
   async insert(
-    doc: OptionalUnlessRequiredId<I>,
-  ): Promise<Result<ServerError, WithId<I>>>
-  async insert(
-    docs: OptionalUnlessRequiredId<I>[],
+    docs: NoTimestamps<I>[],
   ): Promise<Result<ServerError, WithId<I>[]>>
   async insert(
-    doc: OptionalUnlessRequiredId<I> | OptionalUnlessRequiredId<I>[],
+    doc: NoTimestamps<I> | NoTimestamps<I>[],
   ): Promise<Result<ServerError, WithId<I> | WithId<I>[]>> {
     const docs = Array.isArray(doc) ? doc : [doc]
     const collection = await this.getCollection()
 
     const insertResult = await collection.flatMap(c =>
       Result.tryCatch(
-        () => c.insertMany(docs),
+        () =>
+          c.insertMany(
+            docs.map(
+              doc =>
+                ({
+                  ...doc,
+                  createdAt: new Date(),
+                  updatedAt: new Date(),
+                } as unknown as OptionalUnlessRequiredId<I>),
+            ),
+          ),
         error =>
           new ServerError(
             500,
@@ -330,7 +348,7 @@ export class Collection<I extends { _id?: ObjectId }> {
 
   async update(
     filter: Filter<I>,
-    doc: OptionalUnlessRequiredId<I>,
+    doc: NoTimestamps<I>,
   ): Promise<Result<ServerError, WithId<I>>> {
     const collection = await this.getCollection()
 
@@ -340,12 +358,15 @@ export class Collection<I extends { _id?: ObjectId }> {
           return c.findOneAndUpdate(
             filter,
             {
-              $set: Object.entries(doc)
-                .filter(([key]) => key !== '_id')
-                .reduce(
-                  (res, [key, value]) => ({ ...res, [key]: value }),
-                  {} as MatchKeysAndValues<I>,
-                ),
+              $set: {
+                ...Object.entries(doc)
+                  .filter(([key]) => key !== '_id')
+                  .reduce(
+                    (res, [key, value]) => ({ ...res, [key]: value }),
+                    {} as MatchKeysAndValues<I>,
+                  ),
+                updatedAt: new Date(),
+              },
             },
             { returnDocument: 'after' },
           )

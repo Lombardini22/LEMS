@@ -80,13 +80,13 @@ describe('createGuest', () => {
   })
 
   it('should create a guest with a referrer, subscribing it', async () => {
-    const referrerData: Guest = {
+    const referrerData = {
       firstName: 'Referrer first name',
       lastName: 'Referrer last name',
       email: 'create-referrer-test@example.com',
       emailHash: hashGuestEmail('create-referrer-test@example.com'),
-      source: 'RSVP',
-      status: 'RSVP',
+      source: 'RSVP' as const,
+      status: 'RSVP' as const,
       accountManager: null,
     }
 
@@ -143,13 +143,13 @@ describe('createGuest', () => {
 
     expectResult(insertionResult).toHaveSucceeded()
 
-    const referrerData: Guest = {
+    const referrerData = {
       firstName: 'Referrer first name',
       lastName: 'Referrer last name',
       email: 'update-referrer-test@example.com',
       emailHash: hashGuestEmail('update-referrer-test@example.com'),
-      source: 'RSVP',
-      status: 'RSVP',
+      source: 'RSVP' as const,
+      status: 'RSVP' as const,
       accountManager: null,
     }
 

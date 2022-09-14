@@ -9,6 +9,8 @@ import { Collection } from './Collection'
 interface TestDoc {
   _id?: ObjectId
   name: string
+  createdAt: Date
+  updatedAt: Date
 }
 
 describe('Collection', () => {
@@ -37,7 +39,11 @@ describe('Collection', () => {
           name: 'Insert test',
         }
 
-        expectResult(await collection.insert(data)).toHaveSucceededWith(data)
+        expectResult(await collection.insert(data)).toHaveSucceededWith({
+          ...data,
+          createdAt: expect.any(Date),
+          updatedAt: expect.any(Date),
+        })
       })
     })
 
@@ -48,7 +54,13 @@ describe('Collection', () => {
           { _id: new ObjectId(), name: 'InsertMany test 2' },
         ]
 
-        expectResult(await collection.insert(data)).toHaveSucceededWith(data)
+        expectResult(await collection.insert(data)).toHaveSucceededWith(
+          data.map(doc => ({
+            ...doc,
+            createdAt: expect.any(Date),
+            updatedAt: expect.any(Date),
+          })),
+        )
       })
     })
   })
@@ -58,6 +70,8 @@ describe('Collection', () => {
       const data = {
         _id: new ObjectId(),
         name: 'Unique hdkjhfkjshdkjh screw the law of large numbers',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }
 
       await collection.raw(_ =>
@@ -78,6 +92,8 @@ describe('Collection', () => {
       const data = {
         _id: new ObjectId(),
         name: 'GetById test',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }
 
       const insertResult = await collection.raw(_ =>
@@ -100,6 +116,8 @@ describe('Collection', () => {
       const data = {
         _id: new ObjectId(),
         name: 'Aggregate test',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }
 
       const insertResult = await collection.raw(_ =>
@@ -283,6 +301,8 @@ describe('Collection', () => {
     it('should work', async () => {
       const data: TestDoc = {
         name: 'Update test',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }
 
       const updatedName = 'Updated name'
@@ -313,6 +333,8 @@ describe('Collection', () => {
     it('should work', async () => {
       const data: TestDoc = {
         name: 'Delete test',
+        createdAt: new Date(),
+        updatedAt: new Date(),
       }
 
       const insertResult = await collection.raw(_ =>

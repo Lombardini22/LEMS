@@ -11,6 +11,8 @@ interface GuestCommonData {
   companyName?: string
   status: GuestStatus
   accountManager: string | null
+  createdAt: Date
+  updatedAt: Date
 }
 
 interface Referree extends GuestCommonData {

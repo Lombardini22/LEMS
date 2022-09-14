@@ -1,7 +1,7 @@
 import { addGuestThroughMailChimp } from './addGuestThroughMailChimp'
 import { expectResult } from '../../../../shared/testUtils'
 import { ObjectId } from 'mongodb'
-import { Guest, hashGuestEmail } from '../../../../shared/models/Guest'
+import { hashGuestEmail } from '../../../../shared/models/Guest'
 import { guestsCollection } from './guestsCollection'
 import { expectT } from '../../testUtils'
 import { AddListMemberBody } from '@mailchimp/mailchimp_marketing'
@@ -108,6 +108,8 @@ describe('addGuestThroughMailChimp', () => {
         source: 'RSVP',
         status: 'RSVP',
         accountManager: null,
+        createdAt: expect.any(Date),
+        updatedAt: expect.any(Date),
       })
 
       return result
@@ -115,14 +117,14 @@ describe('addGuestThroughMailChimp', () => {
   })
 
   it('should handle existing guests', async () => {
-    const data: Guest = {
+    const data = {
       email: 'email.address@example.com',
       emailHash: hashGuestEmail('email.address@example.com'),
       firstName: 'John',
       lastName: 'Doe',
       companyName: 'ACME Inc.',
-      source: 'RSVP',
-      status: 'RSVP',
+      source: 'RSVP' as const,
+      status: 'RSVP' as const,
       accountManager: null,
     }
 
