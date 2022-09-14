@@ -42,8 +42,8 @@ const routes: Array<RouteRecordRaw> = [
     path: '/ticket/:email',
     component: TicketPage2,
   },{
-    redirect: '/guest',
-    component: AddPlusOne,
+    path: '/plusOne',
+    redirect: '/guest'
   },{
     path: '/guest',
     component: AddPlusOne,
