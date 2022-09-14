@@ -7,7 +7,7 @@
           <div class="ticket ticket-1">
             <div class="details-block">
               <div class="logos-block">
-                <img src="../../public/assets/logos/logo-foresight.png" class="logo-img" />
+                <img src="../../public/assets/logos/logo-foresight1.png" class="logo-img" />
                 <img src="../../public/assets/logos/Lombardini22.png" class="logo-lomb" />
               </div>
 
@@ -141,8 +141,7 @@ console.log(qrCode)
   justify-content: center;
   min-height: 100%;
   color: #999999;
-  background-color: #f4f5f6;
-  background-image: linear-gradient(to bottom left, #abb5ba, #d5dadd);
+  background-color: whitesmoke;
   flex-direction: column;
 }
 
