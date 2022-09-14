@@ -1,12 +1,13 @@
 import { RequestHandler } from 'express'
 import { Path } from '../../routing/Path'
 import { toFileStream } from 'qrcode'
-import { guestsCollection } from './guestsCollection'
 import { Router } from '../../routing/Router'
 import { PassThrough } from 'stream'
 import { env } from '../../resources/env'
 import { Result } from '../../../../shared/Result'
 import { constVoid } from '../../../../shared/utils'
+import { fetchGuest } from './utils/fetchGuest'
+import { hashGuestEmail } from '../../../../shared/models/Guest'
 
 type QrCodeParams = { email: string }
 
@@ -21,9 +22,22 @@ export const sendQrCode: RequestHandler<
   unknown
 > = (req, res) => {
   env.use(async env => {
-    const guest = await guestsCollection.findOne({
-      email: req.params.email,
-    })
+    const emailHash = hashGuestEmail(req.params.email)
+
+    const guest = await fetchGuest(
+      emailHash,
+      env.MAILCHIMP_EVENT_LIST_ID,
+      member => ({
+        firstName: member.merge_fields['FNAME'],
+        lastName: member.merge_fields['LNAME'],
+        email: member.email_address,
+        emailHash,
+        companyName: member.merge_fields['MMERGE3'] || null,
+        source: 'RSVP',
+        status: 'RSVP',
+        accountManager: null,
+      }),
+    )
 
     await guest.fold(
       error => {

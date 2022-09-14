@@ -12,6 +12,14 @@ interface GuestResult extends Omit<Guest, '_id'> {
   _id: string
 }
 
+jest.mock('../../resources/mailchimp', function () {
+  return {
+    mailchimp: {
+      use: jest.fn(<T>(op: () => T): T => op()),
+    },
+  }
+})
+
 jest.mock('./utils/subscribeGuest', () => ({
   subscribeGuest: (guest: WithId<Guest>) => Result.success(() => guest),
 }))
