@@ -6,6 +6,7 @@ import ManualPage from '../views/ManualPage.vue'
 import QuasarPage from '../views/QuasarPage.vue'
 // import TicketPage from '../views/TicketPage.vue'
 import TicketPage2 from '../views/TicketPage2.vue'
+import AddPlusOne from '@/views/AddPlusOne.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -40,6 +41,9 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/ticket/:email',
     component: TicketPage2,
+  },{
+    path: '/plusOne',
+    component: AddPlusOne,
   },
 ]
 

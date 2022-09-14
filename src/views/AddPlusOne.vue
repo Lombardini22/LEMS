@@ -2,47 +2,10 @@
   <ion-page>
     <ion-content>
       <div id="block">
-        <h1 class="title">Grazie per aver confermato la tua presenza allo spettacolo!</h1>
-        <Tilt data-tilt data-tilt-full-page-listening gyroscope="false">
-          <div class="ticket ticket-1">
-            <div class="details-block">
-              <div class="logos-block">
-                <img src="../../public/assets/logos/logo-foresight1.png" class="logo-img" />
-                <img src="../../public/assets/logos/Lombardini22.png" class="logo-lomb" />
-              </div>
-
-              <div class="guest">
-                <span class="name">
-                  {{ ticket.firstName }} {{ ticket.lastName }}</span>
-                <br />
-                <span class="company small">{{ ticket.company }}</span>
-              </div>
-
-              <div class="location-block">
-                <span class="location">05.10.2022 ore 9:00</span>
-                <br />
-                <span class="location">Auditorium Fondazione Cariplo Largo G. Mahler, Milano</span>
-              </div>
-              <img src="../../public/assets/logos/Lombardini22.png" class="logo-lomb-mob" />
-
-              <!-- <div class="rip"></div> -->
-            </div>
-            <div class="qr-block">
-              <div class="upper_block">
-                <img :src="qrCode" alt="QR Code" class="qr-img" />
-                <h3>
-                  Biglietto <br />#{{ tktNumber }}
-                </h3>
-              </div>
-              <div class="lower_block">
-                <span class="disclaimer">Il biglietto è strettamente personale</span>
-              </div>
-            </div>
-          </div>
-        </Tilt>
+        <h1 class="title">Registrati ora e ricevi il tuo biglietto per lo spettacolo!</h1>
+        <iframe class="frame" src="http://eepurl.com/h-TZe9" ></iframe>
         <div class="footer">
           <AddToCalendar />
-          <ion-button class="btn mar-20" :href="plusOne">Invita Qualcuno</ion-button>
           <!-- <ManualAddGuest :refererEmail="params.email" /> -->
           <ion-button class="btn mar-20" href="mailto:info@foresightmilano.it?subject=FORESIGHT 2022">Contattaci Via Mail
           </ion-button>
@@ -57,67 +20,7 @@
 
 <script lang="ts" setup>
 import { IonContent, IonPage, IonButton } from '@ionic/vue'
-import { reactive, ref } from 'vue'
-import { MD5 } from 'crypto-js'
-import Tilt from 'vanilla-tilt-vue'
-import axios from 'axios'
-import AddToCalendar from './components/AddToCalendar.vue'
-// import ManualAddGuest from './components/ManualAddGuest.vue'
-const params = ref({
-  email: window.location.href.split('/').pop()?.toLowerCase() || '',
-})
 
-
-const ticket = reactive({
-  id: MD5(params.value.email).toString(),
-  firstName: '',
-  lastName: '',
-  email: params.value.email,
-  company: '',
-  qrCode: '',
-})
-const tktNumber = ref(ticket.id.slice(0, 5).toUpperCase())
-axios
-  .get(
-    `/api/guests/${params.value.email}/rsvp/`,
-  )
-  .then(response => {
-    ticket.firstName = response.data.firstName
-    ticket.lastName = response.data.lastName
-    ticket.company = response.data.companyName
-    ticket.id = response.data.emailHash
-    console.log('data:', response.data)
-  })
-  .catch(error => {
-    console.log(error)
-  })
-const qrCode = ref(`/api/guests/qr/${ticket.email}`)
-const plusOne = `mailto:?subject=Ti invito a FORESIGHT 2022 | 5 ottobre &body=FORESIGHT 2022%0D%0A
-5 ottobre 2022 | ore 9:00%0D%0A
-Auditorium Fondazione Cariplo%0D%0A
-Largo Gustav Mahler, Milano%0D%0A
-%0D%0A
-Per iscriverti clicca https://iscrizioni.foresightmilano.it/plusOne/${ticket.email} %0D%0A
-%0D%0A
-FORESIGHT è lo spettacolo live di Lombardini22, unico e irripetibile, tra cultura e intrattenimento.%0D%0A
-In-Between è il tema di questa edizione, ovvero gli stati transitori, intermedi, i “tra”, quei luoghi ai margini dove nasce il confronto e si scatena il cambiamento.%0D%0A
-Ne parleremo in tre diversi atti scanditi dall’Orchestra Sinfonica di Milano, con personaggi, linguaggi, saperi, ed enfasi diverse, e con la partecipazione straordinaria di Alessandro Baricco.%0D%0A
-%0D%0A
-info@foresightmilano.it%0D%0A
-www.foresightmilano.it`
-
-axios
-  .get(`/api/guests/${ticket.id}`)
-  .then(res => {
-    ticket.firstName = res.data.firstName
-    ticket.lastName = res.data.lastName
-    ticket.company = res.data.companyName
-  })
-  .catch(err => {
-    console.log(err)
-  })
-
-console.log(qrCode)
 </script>
 
 <style scoped>
@@ -163,6 +66,12 @@ body {
   background-color: #436ea5;
 }
 
+.frame{
+  height: 100%;
+  width: 43%;
+  min-height: 1200px;
+  border: 0;
+}
 .pad-20 {
   padding-top:20px
 }
