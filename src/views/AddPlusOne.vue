@@ -68,7 +68,7 @@ body {
 .frame {
   height: 100%;
   width: 43%;
-  min-height: 1200px;
+  min-height: 1300px;
   border: 0;
 }
 .pad-20 {
