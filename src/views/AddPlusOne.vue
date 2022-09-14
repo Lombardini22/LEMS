@@ -19,7 +19,7 @@
 </template>
 
 <script lang="ts" setup>
-import { IonContent, IonPage, IonButton } from '@ionic/vue'
+import { IonContent, IonPage } from '@ionic/vue'
 </script>
 
 <style scoped>
