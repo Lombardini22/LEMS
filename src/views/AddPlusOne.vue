@@ -310,6 +310,10 @@ h2#believers {
     font-weight: bold;
   }
 
+  .frame{
+    width:100%;
+  }
+
   .name {
     margin-top: 25px;
     font-size: 30px;
