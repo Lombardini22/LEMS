@@ -5,6 +5,7 @@ import {
   hashGuestEmail,
 } from '../../../../shared/models/Guest'
 import { Result } from '../../../../shared/Result'
+import { NoTimestamps } from '../../database/Collection'
 import { Path } from '../../routing/Path'
 import { Request } from '../../routing/Router'
 import { ServerError } from '../../ServerError'
@@ -33,15 +34,12 @@ export async function createGuest(
         })
 
         if (guest.isSuccess()) {
-          return guestsCollection.update(
-            { emailHash: guestEmailHash },
-            {
-              ...guest.unsafeGetValue(),
-              ...req.body,
-              source: 'REFERRER',
-              referrerId: referrer._id,
-            },
-          )
+          return guestsCollection.update({ emailHash: guestEmailHash }, {
+            ...guest.unsafeGetValue(),
+            ...req.body,
+            source: 'REFERRER',
+            referrerId: referrer._id,
+          } as Guest)
         } else {
           const guest = await guestsCollection.insert({
             ...req.body,
@@ -49,7 +47,7 @@ export async function createGuest(
             source: 'REFERRER',
             referrerId: referrer._id,
             status: 'RSVP',
-          })
+          } as NoTimestamps<Guest>)
 
           return guest.flatMap(guest => subscribeGuest(guest))
         }
@@ -71,6 +69,7 @@ export async function createGuest(
         const guest = await guestsCollection.insert({
           ...req.body,
           emailHash: guestEmailHash,
+          companyName: req.body.companyName || null,
           source: 'MANUAL',
           status: 'RSVP',
         })

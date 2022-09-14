@@ -4,7 +4,13 @@ import { Result } from '../../../shared/Result'
 import { ServerError } from '../ServerError'
 import { Resource } from './Resource'
 
-config()
+config(
+  process.env['NODE_ENV'] === 'test'
+    ? {
+        path: '.env.testing',
+      }
+    : {},
+)
 
 const Env = z.object({
   CLIENT_URL: z.string(),

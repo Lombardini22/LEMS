@@ -8,9 +8,11 @@ interface GuestCommonData {
   emailHash: string
   firstName: string
   lastName: string
-  companyName?: string
+  companyName: string | null
   status: GuestStatus
   accountManager: string | null
+  createdAt: Date
+  updatedAt: Date
 }
 
 interface Referree extends GuestCommonData {
@@ -19,7 +21,7 @@ interface Referree extends GuestCommonData {
 }
 
 interface Subscriber extends GuestCommonData {
-  source: 'MANUAL' | 'RSVP'
+  source: 'MANUAL' | 'RSVP' | 'UPLOAD'
 }
 
 type GuestStatus = 'RSVP' | 'CHECKED_IN'
@@ -48,6 +50,7 @@ export function foldGuestBySource<T>(
       return whenReferree(guest)
     case 'MANUAL':
     case 'RSVP':
+    case 'UPLOAD':
       return whenSubscriber(guest)
   }
 }
@@ -59,7 +62,7 @@ const GuestItem = z.object({
   firstName: NonEmptyString,
   lastName: NonEmptyString,
   email: Email,
-  company: z.optional(NonEmptyString),
+  companyName: z.optional(NonEmptyString),
 })
 export type GuestItem = z.infer<typeof GuestItem>
 

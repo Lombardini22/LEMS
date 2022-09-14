@@ -9,6 +9,7 @@ import { Path } from '../../routing/Path'
 import { env } from '../../resources/env'
 import { isMailchimpMembersSuccessResponse } from './utils/isMailchimpMembersSuccessResponse'
 import { subscribeGuest } from './utils/subscribeGuest'
+import { NoTimestamps } from '../../database/Collection'
 
 type AddGuestThroughMailChimpParams = {
   email: string
@@ -64,12 +65,13 @@ export function addGuestThroughMailChimp(
           )
         }
 
-        const guestData: Guest = {
+        const guestData: NoTimestamps<Guest> = {
           ...{
             firstName: mcGuest.merge_fields['FNAME'],
             lastName: mcGuest.merge_fields['LNAME'],
             email: mcGuest.email_address,
             emailHash,
+            companyName: null,
             source: 'RSVP',
             status: 'RSVP',
             accountManager: null,

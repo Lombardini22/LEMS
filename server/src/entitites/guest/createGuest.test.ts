@@ -61,6 +61,7 @@ describe('createGuest', () => {
     const insertionResult = await guestsCollection.insert({
       ...data,
       emailHash: hashGuestEmail(data.email),
+      companyName: null,
       source: 'MANUAL',
       status: 'RSVP',
       accountManager: null,
@@ -80,13 +81,14 @@ describe('createGuest', () => {
   })
 
   it('should create a guest with a referrer, subscribing it', async () => {
-    const referrerData: Guest = {
+    const referrerData = {
       firstName: 'Referrer first name',
       lastName: 'Referrer last name',
       email: 'create-referrer-test@example.com',
       emailHash: hashGuestEmail('create-referrer-test@example.com'),
-      source: 'RSVP',
-      status: 'RSVP',
+      companyName: null,
+      source: 'RSVP' as const,
+      status: 'RSVP' as const,
       accountManager: null,
     }
 
@@ -137,19 +139,21 @@ describe('createGuest', () => {
     const insertionResult = await guestsCollection.insert({
       ...data,
       emailHash: hashGuestEmail(data.email),
+      companyName: null,
       source: 'MANUAL',
       status: 'RSVP',
     })
 
     expectResult(insertionResult).toHaveSucceeded()
 
-    const referrerData: Guest = {
+    const referrerData = {
       firstName: 'Referrer first name',
       lastName: 'Referrer last name',
       email: 'update-referrer-test@example.com',
       emailHash: hashGuestEmail('update-referrer-test@example.com'),
-      source: 'RSVP',
-      status: 'RSVP',
+      companyName: null,
+      source: 'RSVP' as const,
+      status: 'RSVP' as const,
       accountManager: null,
     }
 

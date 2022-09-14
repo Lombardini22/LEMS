@@ -30,22 +30,21 @@ describe('guestRouter', () => {
   describe('happy path', () => {
     it('should provide basic CRUD functionality', () =>
       server.use(async () => {
-        const data: Guest = {
+        const data = {
           firstName: 'John',
           lastName: 'Doe',
           email: 'john.doe@example.com',
           emailHash: hashGuestEmail('john.doe@example.com'),
           companyName: 'ACME Inc.',
-          source: 'MANUAL',
-          status: 'RSVP',
+          source: 'MANUAL' as const,
+          status: 'RSVP' as const,
           accountManager: null,
         }
 
-        const insertionResult = await sendHttpRequest<Guest, GuestResult>(
-          'POST',
-          '/api/guests',
-          data,
-        )
+        const insertionResult = await sendHttpRequest<
+          Omit<Guest, 'createdAt' | 'updatedAt'>,
+          GuestResult
+        >('POST', '/api/guests', data)
 
         expectResult(insertionResult).toHaveSucceededWith({
           status: 200,
