@@ -2,100 +2,126 @@
   <ion-page>
     <ion-content>
       <div id="block">
+        <h1 class="title">Grazie per aver confermato la tua presenza allo spettacolo!</h1>
         <Tilt data-tilt data-tilt-full-page-listening gyroscope="false">
-        <div class="ticket ticket-1">
-          <div class="details-block">
-            <div class="logos-block">
-              <img
-                src="../../public/assets/logos/logo-foresight.png"
-                class="logo-img"
-              />
-              <img
-                src="../../public/assets/logos/Lombardini22.png"
-                class="logo-lomb"
-              />
-            </div>
+          <div class="ticket ticket-1">
+            <div class="details-block">
+              <div class="logos-block">
+                <img src="../../public/assets/logos/logo-foresight1.png" class="logo-img" />
+                <img src="../../public/assets/logos/Lombardini22.png" class="logo-lomb" />
+              </div>
 
-            <div class="guest">
-              <span class="name">
-                {{ ticket.firstName }} {{ ticket.lastName }}</span
-              >
-              <br />
-              <span class="company small">{{ ticket.company }}</span>
-            </div>
+              <div class="guest">
+                <span class="name">
+                  {{ ticket.firstName }} {{ ticket.lastName }}</span>
+                <br />
+                <span class="company small">{{ ticket.company }}</span>
+              </div>
 
-            <div class="location-block">
-              <span class="location">05. 10. 2022 ore 9:00</span>
-              <br />
-              <span class="location"
-                >Auditorium Fondazione Cariplo Largo G. Mahler, Milano</span
-              >
-            </div>
-            <img
-              src="../../public/assets/logos/Lombardini22.png"
-              class="logo-lomb-mob"
-            />
+              <div class="location-block">
+                <span class="location">05.10.2022 ore 9:00</span>
+                <br />
+                <span class="location">Auditorium Fondazione Cariplo Largo G. Mahler, Milano</span>
+              </div>
+              <img src="../../public/assets/logos/Lombardini22.png" class="logo-lomb-mob" />
 
-            <!-- <div class="rip"></div> -->
-          </div>
-          <div class="qr-block">
-            <div class="upper_block">
-              <img :src="qrResult" alt="QR Code" class="qr-img" />
-              <h3>
-                Biglietto <br />#{{ (Math.random() * 1000000).toFixed(0) }}
-              </h3>
+              <!-- <div class="rip"></div> -->
             </div>
-            <div class="lower_block">
-              <span class="disclaimer"
-                >Il biglietto e' strettamente personale</span
-              >
+            <div class="qr-block">
+              <div class="upper_block">
+                <img :src="qrCode" alt="QR Code" class="qr-img" />
+                <h3>
+                  Biglietto <br />#{{ tktNumber }}
+                </h3>
+              </div>
+              <div class="lower_block">
+                <span class="disclaimer">Il biglietto è strettamente personale</span>
+              </div>
             </div>
           </div>
-        </div>
         </Tilt>
-        <AddToCalendar />
-        <h2 id="believers">Our Believers</h2>
-        <img
-          src="../../public/assets/logos/foresight-supporters.png"
-          alt="believers"
-        />
+        <div class="footer">
+          <AddToCalendar />
+          <ion-button class="btn mar-20" :href="plusOne">Invita Qualcuno</ion-button>
+          <!-- <ManualAddGuest :refererEmail="params.email" /> -->
+          <ion-button class="btn mar-20" href="mailto:info@foresightmilano.it?subject=FORESIGHT 2022">Contattaci Via Mail
+          </ion-button>
+        </div> <h4 id="believers" style="color:black" class="pad-20">Sound Design and live performance</h4>
+        <img src="../../public/assets/logos/orchestra.png" alt="believers" width="100" class="pad-20" />
+        <h4 id="believers" style="color:black" class="pad-20">Our Believers</h4>
+        <img src="../../public/assets/logos/foresight-supporters1.png" alt="believers" width="700" class="pad-20" />
       </div>
     </ion-content>
   </ion-page>
 </template>
 
 <script lang="ts" setup>
-import { IonContent, IonPage } from '@ionic/vue'
-import { ref } from 'vue'
+import { IonContent, IonPage, IonButton } from '@ionic/vue'
+import { reactive, ref } from 'vue'
 import { MD5 } from 'crypto-js'
 import Tilt from 'vanilla-tilt-vue'
 import axios from 'axios'
 import AddToCalendar from './components/AddToCalendar.vue'
-
-const ticket = ref({
-  id: MD5(window.location.href.split('/')[5] || '').toString(),
-  firstName: 'Test',
-  lastName: 'Test',
-  email: window.location.href.split('/')[5] || '',
-  company: 'Test SPA',
+// import ManualAddGuest from './components/ManualAddGuest.vue'
+const params = ref({
+  email: window.location.href.split('/').pop()?.toLowerCase() || '',
 })
 
+
+const ticket = reactive({
+  id: MD5(params.value.email).toString(),
+  firstName: '',
+  lastName: '',
+  email: params.value.email,
+  company: '',
+  qrCode: '',
+})
+const tktNumber = ref(ticket.id.slice(0, 5).toUpperCase())
 axios
-  .get(`http://localhost:5000/api/guests/${ticket.value.id}`)
+  .get(
+    `/api/guests/${params.value.email}/rsvp/`,
+  )
+  .then(response => {
+    ticket.firstName = response.data.firstName
+    ticket.lastName = response.data.lastName
+    ticket.company = response.data.companyName
+    ticket.id = response.data.emailHash
+    console.log('data:', response.data)
+  })
+  .catch(error => {
+    console.log(error)
+  })
+const qrCode = ref(`/api/guests/qr/${ticket.email}`)
+const plusOne = `mailto:?subject=Ti invito a FORESIGHT 2022 | 5 ottobre &body=FORESIGHT 2022%0D%0A
+5 ottobre 2022 | ore 9:00%0D%0A
+Auditorium Fondazione Cariplo%0D%0A
+Largo Gustav Mahler, Milano%0D%0A
+%0D%0A
+%0D%0A
+Per iscriverti clicca https://iscrizioni.foresightmilano.it/plusOne %0D%0A
+%0D%0A
+%0D%0A
+FORESIGHT è lo spettacolo live di Lombardini22, unico e irripetibile, tra cultura e intrattenimento.%0D%0A
+In-Between è il tema di questa edizione, ovvero gli stati transitori, intermedi, i “tra”, quei luoghi ai margini dove nasce il confronto e si scatena il cambiamento.%0D%0A
+Ne parleremo in tre diversi atti scanditi dall’Orchestra Sinfonica di Milano, con personaggi, linguaggi, saperi, ed enfasi diverse, e con la partecipazione straordinaria di Alessandro Baricco.%0D%0A
+%0D%0A
+%0D%0A
+
+info@foresightmilano.it%0D%0A
+www.foresightmilano.it`
+
+axios
+  .get(`/api/guests/${ticket.id}`)
   .then(res => {
-    ticket.value.firstName = res.data.firstName
-    ticket.value.lastName = res.data.lastName
-    ticket.value.company = res.data.company
+    ticket.firstName = res.data.firstName
+    ticket.lastName = res.data.lastName
+    ticket.company = res.data.companyName
   })
   .catch(err => {
     console.log(err)
   })
 
-const qrResult = ref('')
-qrResult.value = `http://localhost:5000/api/guests/qr/${ticket.value.id}`
-const qrcode = ref('')
-qrcode.value = ticket.value.id
-console.log(qrcode.value)
+console.log(qrCode)
 </script>
 
 <style scoped>
@@ -104,7 +130,27 @@ console.log(qrcode.value)
   box-sizing: border-box;
   margin: 0;
   /* text-shadow: 0px 0px 20px black; */
-  font-family:helvetica neue,helvetica,arial,verdana,sans-serif;
+  font-family: helvetica neue, helvetica, arial, verdana, sans-serif;
+}
+
+.title {
+  text-align: center;
+  font-size: 2rem;
+  margin: 1rem;
+  color: black;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  margin: 1rem;
+  flex-direction: column;
+  align-content: stretch;
+  justify-content: space-between;
+}
+.btn{
+  background:#a23cfd;
+  --background: #a23cfd;
 }
 
 #block {
@@ -113,13 +159,20 @@ console.log(qrcode.value)
   justify-content: center;
   min-height: 100%;
   color: #999999;
-  background-color: #f4f5f6;
-  background-image: linear-gradient(to bottom left, #abb5ba, #d5dadd);
+  background-color: whitesmoke;
   flex-direction: column;
 }
 
 body {
   background-color: #436ea5;
+}
+
+.pad-20 {
+  padding-top:20px
+}
+
+.mar-20 {
+  margin-top:20px
 }
 
 .ticket {
@@ -141,15 +194,17 @@ body {
 
 .details-block {
   display: flex;
-  background-image: url('../../public/assets/media/bg.png');
+  background-image: url('../../public/assets/media/bg-1.png');
   border-radius: 20px;
   flex-direction: column;
-  background-position: right;
+  background-position: center;
+  background-size: cover;
   background-repeat: repeat;
   justify-content: space-between;
   height: 100%;
   width: 525px;
 }
+
 .logos-block {
   margin-top: 25px;
   display: inline-flex;
@@ -161,10 +216,12 @@ body {
   height: 100px;
   margin-left: 35px;
 }
+
 .logo-lomb {
   height: 35px;
   margin-right: 20px;
 }
+
 .logo-lomb-mob {
   display: none;
 }
@@ -181,6 +238,7 @@ body {
   font-size: 30px;
   text-transform: uppercase;
 }
+
 .company {
   font-size: 20px;
 }
@@ -212,6 +270,7 @@ body {
   /* -webkit-filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3)); */
 }
+
 .location {
   font-size: 16px;
   font-weight: 700;
@@ -263,7 +322,7 @@ body {
 }
 
 .disclaimer {
-  font-size: 9px;
+  font-size: 12px;
   margin-left: 15px;
   margin-right: 15px;
   text-align: center;
@@ -302,16 +361,18 @@ h2#believers {
 
   .details-block {
     display: flex;
-    background-image: url('../../public/assets/media/bg.png');
+    background-image: url('../../public/assets/media/bg-1.png');
     border-radius: 20px;
     flex-direction: column;
-    background-position: right;
+    background-position: center;
     background-repeat: repeat;
+    background-size: cover;
     justify-content: flex-start;
     height: 75%;
     width: 100%;
     align-items: flex-start;
   }
+
   .logos-block {
     margin-top: 25px;
     display: inline-flex;
@@ -323,6 +384,7 @@ h2#believers {
     height: 100px;
     margin-left: 35px;
   }
+
   .logo-lomb {
     height: 35px;
     margin-right: 20px;
@@ -348,6 +410,7 @@ h2#believers {
     font-size: 30px;
     text-transform: uppercase;
   }
+
   .company {
     font-size: 20px;
   }
@@ -379,6 +442,7 @@ h2#believers {
     /* -webkit-filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3)); */
   }
+
   .location {
     font-size: 16px;
     font-weight: 700;
@@ -436,7 +500,7 @@ h2#believers {
   }
 
   .disclaimer {
-    font-size: 10px;
+    font-size: 12px;
     margin-left: 45px;
     margin-right: 15px;
     text-align: left;

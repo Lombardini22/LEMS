@@ -1,5 +1,6 @@
 import { MD5 } from 'crypto-js'
 import { ObjectId } from 'mongodb'
+import { z } from 'zod'
 
 interface GuestCommonData {
   _id?: ObjectId
@@ -49,4 +50,35 @@ export function foldGuestBySource<T>(
     case 'RSVP':
       return whenSubscriber(guest)
   }
+}
+
+const NonEmptyString = z.string().min(1).brand<'NonEmptyString'>()
+const Email = z.string().email().brand<'Email'>()
+
+const GuestItem = z.object({
+  firstName: NonEmptyString,
+  lastName: NonEmptyString,
+  email: Email,
+  company: z.optional(NonEmptyString),
+})
+export type GuestItem = z.infer<typeof GuestItem>
+
+export const UploadGuestsFileContent = z.array(GuestItem).min(1)
+export type UploadGuestsFileContent = z.infer<typeof UploadGuestsFileContent>
+
+interface UploadGuestsError {
+  email_address: 'string'
+  error: 'string'
+  error_code: 'ERROR_CONTACT_EXISTS'
+  field: 'string'
+  field_message: 'string'
+}
+
+export interface UploadGuestsResult {
+  processedCount: number
+  uploadedCount: number
+  createdCount: number
+  updatedCount: number
+  errorsCount: number
+  errors: UploadGuestsError[]
 }

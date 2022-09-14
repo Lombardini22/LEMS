@@ -4,25 +4,48 @@ import { ObjectId } from 'mongodb'
 import { Guest, hashGuestEmail } from '../../../../shared/models/Guest'
 import { guestsCollection } from './guestsCollection'
 import { expectT } from '../../testUtils'
+import { AddListMemberBody } from '@mailchimp/mailchimp_marketing'
 import { env } from '../../resources/env'
 import { Result } from '../../../../shared/Result'
-import { constVoid } from '../../../../shared/utils'
+import { ServerError } from '../../ServerError'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const getListMember = jest.fn((_listId: string, _emailHash: string) =>
+const getListMember = jest.fn(async (listId: string, _emailHash: string) => {
+  const result = await env.use(env => {
+    if (listId === env.MAILCHIMP_DATABASE_LIST_ID) {
+      return Result.success(() => ({
+        status: 'subscribed',
+        email_address: 'email.address@example.com',
+        merge_fields: {
+          FNAME: 'First name',
+          LNAME: 'Last name',
+          MMERGE7: 'Company name',
+        },
+      }))
+    } else {
+      return Result.failure(() => new ServerError(404, 'Not found'))
+    }
+  })
+
+  if (result.isSuccess()) {
+    return Promise.resolve(result.unsafeGetValue())
+  } else {
+    return Promise.reject(result.unsafeGetError())
+  }
+})
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const addListMember = jest.fn((_listId: string, _data: AddListMemberBody) =>
   Promise.resolve({
     status: 'subscribed',
     email_address: 'email.address@example.com',
     merge_fields: {
       FNAME: 'First name',
       LNAME: 'Last name',
-      MMERGE8: 'Company name',
+      MMERGE7: 'Company name',
     },
   }),
 )
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const trigger = jest.fn((_triggerId, _stepId, _options) => Promise.resolve())
 
 jest.mock('../../resources/mailchimp', function () {
   return {
@@ -32,9 +55,7 @@ jest.mock('../../resources/mailchimp', function () {
           op({
             lists: {
               getListMember,
-            },
-            customerJourneys: {
-              trigger,
+              addListMember,
             },
           }),
       ),
@@ -43,49 +64,52 @@ jest.mock('../../resources/mailchimp', function () {
 })
 
 describe('addGuestThroughMailChimp', () => {
-  beforeEach(() => {
-    trigger.mockClear()
-  })
-
   it('should work', async () => {
-    expect.assertions(5)
+    return env.use(async env => {
+      const result = await addGuestThroughMailChimp({
+        params: { email: 'email' },
+        query: {},
+        body: {},
+      })
 
-    const result = await addGuestThroughMailChimp({
-      params: {
-        listId: 'listId',
-        email: 'email',
-      },
-      query: {},
-      body: {},
-    })
+      const emailHash = hashGuestEmail('email')
 
-    const emailHash = hashGuestEmail('email')
+      expect(getListMember).toHaveBeenCalledTimes(2)
 
-    expect(getListMember).toHaveBeenCalledTimes(1)
-    expect(getListMember).toHaveBeenCalledWith('listId', emailHash)
-
-    expectResult(result).toHaveSucceededWith({
-      _id: expect.any(ObjectId),
-      firstName: 'First name',
-      lastName: 'Last name',
-      email: 'email.address@example.com',
-      emailHash,
-      companyName: 'Company name',
-      source: 'RSVP',
-      status: 'RSVP',
-      accountManager: null,
-    })
-
-    expect(trigger).toHaveBeenCalledTimes(1)
-
-    await env.use(env => {
-      expect(trigger).toHaveBeenCalledWith(
-        env.MAILCHIMP_JOURNEY_ID,
-        env.MAILCHIMP_JOURNEY_TRIGGER_STEP_ID,
-        { email_address: 'email.address@example.com' },
+      expect(getListMember).toHaveBeenCalledWith(
+        env.MAILCHIMP_DATABASE_LIST_ID,
+        emailHash,
       )
 
-      return Result.success(constVoid)
+      expect(getListMember).toHaveBeenCalledWith(
+        env.MAILCHIMP_EVENT_LIST_ID,
+        emailHash,
+      )
+
+      expect(addListMember).toHaveBeenCalledTimes(1)
+
+      expect(addListMember).toHaveBeenCalledWith(env.MAILCHIMP_EVENT_LIST_ID, {
+        email_address: 'email.address@example.com',
+        merge_fields: {
+          FNAME: 'First name',
+          LNAME: 'Last name',
+        },
+        status: 'subscribed',
+      })
+
+      expectResult(result).toHaveSucceededWith({
+        _id: expect.any(ObjectId),
+        firstName: 'First name',
+        lastName: 'Last name',
+        email: 'email.address@example.com',
+        emailHash,
+        companyName: 'Company name',
+        source: 'RSVP',
+        status: 'RSVP',
+        accountManager: null,
+      })
+
+      return result
     })
   })
 
@@ -106,10 +130,7 @@ describe('addGuestThroughMailChimp', () => {
     expectResult(insertionResult).toHaveSucceeded()
 
     const result = await addGuestThroughMailChimp({
-      params: {
-        listId: 'listId',
-        email: 'email',
-      },
+      params: { email: 'email' },
       query: {},
       body: {},
     })
@@ -118,6 +139,5 @@ describe('addGuestThroughMailChimp', () => {
     expectT(result.unsafeGetValue().firstName).toEqual('First name')
     expectT(result.unsafeGetValue().lastName).toEqual('Last name')
     expectT(result.unsafeGetValue().companyName).toEqual('Company name')
-    expect(trigger).toHaveBeenCalledTimes(0)
   })
 })

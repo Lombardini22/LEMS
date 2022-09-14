@@ -56,7 +56,7 @@ lastname: '',
 email: '',
 company: ''
 }
-await axios.get('http://localhost:5000/api/guests/' + qrString.value).then(res => {
+await axios.get('/api/guests/' + qrString.value).then(res => {
 guest.firstname = res.data.firstName
 guest.lastname = res.data.lastName
 guest.email = res.data.email

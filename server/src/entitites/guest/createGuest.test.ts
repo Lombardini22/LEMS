@@ -4,13 +4,32 @@ import {
   GuestCreationInput,
   hashGuestEmail,
 } from '../../../../shared/models/Guest'
+import { Result } from '../../../../shared/Result'
 import { expectResult } from '../../../../shared/testUtils'
+import { ServerError } from '../../ServerError'
 import { expectT } from '../../testUtils'
 import { createGuest } from './createGuest'
 import { guestsCollection } from './guestsCollection'
+import { subscribeGuest } from './utils/subscribeGuest'
+
+jest.mock('./utils/subscribeGuest', () => ({
+  subscribeGuest: jest.fn((guest: Guest) => Result.success(() => guest)),
+}))
 
 describe('createGuest', () => {
-  it('should create a guest with no referrer', async () => {
+  afterEach(() => {
+    const subscribeGuestMock = subscribeGuest as jest.Mock
+    subscribeGuestMock.mockClear()
+
+    return guestsCollection.raw(collection =>
+      Result.tryCatch(
+        () => collection.deleteMany({}),
+        () => new ServerError(500, 'Unable to clear guests collection'),
+      ),
+    )
+  })
+
+  it('should create a guest with no referrer, subscribing it', async () => {
     const data: GuestCreationInput = {
       firstName: 'John',
       lastName: 'Doe',
@@ -27,21 +46,10 @@ describe('createGuest', () => {
 
     expectResult(result).toHaveSucceeded()
     expectT(result.unsafeGetValue().source).toEqual('MANUAL')
+    expect(subscribeGuest).toHaveBeenCalledTimes(1)
   })
 
-  it('should update a guest if it already exists', async () => {
-    const insertionResult = await guestsCollection.insert({
-      firstName: 'First name',
-      lastName: 'Last name',
-      email: 'email@example.com',
-      emailHash: hashGuestEmail('email@example.com'),
-      source: 'MANUAL',
-      status: 'RSVP',
-      accountManager: null,
-    })
-
-    expectResult(insertionResult).toHaveSucceeded()
-
+  it('should update a guest if it already exists, without subscribing it', async () => {
     const data: GuestCreationInput = {
       firstName: 'John',
       lastName: 'Doe',
@@ -49,6 +57,16 @@ describe('createGuest', () => {
       companyName: 'ACME Inc.',
       accountManager: null,
     }
+
+    const insertionResult = await guestsCollection.insert({
+      ...data,
+      emailHash: hashGuestEmail(data.email),
+      source: 'MANUAL',
+      status: 'RSVP',
+      accountManager: null,
+    })
+
+    expectResult(insertionResult).toHaveSucceeded()
 
     const result = await createGuest({
       params: {},
@@ -58,9 +76,10 @@ describe('createGuest', () => {
 
     expectResult(result).toHaveSucceeded()
     expect(result.unsafeGetValue()).toMatchObject(data)
+    expect(subscribeGuest).not.toHaveBeenCalled()
   })
 
-  it('should create a guest with a referrer', async () => {
+  it('should create a guest with a referrer, subscribing it', async () => {
     const referrerData: Guest = {
       firstName: 'Referrer first name',
       lastName: 'Referrer last name',
@@ -102,17 +121,24 @@ describe('createGuest', () => {
 
     expectT(referree.source).toEqual('REFERRER')
     expectT(referree.referrerId).toEqual(referrerId)
+    expect(subscribeGuest).toHaveBeenCalledTimes(1)
+    expect(subscribeGuest).toHaveBeenCalledWith(result.unsafeGetValue())
   })
 
-  it('should update a guest with a referrer if it already exists', async () => {
+  it('should update a guest with a referrer if it already exists, without subscribing it', async () => {
+    const data: GuestCreationInput = {
+      firstName: 'John',
+      lastName: 'Doe',
+      email: 'john.doe@example.com',
+      companyName: 'ACME Inc.',
+      accountManager: null,
+    }
+
     const insertionResult = await guestsCollection.insert({
-      firstName: 'First name',
-      lastName: 'Last name',
-      email: 'email@example.com',
-      emailHash: hashGuestEmail('email@example.com'),
+      ...data,
+      emailHash: hashGuestEmail(data.email),
       source: 'MANUAL',
       status: 'RSVP',
-      accountManager: null,
     })
 
     expectResult(insertionResult).toHaveSucceeded()
@@ -131,14 +157,6 @@ describe('createGuest', () => {
 
     expectResult(referrer).toHaveSucceeded()
     const referrerId = referrer.unsafeGetValue()._id
-
-    const data: GuestCreationInput = {
-      firstName: 'John',
-      lastName: 'Doe',
-      email: 'john.doe@example.com',
-      companyName: 'ACME Inc.',
-      accountManager: null,
-    }
 
     const result = await createGuest({
       params: {},
@@ -159,5 +177,6 @@ describe('createGuest', () => {
     expect(referree).toMatchObject(data)
     expectT(referree.source).toEqual('REFERRER')
     expectT(referree.referrerId).toEqual(referrerId)
+    expect(subscribeGuest).not.toHaveBeenCalled()
   })
 })

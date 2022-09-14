@@ -6,36 +6,32 @@ import ManualPage from '../views/ManualPage.vue'
 import QuasarPage from '../views/QuasarPage.vue'
 // import TicketPage from '../views/TicketPage.vue'
 import TicketPage2 from '../views/TicketPage2.vue'
+import AddPlusOne from '@/views/AddPlusOne.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/',
-    redirect: '/home',
-  },
-  {
-    path: "/",
+    path: '/lems/management',
     component: TabsPage,
     children: [
       {
-        path: "/",
-        redirect: "/home",
+        path: '/lems/management',
+        redirect: '/lems/management/scan',
       },
       {
-        path: "home",
-        name: "home",
+        path: 'scan',
+        name: 'scan',
         component: ScanPage,
       },
       {
-        path: "manual",
+        path: 'manual',
         component: ManualPage,
         // beforeEnter: authCheck,
       },
       {
-        path: "quasar",
+        path: 'quasar',
         component: QuasarPage,
         // beforeEnter: authCheck,
       },
-
     ],
   },
   // {
@@ -43,8 +39,11 @@ const routes: Array<RouteRecordRaw> = [
   //   component: TicketPage,
   // },
   {
-    path: "/ticket/:listId/:email",
+    path: '/ticket/:email',
     component: TicketPage2,
+  },{
+    path: '/plusOne',
+    component: AddPlusOne,
   },
 ]
 
