@@ -2,16 +2,16 @@
   <ion-page>
     <ion-content>
       <div id="block">
-        <h1 class="title">Registrati ora e ricevi il tuo biglietto per lo spettacolo!</h1>
-        <iframe class="frame" src="https://eepurl.com/h-TZe9" ></iframe>
+        <!-- <h1 class="title">Registrati ora e ricevi il tuo biglietto per lo spettacolo!</h1> -->
+        <iframe class="frame" src="https://eepurl.com/h-TZe9"></iframe>
         <div class="footer">
           <AddToCalendar />
           <!-- <ManualAddGuest :refererEmail="params.email" /> -->
-          <ion-button class="btn mar-20" href="mailto:info@foresightmilano.it?subject=FORESIGHT 2022">Contattaci Via Mail
-          </ion-button>
-        </div> <h4 id="believers" style="color:black" class="pad-20">Sound Design and live performance</h4>
+          <!-- <ion-button class="btn mar-20" href="mailto:info@foresightmilano.it?subject=FORESIGHT 2022">Contattaci Via Mail</ion-button> -->
+        </div>
+        <h4 id="believers" style="color: black" class="pad-20">Sound Design and live performance</h4>
         <img src="../../public/assets/logos/orchestra.png" alt="believers" width="100" class="pad-20" />
-        <h4 id="believers" style="color:black" class="pad-20">Our Believers</h4>
+        <h4 id="believers" style="color: black" class="pad-20">Our Believers</h4>
         <img src="../../public/assets/logos/foresight-supporters1.png" alt="believers" width="700" class="pad-20" />
       </div>
     </ion-content>
@@ -20,7 +20,6 @@
 
 <script lang="ts" setup>
 import { IonContent, IonPage, IonButton } from '@ionic/vue'
-
 </script>
 
 <style scoped>
@@ -47,8 +46,8 @@ import { IonContent, IonPage, IonButton } from '@ionic/vue'
   align-content: stretch;
   justify-content: space-between;
 }
-.btn{
-  background:#a23cfd;
+.btn {
+  background: #a23cfd;
   --background: #a23cfd;
 }
 
@@ -66,18 +65,18 @@ body {
   background-color: #436ea5;
 }
 
-.frame{
+.frame {
   height: 100%;
   width: 43%;
-  min-height: 1200px;
+  min-height: 1300px;
   border: 0;
 }
 .pad-20 {
-  padding-top:20px
+  padding-top: 20px;
 }
 
 .mar-20 {
-  margin-top:20px
+  margin-top: 20px;
 }
 
 .ticket {
@@ -310,8 +309,9 @@ h2#believers {
     font-weight: bold;
   }
 
-  .frame{
-    width:100%;
+  .frame {
+    width: 100%;
+    min-height: 1300px;
   }
 
   .name {

@@ -12,8 +12,7 @@
               </div>
 
               <div class="guest">
-                <span class="name">
-                  {{ ticket.firstName }} {{ ticket.lastName }}</span>
+                <span class="name"> {{ ticket.firstName }} {{ ticket.lastName }}</span>
                 <br />
                 <span class="company small">{{ ticket.company }}</span>
               </div>
@@ -30,9 +29,7 @@
             <div class="qr-block">
               <div class="upper_block">
                 <img :src="qrCode" alt="QR Code" class="qr-img" />
-                <h3>
-                  Biglietto <br />#{{ tktNumber }}
-                </h3>
+                <h3>Biglietto <br />#{{ tktNumber }}</h3>
               </div>
               <div class="lower_block">
                 <span class="disclaimer">Il biglietto è strettamente personale</span>
@@ -44,11 +41,13 @@
           <AddToCalendar />
           <ion-button class="btn mar-20" :href="plusOne">Invita Qualcuno</ion-button>
           <!-- <ManualAddGuest :refererEmail="params.email" /> -->
-          <ion-button class="btn mar-20" href="mailto:info@foresightmilano.it?subject=FORESIGHT 2022">Contattaci Via Mail
+          <ion-button class="btn mar-20" href="mailto:info@foresightmilano.it?subject=FORESIGHT 2022"
+            >Contattaci Via Mail
           </ion-button>
-        </div> <h4 id="believers" style="color:black" class="pad-20">Sound Design and live performance</h4>
+        </div>
+        <h4 id="believers" style="color: black" class="pad-20">Sound Design and live performance</h4>
         <img src="../../public/assets/logos/orchestra.png" alt="believers" width="100" class="pad-20" />
-        <h4 id="believers" style="color:black" class="pad-20">Our Believers</h4>
+        <h4 id="believers" style="color: black" class="pad-20">Our Believers</h4>
         <img src="../../public/assets/logos/foresight-supporters1.png" alt="believers" width="700" class="pad-20" />
       </div>
     </ion-content>
@@ -67,7 +66,6 @@ const params = ref({
   email: window.location.href.split('/').pop()?.toLowerCase() || '',
 })
 
-
 const ticket = reactive({
   id: MD5(params.value.email).toString(),
   firstName: '',
@@ -78,9 +76,7 @@ const ticket = reactive({
 })
 const tktNumber = ref(ticket.id.slice(0, 5).toUpperCase())
 axios
-  .get(
-    `/api/guests/${params.value.email}/rsvp/`,
-  )
+  .get(`/api/guests/${params.value.email}/rsvp/`)
   .then(response => {
     ticket.firstName = response.data.firstName
     ticket.lastName = response.data.lastName
@@ -98,7 +94,7 @@ Auditorium Fondazione Cariplo%0D%0A
 Largo Gustav Mahler, Milano%0D%0A
 %0D%0A
 %0D%0A
-Per iscriverti clicca https://iscrizioni.foresightmilano.it/plusOne %0D%0A
+Per iscriverti clicca https://iscrizioni.foresightmilano.it/guest %0D%0A
 %0D%0A
 %0D%0A
 FORESIGHT è lo spettacolo live di Lombardini22, unico e irripetibile, tra cultura e intrattenimento.%0D%0A
@@ -148,8 +144,8 @@ console.log(qrCode)
   align-content: stretch;
   justify-content: space-between;
 }
-.btn{
-  background:#a23cfd;
+.btn {
+  background: #a23cfd;
   --background: #a23cfd;
 }
 
@@ -168,11 +164,11 @@ body {
 }
 
 .pad-20 {
-  padding-top:20px
+  padding-top: 20px;
 }
 
 .mar-20 {
-  margin-top:20px
+  margin-top: 20px;
 }
 
 .ticket {
