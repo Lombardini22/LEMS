@@ -86,7 +86,7 @@ export function guestToMailchimpListMember(
     merge_fields: {
       FNAME: guest.firstName,
       LNAME: guest.lastName,
-      MMERGE3: guest.companyName,
+      MMERGE4: guest.companyName,
     },
   }
 }
