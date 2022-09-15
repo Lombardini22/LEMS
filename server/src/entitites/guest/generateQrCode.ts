@@ -32,7 +32,7 @@ export const sendQrCode: RequestHandler<
         lastName: member.merge_fields['LNAME'],
         email: member.email_address,
         emailHash,
-        companyName: member.merge_fields['MMERGE3'] || null,
+        companyName: member.merge_fields['MMERGE4'] || null,
         source: 'RSVP',
         status: 'RSVP',
         accountManager: null,

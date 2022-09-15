@@ -93,7 +93,7 @@ describe('addGuestThroughMailChimp', () => {
         merge_fields: {
           FNAME: 'First name',
           LNAME: 'Last name',
-          MMERGE3: 'Company name',
+          MMERGE4: 'Company name',
         },
         status: 'subscribed',
       })
