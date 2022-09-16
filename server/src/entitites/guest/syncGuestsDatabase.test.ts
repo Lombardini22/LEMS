@@ -102,5 +102,38 @@ describe('syncGuestsDatabase', () => {
     )
   })
 
-  it.todo('should update guests that are on local DB and on MailChimp')
+  it('should update guests that are on local DB and on MailChimp', async () => {
+    const existingGuestInsertion = await guestsCollection.insert({
+      firstName: 'Existing',
+      lastName: 'Guest',
+      email: 'mailchimp-user1@example.com',
+      emailHash: hashGuestEmail('mailchimp-user1@example.com'),
+      companyName: null,
+      accountManager: null,
+      source: 'RSVP',
+      status: 'RSVP',
+    })
+
+    expectResult(existingGuestInsertion).toHaveSucceeded()
+    const _id = existingGuestInsertion.unsafeGetValue()._id
+
+    const result = await syncGuestsDatabase()
+    expectResult(result).toHaveSucceeded()
+
+    const existingGuestAfterSync = await guestsCollection.findById(_id)
+
+    expectResult(existingGuestAfterSync).toHaveSucceededWith(
+      expect.objectContaining({
+        _id,
+        firstName: 'MailChimp',
+        lastName: 'User1',
+        companyName: 'MailChimp Inc',
+        email: 'mailchimp-user1@example.com',
+        emailHash: hashGuestEmail('mailchimp-user1@example.com'),
+        accountManager: null,
+        source: 'RSVP',
+        status: 'RSVP',
+      }),
+    )
+  })
 })
