@@ -7,6 +7,7 @@ import QuasarPage from '../views/QuasarPage.vue'
 // import TicketPage from '../views/TicketPage.vue'
 import TicketPage2 from '../views/TicketPage2.vue'
 import AddPlusOne from '@/views/AddPlusOne.vue'
+import LoginPage from '@/views/LoginPage.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -47,6 +48,10 @@ const routes: Array<RouteRecordRaw> = [
   },{
     path: '/guest',
     component: AddPlusOne,
+  },
+  {
+    path: '/login',
+    component: LoginPage,
   },
 ]
 
