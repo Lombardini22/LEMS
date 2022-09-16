@@ -13,6 +13,8 @@ config(
 )
 
 const Env = z.object({
+  BASIC_USERNAME: z.string(),
+  BASIC_PASSWORD: z.string(),
   CLIENT_URL: z.string(),
   MAILCHIMP_API_KEY: z.string(),
   MAILCHIMP_DATABASE_LIST_ID: z.string(),
