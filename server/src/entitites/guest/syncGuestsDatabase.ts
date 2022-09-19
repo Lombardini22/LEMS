@@ -3,6 +3,7 @@ import { Result } from '../../../../shared/Result'
 import { constVoid } from '../../../../shared/utils'
 import { database } from '../../resources/database'
 import { env } from '../../resources/env'
+import { Path } from '../../routing/Path'
 import { ServerError } from '../../ServerError'
 import {
   createGuestsCollectionIndexes,
@@ -18,6 +19,14 @@ interface CleanResponse {
 interface UpsertResponse {
   success: true
 }
+
+export const cleanGuestsDatabasePath = Path.start()
+  .literal('sync')
+  .literal('clean')
+
+export const upsertGuestsDatabasePath = Path.start()
+  .literal('sync')
+  .literal('upsert')
 
 export function cleanGuestsDatabase(): Promise<
   Result<ServerError, CleanResponse>
