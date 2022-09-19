@@ -7,13 +7,14 @@
             <ion-icon slot="icon-only" :icon="addOutline"></ion-icon>
           </ion-button>
         </ion-buttons>
-
-        <ion-title>Guest List</ion-title>
+        <ion-title>Guest List - {{count}} </ion-title>
       </ion-toolbar>
       <ion-toolbar>
         <ion-searchbar animated v-model="search"></ion-searchbar>
       </ion-toolbar>
     </ion-header>
+
+
 
     <ion-content :fullscreen="true">
       <ion-header collapse="condense">
@@ -37,7 +38,7 @@
               <p>No results found!</p>
             </ion-item>
           </ion-list>
-          
+
         </div>
         <!-- ALERT -->
         <ion-alert :is-open="alert" header="Confirm Information" :sub-header="alertSubTitle" :message="alertMsg"
@@ -68,7 +69,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref,watch } from 'vue'
 import axios from 'axios'
 import {
   IonContent,
@@ -100,6 +101,11 @@ const alert = ref(false)
 const alertMsg = ref()
 const alertTitle = ref()
 const alertSubTitle = ref()
+
+// Counts
+const totalCount = ref(0)
+const filteredCount = ref(0)
+// const chekedCount = ref(0)
 
 // Form
 const firstName = ref('')
@@ -144,6 +150,7 @@ const submit = async () => {
 
 axios.get(serverUrl + 'api/guests/?order=ASC&first=1000').then(res => {
   data.value = res.data.edges
+  totalCount.value = res.data.pageInfo.totalCount
   console.table(data.value)
 })
 
@@ -163,6 +170,15 @@ const filteredData = computed(() => {
   } else {
     return data.value
   }
+  
+})
+
+watch(filteredData, (val) => {
+  filteredCount.value = val.length
+})
+
+const count = computed(() => {
+  return `${filteredCount.value} of ${totalCount.value} guests`
 })
 
 // const logScrollStart = () => {
