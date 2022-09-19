@@ -69,7 +69,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref,watch } from 'vue'
+import { ref, watch } from 'vue'
 import axios from 'axios'
 import {
   IonContent,
@@ -165,12 +165,14 @@ const print = (item: any) => {
 const filteredData = computed(() => {
   if (search.value) {
     return data.value.filter((item: any) => {
-      return item.node.firstName.toLowerCase().includes(search.value.toLowerCase())
+      const fullName = `${item.node.firstName} ${item.node.lastName}`
+      return fullName.toLowerCase().includes(search.value.toLowerCase())
+      
     })
   } else {
     return data.value
   }
-  
+
 })
 
 watch(filteredData, (val) => {
