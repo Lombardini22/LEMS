@@ -1,9 +1,9 @@
 import { hashGuestEmail } from '../../../../shared/models/Guest'
-import { Result } from '../../../../shared/Result'
 import { expectResult } from '../../../../shared/testUtils'
 import { ServerError } from '../../ServerError'
 import { guestsCollection } from './guestsCollection'
-import { MembersListResult, syncGuestsDatabase } from './syncGuestsDatabase'
+import { cleanGuestsDatabase } from './syncGuestsDatabase'
+import { MembersListResult } from './utils/fetchMailchimpMembers'
 
 const getListMembersInfo = jest.fn(
   (
@@ -48,34 +48,34 @@ jest.mock('../../resources/mailchimp', () => ({
 }))
 
 describe('syncGuestsDatabase', () => {
-  it('should create guests that are on MailChimp but not on local DB', async () => {
-    const result = await syncGuestsDatabase()
-    expectResult(result).toHaveSucceeded()
+  // it('should create guests that are on MailChimp but not on local DB', async () => {
+  //   const result = await syncGuestsDatabase()
+  //   expectResult(result).toHaveSucceeded()
 
-    const guests = await guestsCollection.raw(collection =>
-      Result.tryCatch(
-        () =>
-          collection
-            .find({
-              email: {
-                $in: [
-                  'mailchimp-user1@example.com',
-                  'mailchimp-user2@example.com',
-                ],
-              },
-            })
-            .toArray(),
-        () => new ServerError(500, 'Unable to find guests after sync'),
-      ),
-    )
+  //   const guests = await guestsCollection.raw(collection =>
+  //     Result.tryCatch(
+  //       () =>
+  //         collection
+  //           .find({
+  //             email: {
+  //               $in: [
+  //                 'mailchimp-user1@example.com',
+  //                 'mailchimp-user2@example.com',
+  //               ],
+  //             },
+  //           })
+  //           .toArray(),
+  //       () => new ServerError(500, 'Unable to find guests after sync'),
+  //     ),
+  //   )
 
-    const emails = await guests.map(guests => guests.map(guest => guest.email))
+  //   const emails = await guests.map(guests => guests.map(guest => guest.email))
 
-    expectResult(emails).toHaveSucceededWith([
-      'mailchimp-user2@example.com',
-      'mailchimp-user1@example.com',
-    ])
-  })
+  //   expectResult(emails).toHaveSucceededWith([
+  //     'mailchimp-user2@example.com',
+  //     'mailchimp-user1@example.com',
+  //   ])
+  // })
 
   it('should delete guests that are on local DB but not on MailChimp', async () => {
     const oldGuestInsertion = await guestsCollection.insert({
@@ -92,8 +92,8 @@ describe('syncGuestsDatabase', () => {
     expectResult(oldGuestInsertion).toHaveSucceeded()
     const _id = oldGuestInsertion.unsafeGetValue()._id
 
-    const result = await syncGuestsDatabase()
-    expectResult(result).toHaveSucceeded()
+    const result = await cleanGuestsDatabase()
+    expectResult(result).toHaveSucceededWith({ deleted: 1 })
 
     const oldGuestAfterSync = await guestsCollection.findById(_id)
 
@@ -102,38 +102,38 @@ describe('syncGuestsDatabase', () => {
     )
   })
 
-  it('should update guests that are on local DB and on MailChimp', async () => {
-    const existingGuestInsertion = await guestsCollection.insert({
-      firstName: 'Existing',
-      lastName: 'Guest',
-      email: 'mailchimp-user1@example.com',
-      emailHash: hashGuestEmail('mailchimp-user1@example.com'),
-      companyName: null,
-      accountManager: null,
-      source: 'RSVP',
-      status: 'RSVP',
-    })
+  // it('should update guests that are on local DB and on MailChimp', async () => {
+  //   const existingGuestInsertion = await guestsCollection.insert({
+  //     firstName: 'Existing',
+  //     lastName: 'Guest',
+  //     email: 'mailchimp-user1@example.com',
+  //     emailHash: hashGuestEmail('mailchimp-user1@example.com'),
+  //     companyName: null,
+  //     accountManager: null,
+  //     source: 'RSVP',
+  //     status: 'RSVP',
+  //   })
 
-    expectResult(existingGuestInsertion).toHaveSucceeded()
-    const _id = existingGuestInsertion.unsafeGetValue()._id
+  //   expectResult(existingGuestInsertion).toHaveSucceeded()
+  //   const _id = existingGuestInsertion.unsafeGetValue()._id
 
-    const result = await syncGuestsDatabase()
-    expectResult(result).toHaveSucceeded()
+  //   const result = await syncGuestsDatabase()
+  //   expectResult(result).toHaveSucceeded()
 
-    const existingGuestAfterSync = await guestsCollection.findById(_id)
+  //   const existingGuestAfterSync = await guestsCollection.findById(_id)
 
-    expectResult(existingGuestAfterSync).toHaveSucceededWith(
-      expect.objectContaining({
-        _id,
-        firstName: 'MailChimp',
-        lastName: 'User1',
-        companyName: 'MailChimp Inc',
-        email: 'mailchimp-user1@example.com',
-        emailHash: hashGuestEmail('mailchimp-user1@example.com'),
-        accountManager: null,
-        source: 'RSVP',
-        status: 'RSVP',
-      }),
-    )
-  })
+  //   expectResult(existingGuestAfterSync).toHaveSucceededWith(
+  //     expect.objectContaining({
+  //       _id,
+  //       firstName: 'MailChimp',
+  //       lastName: 'User1',
+  //       companyName: 'MailChimp Inc',
+  //       email: 'mailchimp-user1@example.com',
+  //       emailHash: hashGuestEmail('mailchimp-user1@example.com'),
+  //       accountManager: null,
+  //       source: 'RSVP',
+  //       status: 'RSVP',
+  //     }),
+  //   )
+  // })
 })
