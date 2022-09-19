@@ -41,8 +41,8 @@
           <AddToCalendar />
           <ion-button class="btn mar-20" :href="plusOne">Invita un ospite</ion-button>
           <!-- <ManualAddGuest :refererEmail="params.email" /> -->
-          <ion-button class="btn mar-20" href="mailto:info@foresightmilano.it?subject=FORESIGHT 2022"
-            >Contattaci Via Mail
+          <ion-button class="btn mar-20" href="mailto:info@foresightmilano.it?subject=FORESIGHT 2022">Contattaci Via
+            Mail
           </ion-button>
         </div>
         <h4 id="believers" style="color: black" class="pad-20">Sound Design and live performance</h4>
@@ -62,6 +62,8 @@ import Tilt from 'vanilla-tilt-vue'
 import axios from 'axios'
 import AddToCalendar from './components/AddToCalendar.vue'
 // import ManualAddGuest from './components/ManualAddGuest.vue'
+const serverUrl = process.env.VUE_APP_SERVER_URL
+
 const params = ref({
   email: window.location.href.split('/').pop()?.toLowerCase() || '',
 })
@@ -76,7 +78,7 @@ const ticket = reactive({
 })
 const tktNumber = ref(ticket.id.slice(0, 5).toUpperCase())
 axios
-  .get(`/api/guests/${params.value.email}/rsvp/`)
+  .get(serverUrl + `api/guests/${params.value.email}/rsvp/`)
   .then(response => {
     ticket.firstName = response.data.firstName
     ticket.lastName = response.data.lastName
@@ -87,7 +89,7 @@ axios
   .catch(error => {
     console.log(error)
   })
-const qrCode = ref(`/api/guests/qr/${ticket.email}`)
+const qrCode = ref(serverUrl + `api/guests/qr/${ticket.email}`)
 const plusOne = `mailto:?subject=Ti invito a FORESIGHT 2022 | 5 ottobre &body=FORESIGHT 2022%0D%0A
 5 ottobre 2022 | ore 9:00%0D%0A
 Auditorium Fondazione Cariplo%0D%0A
@@ -107,7 +109,7 @@ info@foresightmilano.it%0D%0A
 www.foresightmilano.it`
 
 axios
-  .get(`/api/guests/${ticket.id}`)
+  .get(serverUrl + `api/guests/${ticket.id}`)
   .then(res => {
     ticket.firstName = res.data.firstName
     ticket.lastName = res.data.lastName
@@ -144,6 +146,7 @@ console.log(qrCode)
   align-content: stretch;
   justify-content: space-between;
 }
+
 .btn {
   background: #a23cfd;
   --background: #a23cfd;

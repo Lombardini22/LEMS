@@ -3,7 +3,7 @@
     <ion-header :translucent="true">
       <ion-toolbar>
         <ion-buttons slot="primary">
-          <ion-button @click="setOpen(true)">
+          <ion-button @click="setOpen(!isOpen)">
             <ion-icon slot="icon-only" :icon="addOutline"></ion-icon>
           </ion-button>
         </ion-buttons>
@@ -11,10 +11,7 @@
         <ion-title>Guest List</ion-title>
       </ion-toolbar>
       <ion-toolbar>
-        <ion-searchbar
-          animated
-          @input="(e) => search = (e.detail.value!)"
-        ></ion-searchbar>
+        <ion-searchbar animated v-model="search"></ion-searchbar>
       </ion-toolbar>
     </ion-header>
 
@@ -25,32 +22,26 @@
         </ion-toolbar>
       </ion-header>
 
-      <ion-content
-        :scroll-events="true"
-      >
+      <ion-content :scroll-events="true">
         <div>
           <!-- List of Input Items -->
           <ion-list>
-            <ion-item v-for="item in data" :key="item.node._id">
-              <ion-label
-                >{{ item.node.firstName }} {{ item.node.lastName }}</ion-label
-              >
+            <ion-item v-for="item in filteredData" :key="item">
+              <ion-label>{{ item.node.firstName }} {{ item.node.lastName }}</ion-label>
               <ion-button slot="end" @click="print(item.node)">
                 Print
                 <ion-icon :icon="printOutline" />
               </ion-button>
             </ion-item>
+            <ion-item v-if="search&&!filteredData.length">
+              <p>No results found!</p>
+            </ion-item>
           </ion-list>
+          
         </div>
         <!-- ALERT -->
-        <ion-alert
-          :is-open="alert"
-          header="Confirm Information"
-          :sub-header="alertSubTitle"
-          :message="alertMsg"
-          :buttons="['OK']"
-          @didDismiss="setAlertStatus(false)"
-        ></ion-alert>
+        <ion-alert :is-open="alert" header="Confirm Information" :sub-header="alertSubTitle" :message="alertMsg"
+          :buttons="['OK']" @didDismiss="setAlertStatus(false)"></ion-alert>
         <!-- MODAL  -->
         <ion-modal :is-open="isOpen">
           <ion-header>
@@ -97,8 +88,10 @@ import {
   IonAlert
 } from '@ionic/vue'
 import { printOutline, addOutline } from 'ionicons/icons'
- 
-const serverUrl = '/'
+import { computed } from '@vue/reactivity';
+
+const serverUrl = process.env.VUE_APP_SERVER_URL
+// console.log({"serverUrl": serverUrl})
 const data = ref([] as any[])
 const search = ref()
 const isOpen = ref(false)
@@ -126,7 +119,7 @@ const submit = async () => {
 
   console.log(newGuest)
   await axios
-    .post(serverUrl+'api/guests', newGuest)
+    .post(serverUrl + 'api/guests', newGuest)
     .then(res => {
       console.log(res)
     })
@@ -139,12 +132,17 @@ const submit = async () => {
     })
     .finally(() => {
       setTimeout(() => {
+        newGuest.firstName = ''
+        newGuest.lastName = ''
+        newGuest.email = ''
+        newGuest.companyName = ''
         setOpen(false)
       }, 2000)
     })
+
 }
 
-axios.get(serverUrl+'api/guests/?order=ASC&first=1000').then(res => {
+axios.get(serverUrl + 'api/guests/?order=ASC&first=1000').then(res => {
   data.value = res.data.edges
   console.table(data.value)
 })
@@ -157,6 +155,15 @@ const print = (item: any) => {
   alertSubTitle.value = 'Print this guest?'
 }
 
+const filteredData = computed(() => {
+  if (search.value) {
+    return data.value.filter((item: any) => {
+      return item.node.firstName.toLowerCase().includes(search.value.toLowerCase())
+    })
+  } else {
+    return data.value
+  }
+})
 
 // const logScrollStart = () => {
 //   console.log('scrolling started')
@@ -197,9 +204,7 @@ const setAlertStatus = (value: boolean) => {
 #container p {
   font-size: 16px;
   line-height: 22px;
-
   color: #8c8c8c;
-
   margin: 0;
 }
 
