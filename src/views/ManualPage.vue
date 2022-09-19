@@ -43,7 +43,7 @@
 
         </div>
         <!-- ALERT -->
-        <ion-alert :is-open="alert" header="Confirm Information" :sub-header="alertSubTitle" :message="alertMsg"
+        <ion-alert :is-open="alert" :header="alertTitle" :sub-header="alertSubTitle" :message="alertMsg"
           :buttons="['OK']" @didDismiss="setAlertStatus(false)"></ion-alert>
         <!-- MODAL  -->
         <ion-modal :is-open="isOpen">
@@ -67,6 +67,8 @@
         </ion-modal>
       </ion-content>
     </ion-content>
+    <!-- <ion-button expand="block" @click="presentToast('bottom')">Present Toast At the Bottom</ion-button> -->
+
   </ion-page>
 </template>
 
@@ -90,6 +92,7 @@ import {
   IonInput,
   IonAlert,
   // IonToggle,
+  toastController
 } from '@ionic/vue'
 import { personOutline, addOutline } from 'ionicons/icons'
 import { computed } from '@vue/reactivity';
@@ -134,10 +137,11 @@ const submit = async () => {
     })
     .catch(err => {
       console.log(err)
-      alertMsg.value = err
-      alertTitle.value = 'Error'
-      alertSubTitle.value = 'Error'
-      alert.value = true
+      // alertMsg.value = err
+      // alertTitle.value = 'Error'
+      // alertSubTitle.value = 'Error'
+      // alert.value = true
+      presentToast('bottom', `Errore! qualcosa è andato storto! - ${err}`, 'danger', 5000)
     })
     .finally(() => {
       setTimeout(() => {
@@ -146,6 +150,7 @@ const submit = async () => {
         newGuest.email = ''
         newGuest.companyName = ''
         setOpen(false)
+        presentToast('bottom', 'Guest Registrato con Successo!', 'success', 2000)
       }, 2000)
     })
 
@@ -161,7 +166,7 @@ const guestInfo = (item: any) => {
   console.log(item)
   setAlertStatus(true)
   alertMsg.value = `${item.email} `
-  alertTitle.value = '${item.firstName} ${item.lastName} '
+  alertTitle.value = `${item.firstName} ${item.lastName}`
   alertSubTitle.value = `${item.companyName}`
 }
 
@@ -185,6 +190,16 @@ watch(filteredData, (val) => {
 const count = computed(() => {
   return `${filteredCount.value} of ${totalCount.value} guests`
 })
+
+const presentToast = async (position: any, message: any, color: any, duration: number) => {
+  const toast = await toastController.create({
+    message: message,
+    duration: duration,
+    position: position,
+    color: color,
+  })
+  toast.present()
+}
 
 // const logScrollStart = () => {
 //   console.log('scrolling started')

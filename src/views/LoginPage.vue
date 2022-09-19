@@ -85,7 +85,7 @@ axios
     if(res.status == 200){
         userValid.value = true;
         console.log("User Valid");
-        localStorage.setItem("user", JSON.stringify(res.data.accessToken));
+        localStorage.setItem("user", res.data.accessToken);
         setTimeout(() => {
           window.location.href = "/lems/management";
         }, 1000);
