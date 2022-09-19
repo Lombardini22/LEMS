@@ -121,7 +121,7 @@ const submit = async () => {
     firstName: firstName.value,
     lastName: lastName.value,
     email: email.value,
-    company: company.value,
+    companyName: company.value,
   }
 
   console.log(newGuest)
