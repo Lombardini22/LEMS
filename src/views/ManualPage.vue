@@ -28,10 +28,12 @@
           <!-- List of Input Items -->
           <ion-list>
             <ion-item v-for="item in filteredData" :key="item">
-              <ion-label>{{ item.node.firstName }} {{ item.node.lastName }}</ion-label>
-              <ion-button slot="end" @click="print(item.node)">
-                Print
-                <ion-icon :icon="printOutline" />
+              <ion-label>{{ item.node.firstName }} {{ item.node.lastName }} ({{item.node.companyName}})</ion-label>
+              <ion-toggle color="primary"  :checked="item.node.status=='CHECKED_IN'"></ion-toggle>
+
+              <ion-button slot="end" @click="guestInfo(item.node)">
+                Guest Info 
+                <ion-icon :icon="personOutline" />
               </ion-button>
             </ion-item>
             <ion-item v-if="search&&!filteredData.length">
@@ -86,9 +88,10 @@ import {
   IonModal,
   IonIcon,
   IonInput,
-  IonAlert
+  IonAlert,
+  IonToggle,
 } from '@ionic/vue'
-import { printOutline, addOutline } from 'ionicons/icons'
+import { personOutline, addOutline } from 'ionicons/icons'
 import { computed } from '@vue/reactivity';
 
 const serverUrl = process.env.VUE_APP_SERVER_URL
@@ -154,20 +157,20 @@ axios.get(serverUrl + 'api/guests/?order=ASC&first=1000').then(res => {
   console.table(data.value)
 })
 
-const print = (item: any) => {
+const guestInfo = (item: any) => {
   console.log(item)
   setAlertStatus(true)
-  alertMsg.value = `${item.firstName} ${item.lastName}`
-  alertTitle.value = 'Print'
-  alertSubTitle.value = 'Print this guest?'
+  alertMsg.value = `${item.email} ` 
+  alertTitle.value = '${item.firstName} ${item.lastName} '
+  alertSubTitle.value = `${item.companyName}`
 }
 
 const filteredData = computed(() => {
   if (search.value) {
     return data.value.filter((item: any) => {
-      const fullName = `${item.node.firstName} ${item.node.lastName}`
+      const fullName = `${item.node.firstName} ${item.node.lastName} ${item.node.email} ${item.node.companyName}`
       return fullName.toLowerCase().includes(search.value.toLowerCase())
-      
+
     })
   } else {
     return data.value
