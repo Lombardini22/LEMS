@@ -21,6 +21,9 @@ const authCheck = () =>{
   return {isAuth, check}
 }
 
+const logout = () => {
+  localStorage.removeItem('user')
+}
 
 
 const routes: Array<RouteRecordRaw> = [
@@ -90,6 +93,14 @@ const routes: Array<RouteRecordRaw> = [
       } else {
         return true
       }
+    }
+  },
+  {
+    path: '/logout',
+    component: LoginPage,
+    beforeEnter: () => {
+      logout()
+      return '/login'
     }
   },
 ]
