@@ -76,7 +76,7 @@ const userValid = ref(false);
 const onLogin =  () => {
   submitted.value = true;
 axios
-    .post("http://localhost:5000/api/users/login", {
+    .post(process.env.VUE_APP_SERVER_URL+"api/users/login", {
       username: username.value,
       password: password.value,
     })
@@ -86,6 +86,9 @@ axios
         userValid.value = true;
         console.log("User Valid");
         localStorage.setItem("user", JSON.stringify(res.data.accessToken));
+        setTimeout(() => {
+          window.location.href = "/lems/management";
+        }, 1000);
     }else {
         userValid.value = false;
         console.log("User Invalid");
