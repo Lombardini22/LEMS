@@ -29,10 +29,10 @@
           <ion-list>
             <ion-item v-for="item in filteredData" :key="item">
               <ion-label>{{ item.node.firstName }} {{ item.node.lastName }} ({{item.node.companyName}})</ion-label>
-              <ion-toggle color="primary"  :checked="item.node.status=='CHECKED_IN'"></ion-toggle>
+              <!-- <ion-toggle color="primary"  :checked="item.node.status=='CHECKED_IN'"></ion-toggle> -->
 
               <ion-button slot="end" @click="guestInfo(item.node)">
-                Guest Info 
+                Guest Info
                 <ion-icon :icon="personOutline" />
               </ion-button>
             </ion-item>
@@ -89,7 +89,7 @@ import {
   IonIcon,
   IonInput,
   IonAlert,
-  IonToggle,
+  // IonToggle,
 } from '@ionic/vue'
 import { personOutline, addOutline } from 'ionicons/icons'
 import { computed } from '@vue/reactivity';
@@ -160,7 +160,7 @@ axios.get(serverUrl + 'api/guests/?order=ASC&first=1000').then(res => {
 const guestInfo = (item: any) => {
   console.log(item)
   setAlertStatus(true)
-  alertMsg.value = `${item.email} ` 
+  alertMsg.value = `${item.email} `
   alertTitle.value = '${item.firstName} ${item.lastName} '
   alertSubTitle.value = `${item.companyName}`
 }
