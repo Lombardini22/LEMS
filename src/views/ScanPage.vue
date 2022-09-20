@@ -16,7 +16,7 @@
       <div id="container">
         <strong>Please Scan A QRCode to Checkin</strong>
         <ion-input rounded outlined v-model="qrString" placeholder="Scan Your QRCode Using the Scanners" autofocus
-          ref="qrInput" v-on:focusout="onFocusOut"></ion-input>
+          ref="qrInput" v-on:focusout="onFocusOut" :maxlength="32"></ion-input>
         <p>
           <ion-button @click="presentAlert">
             <ion-icon :icon="qrCodeOutline" /> Scan
@@ -29,13 +29,13 @@
 
 <script lang="ts" setup>
 import {
-IonContent,
-IonHeader,
-IonPage,
-IonTitle,
-IonToolbar,
-alertController,
-IonInput,
+  IonContent,
+  IonHeader,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+  alertController,
+  IonInput,
 } from '@ionic/vue'
 import { ref } from 'vue'
 import { qrCodeOutline } from 'ionicons/icons'
@@ -44,33 +44,33 @@ const qrString = ref('')
 const qrInput = ref<HTMLInputElement>()
 
 const onFocusOut = () => {
-if (qrInput.value) {
-// qrInput.value.focus()
-console.log('focusout')
-}
+  if (qrInput.value) {
+    // qrInput.value.focus()
+    console.log('focusout')
+  }
 }
 const presentAlert = async () => {
-const guest = {
-firstname: '',
-lastname: '',
-email: '',
-company: ''
-}
-await axios.get('/api/guests/' + qrString.value).then(res => {
-guest.firstname = res.data.firstName
-guest.lastname = res.data.lastName
-guest.email = res.data.email
-guest.company = res.data.company
-})
+  const guest = {
+    firstname: '',
+    lastname: '',
+    email: '',
+    company: ''
+  }
+  await axios.get(process.env.VUE_APP_SERVER_URL + '/api/guests/' + qrString.value).then(res => {
+    guest.firstname = res.data.firstName
+    guest.lastname = res.data.lastName
+    guest.email = res.data.email
+    guest.company = res.data.company
+  })
 
-const alert = await alertController.create({
-header: 'Printing...',
-subHeader: `${guest.firstname} ${guest.lastname}`,
-message: `${guest.company}`,
-buttons: ['PRINT'],
-})
+  const alert = await alertController.create({
+    header: 'Printing...',
+    subHeader: `${guest.firstname} ${guest.lastname}`,
+    message: `${guest.company}`,
+    buttons: ['PRINT'],
+  })
 
-await alert.present()
+  await alert.present()
 }
 </script>
 

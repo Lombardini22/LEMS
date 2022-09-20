@@ -8,9 +8,10 @@ import ManualPage from '../views/ManualPage.vue'
 import TicketPage2 from '../views/TicketPage2.vue'
 import AddPlusOne from '@/views/AddPlusOne.vue'
 import LoginPage from '@/views/LoginPage.vue'
-import {ref} from 'vue'
+import PrintPage from '@/views/PrintPage.vue'
+import { ref } from 'vue'
 
-const authCheck = () =>{
+const authCheck = () => {
   const isAuth = ref(false)
   const check = () => {
     const token = localStorage.getItem('user')
@@ -18,7 +19,7 @@ const authCheck = () =>{
       isAuth.value = true
     }
   }
-  return {isAuth, check}
+  return { isAuth, check }
 }
 
 const logout = () => {
@@ -40,7 +41,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'scan',
         component: ScanPage,
         beforeEnter: () => {
-          const {isAuth, check} = authCheck()
+          const { isAuth, check } = authCheck()
           check()
           if (isAuth.value) {
             return true
@@ -53,7 +54,7 @@ const routes: Array<RouteRecordRaw> = [
         path: 'manual',
         component: ManualPage,
         beforeEnter: () => {
-          const {isAuth, check} = authCheck()
+          const { isAuth, check } = authCheck()
           check()
           if (isAuth.value) {
             return true
@@ -75,18 +76,24 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/ticket/:email',
     component: TicketPage2,
-  }, {
+  },
+  {
     path: '/plusOne',
     redirect: '/guest'
-  }, {
+  },
+  {
     path: '/guest',
     component: AddPlusOne,
+  },
+  {
+    path: '/print/:name/:email',
+    component: PrintPage,
   },
   {
     path: '/login',
     component: LoginPage,
     beforeEnter: () => {
-      const {isAuth, check} = authCheck()
+      const { isAuth, check } = authCheck()
       check()
       if (isAuth.value) {
         return '/lems/management'

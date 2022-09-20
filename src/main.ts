@@ -4,6 +4,8 @@ import App from './App.vue'
 import router from './router'
 
 import { IonicVue } from '@ionic/vue'
+import {Vue3SimpleHtml2pdf} from "vue3-simple-html2pdf";
+
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css'
@@ -26,7 +28,7 @@ import './theme/variables.css'
 
 // const pinia = createPinia()
 
-const app = createApp(App).use(IonicVue).use(router)
+const app = createApp(App).use(IonicVue).use(router).use(Vue3SimpleHtml2pdf);
 // .use(pinia)
 
 router.isReady().then(() => {
