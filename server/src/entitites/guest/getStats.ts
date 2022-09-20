@@ -1,4 +1,5 @@
 import { Result } from '../../../../shared/Result'
+import { Path } from '../../routing/Path'
 import { ServerError } from '../../ServerError'
 import { guestsCollection } from './guestsCollection'
 
@@ -7,6 +8,8 @@ interface Stats {
   checkedIn: number
   notCheckedIn: number
 }
+
+export const getStatsPath = Path.start().literal('stats')
 
 export async function getStats(): Promise<Result<ServerError, Stats>> {
   const result = await guestsCollection.aggregate<Stats>([
