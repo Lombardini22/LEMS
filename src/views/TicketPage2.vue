@@ -39,7 +39,7 @@
         </Tilt>
         <div class="footer">
           <AddToCalendar />
-          <ion-button class="btn mar-20" :href="printUrl">Salva Voucher in PDF</ion-button>
+          <!-- <ion-button class="btn mar-20" :href="printUrl">Salva Voucher in PDF</ion-button> -->
 
           <ion-button class="btn mar-20" :href="plusOne">Invita un ospite</ion-button>
           <!-- <ManualAddGuest :refererEmail="params.email" /> -->
@@ -64,6 +64,7 @@ import Tilt from 'vanilla-tilt-vue'
 import axios from 'axios'
 import AddToCalendar from './components/AddToCalendar.vue'
 // import ManualAddGuest from './components/ManualAddGuest.vue'
+
 const serverUrl = process.env.VUE_APP_SERVER_URL
 
 const params = ref({
@@ -91,6 +92,8 @@ axios
   .catch(error => {
     console.log(error)
   })
+
+const fullName = ref(ticket.firstName + ' ' + ticket.lastName)
 const qrCode = ref(serverUrl + `api/guests/qr/${ticket.email}`)
 const plusOne = `mailto:?subject=Ti invito a FORESIGHT 2022 | 5 ottobre &body=FORESIGHT 2022%0D%0A
 5 ottobre 2022 | ore 9:00%0D%0A
@@ -122,7 +125,7 @@ axios
   })
 
 const printUrl = ref('')
-printUrl.value = `/print/${ticket.firstName} ${ticket.lastName}/${ticket.email}`
+printUrl.value = `/print/${fullName.value}/${ticket.email}`
 
 // console.log(qrCode)
 </script>
