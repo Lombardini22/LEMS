@@ -46,7 +46,7 @@ export const sendQrCode: RequestHandler<
       async () => {
         const stream = new PassThrough()
 
-        await toFileStream(stream, env.CLIENT_URL, {
+        await toFileStream(stream, emailHash, {
           type: 'png',
           width: 200,
           margin: 1,
