@@ -39,6 +39,8 @@
         </Tilt>
         <div class="footer">
           <AddToCalendar />
+          <ion-button class="btn mar-20" :href="printUrl">Salva Voucher in PDF</ion-button>
+
           <ion-button class="btn mar-20" :href="plusOne">Invita un ospite</ion-button>
           <!-- <ManualAddGuest :refererEmail="params.email" /> -->
           <ion-button class="btn mar-20" href="mailto:info@foresightmilano.it?subject=FORESIGHT 2022">Contattaci Via
@@ -96,7 +98,7 @@ Auditorium Fondazione Cariplo%0D%0A
 Largo Gustav Mahler, Milano%0D%0A
 %0D%0A
 %0D%0A
-Per iscriverti clicca https://iscrizioni.foresightmilano.it/guest %0D%0A
+Per iscriverti clicca qui https://iscrizioni.foresightmilano.it/guest %0D%0A
 %0D%0A
 %0D%0A
 FORESIGHT è lo spettacolo live di Lombardini22, unico e irripetibile, tra cultura e intrattenimento.%0D%0A
@@ -119,7 +121,10 @@ axios
     console.log(err)
   })
 
-console.log(qrCode)
+const printUrl = ref('')
+printUrl.value = `/print/${ticket.firstName} ${ticket.lastName}/${ticket.email}`
+
+// console.log(qrCode)
 </script>
 
 <style scoped>

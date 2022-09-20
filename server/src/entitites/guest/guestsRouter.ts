@@ -9,6 +9,7 @@ import { deleteGuest, deleteGuestPath } from './deleteGuest'
 import { findGuest, findGuestPath } from './findGuest'
 import { findGuests, findGuestsPath } from './findGuests'
 import { sendQrCode, sendQrCodePath } from './generateQrCode'
+import { getStats, getStatsPath } from './getStats'
 import {
   cleanGuestsDatabase,
   cleanGuestsDatabasePath,
@@ -22,6 +23,7 @@ export const guestsRouter = Router.make('/guests')
   .post(createGuestPath, createGuest)
   .post(uploadGuestsPath, uploadGuests)
   .get(findGuestsPath, findGuests)
+  .get(getStatsPath, getStats)
   .get(findGuestPath, findGuest)
   .get(checkInGuestPath, checkInGuest)
   .put(updateGuestPath, updateGuest)
