@@ -28,7 +28,7 @@ export function addGuestThroughMailChimp(
       const { email } = req.params
       const emailHash = hashGuestEmail(email)
 
-      const response = await Result.tryCatch(
+      const mailchimpMemberResponse = await Result.tryCatch(
         () => mailchimp.lists.getListMember(sourceListId, emailHash),
         error =>
           new ServerError(404, 'MailChimp subscriber not found', {
@@ -38,24 +38,26 @@ export function addGuestThroughMailChimp(
           }),
       )
 
-      const guestData = await response.flatMap(response => {
-        if (isMailchimpMembersSuccessResponse(response)) {
-          return Result.success(() => response)
-        } else {
-          return Result.failure(
-            () =>
-              new ServerError(
-                500,
-                'Error in getting subscriber from MailChimp',
-                {
-                  response,
-                },
-              ),
-          )
-        }
-      })
+      const mailchimpMember = await mailchimpMemberResponse.flatMap(
+        response => {
+          if (isMailchimpMembersSuccessResponse(response)) {
+            return Result.success(() => response)
+          } else {
+            return Result.failure(
+              () =>
+                new ServerError(
+                  500,
+                  'Error in getting subscriber from MailChimp',
+                  {
+                    response,
+                  },
+                ),
+            )
+          }
+        },
+      )
 
-      const localGuest = await guestData.flatMap(async mcGuest => {
+      const localGuest = await mailchimpMember.flatMap(async mcGuest => {
         if (!mcGuest.merge_fields['FNAME'] || !mcGuest.merge_fields['LNAME']) {
           return Result.failure(
             () =>
