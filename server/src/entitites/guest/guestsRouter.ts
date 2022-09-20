@@ -9,6 +9,12 @@ import { deleteGuest, deleteGuestPath } from './deleteGuest'
 import { findGuest, findGuestPath } from './findGuest'
 import { findGuests, findGuestsPath } from './findGuests'
 import { sendQrCode, sendQrCodePath } from './generateQrCode'
+import {
+  cleanGuestsDatabase,
+  cleanGuestsDatabasePath,
+  upsertGuestsDatabase,
+  upsertGuestsDatabasePath,
+} from './syncGuestsDatabase'
 import { updateGuest, updateGuestPath } from './updateGuest'
 import { uploadGuests, uploadGuestsPath } from './uploadGuests'
 
@@ -22,3 +28,5 @@ export const guestsRouter = Router.make('/guests')
   .delete(deleteGuestPath, deleteGuest)
   .custom('GET', sendQrCodePath, sendQrCode)
   .get(addGuestThroughMailChimpPath, addGuestThroughMailChimp)
+  .put(cleanGuestsDatabasePath, cleanGuestsDatabase)
+  .put(upsertGuestsDatabasePath, upsertGuestsDatabase)
