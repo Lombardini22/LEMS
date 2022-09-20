@@ -22,62 +22,67 @@ export async function createGuest(
   req: Request<unknown, CreateGuestQuery, GuestCreationInput>,
 ): Promise<Result<ServerError, WithId<Guest>>> {
   const guestEmailHash = hashGuestEmail(req.body.email)
-  const referrerEmail = req.query.referrerEmail
 
-  const guest = await (async () => {
+  const localGuest = await guestsCollection.findOne({
+    emailHash: guestEmailHash,
+  })
+
+  const subscriptionResult = await localGuest.fold<
+    Result<ServerError, unknown>
+  >(
+    () =>
+      subscribeGuest({
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
+        email: req.body.email,
+        emailHash: guestEmailHash,
+        companyName: req.body.companyName || null,
+      }),
+    guest => Result.success(() => guest),
+  )
+
+  return subscriptionResult.flatMap(async () => {
+    const referrerEmail = req.query.referrerEmail
+
     if (referrerEmail) {
       const referrer = await guestsCollection.findOne({ email: referrerEmail })
 
       return referrer.flatMap(async referrer => {
-        const guest = await guestsCollection.findOne({
-          emailHash: guestEmailHash,
-        })
-
-        if (guest.isSuccess()) {
+        if (localGuest.isSuccess()) {
           return guestsCollection.update({ emailHash: guestEmailHash }, {
-            ...guest.unsafeGetValue(),
+            ...localGuest.unsafeGetValue(),
             ...req.body,
             source: 'REFERRER',
             referrerId: referrer._id,
           } as Guest)
         } else {
-          const guest = await guestsCollection.insert({
+          return await guestsCollection.insert({
             ...req.body,
             emailHash: guestEmailHash,
             source: 'REFERRER',
             referrerId: referrer._id,
             status: 'RSVP',
           } as NoTimestamps<Guest>)
-
-          return guest.flatMap(guest => subscribeGuest(guest))
         }
       })
     } else {
-      const guest = await guestsCollection.findOne({
-        emailHash: guestEmailHash,
-      })
-
-      if (guest.isSuccess()) {
+      if (localGuest.isSuccess()) {
         return guestsCollection.update(
           { emailHash: guestEmailHash },
           {
-            ...guest.unsafeGetValue(),
+            ...localGuest.unsafeGetValue(),
             ...req.body,
           },
         )
       } else {
-        const guest = await guestsCollection.insert({
+        return guestsCollection.insert({
           ...req.body,
           emailHash: guestEmailHash,
           companyName: req.body.companyName || null,
           source: 'MANUAL',
           status: 'RSVP',
         })
-
-        return guest.flatMap(guest => subscribeGuest(guest))
       }
     }
-  })()
-
-  return guest
+  })
 }

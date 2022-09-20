@@ -124,7 +124,16 @@ describe('createGuest', () => {
     expectT(referree.source).toEqual('REFERRER')
     expectT(referree.referrerId).toEqual(referrerId)
     expect(subscribeGuest).toHaveBeenCalledTimes(1)
-    expect(subscribeGuest).toHaveBeenCalledWith(result.unsafeGetValue())
+
+    const guest = result.unsafeGetValue()
+
+    expect(subscribeGuest).toHaveBeenCalledWith({
+      firstName: guest.firstName,
+      lastName: guest.lastName,
+      email: guest.email,
+      emailHash: guest.emailHash,
+      companyName: guest.companyName,
+    })
   })
 
   it('should update a guest with a referrer if it already exists, without subscribing it', async () => {

@@ -1,5 +1,4 @@
 import { AddListMemberBody } from '@mailchimp/mailchimp_marketing'
-import { WithId } from 'mongodb'
 import { Guest } from '../../../../../shared/models/Guest'
 import { Result } from '../../../../../shared/Result'
 import { env } from '../../../resources/env'
@@ -7,9 +6,14 @@ import { mailchimp } from '../../../resources/mailchimp'
 import { ServerError } from '../../../ServerError'
 import { isMailchimpMembersSuccessResponse } from './isMailchimpMembersSuccessResponse'
 
-export async function subscribeGuest(
-  guest: WithId<Guest>,
-): Promise<Result<ServerError, WithId<Guest>>> {
+type MailchimpGuestData = Pick<
+  Guest,
+  'firstName' | 'lastName' | 'email' | 'emailHash' | 'companyName'
+>
+
+export async function subscribeGuest<G extends MailchimpGuestData>(
+  guest: G,
+): Promise<Result<ServerError, G>> {
   return env.use(env =>
     mailchimp.use(async mailchimp => {
       const destinationListId = env.MAILCHIMP_EVENT_LIST_ID
@@ -78,7 +82,7 @@ export async function subscribeGuest(
 }
 
 export function guestToMailchimpListMember(
-  guest: Pick<Guest, 'firstName' | 'lastName' | 'email' | 'companyName'>,
+  guest: MailchimpGuestData,
 ): AddListMemberBody {
   return {
     email_address: guest.email,

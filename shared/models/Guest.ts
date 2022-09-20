@@ -21,7 +21,7 @@ interface Referree extends GuestCommonData {
 }
 
 interface Subscriber extends GuestCommonData {
-  source: 'MANUAL' | 'RSVP' | 'UPLOAD'
+  source: 'MANUAL' | 'RSVP' | 'UPLOAD' | 'SYNC'
 }
 
 type GuestStatus = 'RSVP' | 'CHECKED_IN'
@@ -51,6 +51,7 @@ export function foldGuestBySource<T>(
     case 'MANUAL':
     case 'RSVP':
     case 'UPLOAD':
+    case 'SYNC':
       return whenSubscriber(guest)
   }
 }
