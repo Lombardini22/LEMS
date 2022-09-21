@@ -57,7 +57,7 @@ export function foldGuestBySource<T>(
 }
 
 const NonEmptyString = z.string().min(1).brand<'NonEmptyString'>()
-const Email = z.string().email().brand<'Email'>()
+const Email = z.string().trim().email().brand<'Email'>()
 
 const GuestItem = z.object({
   firstName: NonEmptyString,
