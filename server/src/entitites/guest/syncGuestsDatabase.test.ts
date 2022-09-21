@@ -65,7 +65,7 @@ describe('syncGuestsDatabase', () => {
     env.use(async env => {
       const result = await upsertGuestsDatabase({
         body: {
-          secret: env.VUE_APP_SYNC_SECRET,
+          secret: env.SYNC_SECRET,
         },
         params: {},
         query: {},
@@ -120,7 +120,7 @@ describe('syncGuestsDatabase', () => {
 
       const result = await cleanGuestsDatabase({
         body: {
-          secret: env.VUE_APP_SYNC_SECRET,
+          secret: env.SYNC_SECRET,
         },
         params: {},
         query: {},
@@ -156,7 +156,7 @@ describe('syncGuestsDatabase', () => {
 
       const result = await upsertGuestsDatabase({
         body: {
-          secret: env.VUE_APP_SYNC_SECRET,
+          secret: env.SYNC_SECRET,
         },
         params: {},
         query: {},

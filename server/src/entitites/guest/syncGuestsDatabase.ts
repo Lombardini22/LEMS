@@ -191,7 +191,7 @@ function verifySecretRequest(
   request: Request<unknown, unknown, SyncSecretInput>,
 ): Promise<Result<ServerError, void>> {
   return env.use(env => {
-    if (request.body.secret === env.VUE_APP_SYNC_SECRET) {
+    if (request.body.secret === env.SYNC_SECRET) {
       return Result.success(constVoid)
     } else {
       return Result.failure(() => new ServerError(401, 'Invalid credentials'))
