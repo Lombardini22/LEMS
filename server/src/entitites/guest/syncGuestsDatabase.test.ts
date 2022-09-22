@@ -102,6 +102,37 @@ describe('syncGuestsDatabase', () => {
       return Result.success(constVoid)
     }))
 
+  it('should return guests that are on local DB but not on MailChimp', () =>
+    env.use(async env => {
+      const oldGuestInsertion = await guestsCollection.insert({
+        firstName: 'Old',
+        lastName: 'Guest',
+        email: 'old-guest@example.com',
+        emailHash: hashGuestEmail('old-guest@example.com'),
+        companyName: null,
+        accountManager: null,
+        source: 'MANUAL',
+        status: 'RSVP',
+      })
+
+      expectResult(oldGuestInsertion).toHaveSucceeded()
+
+      const oldGuest = oldGuestInsertion.unsafeGetValue()
+
+      const result = await cleanGuestsDatabase({
+        body: {
+          secret: env.SYNC_SECRET,
+          delete: false,
+        },
+        params: {},
+        query: {},
+      })
+
+      expectResult(result).toHaveSucceededWith([oldGuest])
+
+      return Result.success(constVoid)
+    }))
+
   it('should delete guests that are on local DB but not on MailChimp', () =>
     env.use(async env => {
       const oldGuestInsertion = await guestsCollection.insert({
@@ -121,6 +152,7 @@ describe('syncGuestsDatabase', () => {
       const result = await cleanGuestsDatabase({
         body: {
           secret: env.SYNC_SECRET,
+          delete: true,
         },
         params: {},
         query: {},
