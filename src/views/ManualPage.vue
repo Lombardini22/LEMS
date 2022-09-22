@@ -136,7 +136,7 @@ const submit = async () => {
       console.log(res)
     })
     .catch(err => {
-      console.log(err)
+      console.error(err)
       // alertMsg.value = err
       // alertTitle.value = 'Error'
       // alertSubTitle.value = 'Error'

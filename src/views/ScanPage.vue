@@ -34,10 +34,11 @@ import {
   IonPage,
   IonTitle,
   IonToolbar,
-  alertController,
+  // alertController,
   IonInput,
+  toastController,
 } from '@ionic/vue'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { qrCodeOutline } from 'ionicons/icons'
 import axios from 'axios';
 const qrString = ref('')
@@ -51,27 +52,68 @@ const onFocusOut = () => {
 }
 const presentAlert = async () => {
   const guest = {
-    firstname: '',
-    lastname: '',
+    firstName: '',
+    lastName: '',
     email: '',
     company: ''
   }
-  await axios.get(process.env.VUE_APP_SERVER_URL + '/api/guests/' + qrString.value).then(res => {
-    guest.firstname = res.data.firstName
-    guest.lastname = res.data.lastName
+  await axios.get(process.env.VUE_APP_SERVER_URL + 'api/guests/' + qrString.value)
+  .then(res => {
+    console.log(res.data)
+    guest.firstName = res.data.firstName
+    guest.lastName = res.data.lastName
     guest.email = res.data.email
     guest.company = res.data.company
+    if(res.status === 404) {
+      throw new Error('Guest Not Found')
+    }
   })
+    .then(async () => {
+      await axios.get(process.env.VUE_APP_SERVER_URL + 'api/guests/' + qrString.value + "/check-in").then(res => {
+        console.log(res.data)
+        if(res.status===200)
+          presentToast('bottom', 'Guest Checked In con Successo!', 'success', 2000)
+      }).catch(() => {
+        presentToast('bottom', 'An Error Has Occured!', 'danger', 2000)
+      })
+    }
+    )
+    .catch(err => {
+      console.error(err)
+      presentToast('bottom', `An Error Has Occured! - Guest Not Found`, 'danger', 2000)
+    })
 
-  const alert = await alertController.create({
-    header: 'Printing...',
-    subHeader: `${guest.firstname} ${guest.lastname}`,
-    message: `${guest.company}`,
-    buttons: ['PRINT'],
-  })
+  // const alert = await alertController.create({
+  //   header: 'Checking In...',
+  //   subHeader: `${guest.firstName} ${guest.lastName}`,
+  //   message: `Guest Checked In`,
+  //   buttons: ['Ok'],
+  // })
 
-  await alert.present()
+  // await alert.present()
 }
+
+watch(qrString, (val: any) => {
+  if (val.length === 32) {
+    presentAlert()
+    console.log(val)
+    setTimeout(() => {
+      qrString.value = ''
+    }, 2000)
+  }
+})
+
+const presentToast = async (position: any, message: any, color: any, duration: number) => {
+  const toast = await toastController.create({
+    message: message,
+    duration: duration,
+    position: position,
+    color: color,
+  })
+  toast.present()
+}
+
+
 </script>
 
 <style scoped>
