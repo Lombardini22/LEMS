@@ -65,7 +65,9 @@ export async function cleanGuestsDatabase(
             Result.tryCatch(
               () =>
                 collection.deleteMany({
-                  email: { $nin: members.map(_ => _.email_address) },
+                  emailHash: {
+                    $nin: members.map(_ => hashGuestEmail(_.email_address)),
+                  },
                 }),
               error =>
                 new ServerError(500, 'Unable to clean guests database', {
@@ -95,7 +97,9 @@ export async function cleanGuestsDatabase(
               () =>
                 collection
                   .find({
-                    email: { $nin: members.map(_ => _.email_address) },
+                    emailHash: {
+                      $nin: members.map(_ => hashGuestEmail(_.email_address)),
+                    },
                   })
                   .toArray(),
               error =>
@@ -193,6 +197,7 @@ export async function upsertGuestsDatabase(
                             $set: {
                               firstName: '$$new.firstName',
                               lastName: '$$new.lastName',
+                              email: '$$new.email',
                               companyName: '$$new.companyName',
                               updatedAt: '$$new.updatedAt',
                             },
