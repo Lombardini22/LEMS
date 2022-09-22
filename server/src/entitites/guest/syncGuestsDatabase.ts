@@ -3,6 +3,7 @@ import { Result } from '../../../../shared/Result'
 import { constVoid } from '../../../../shared/utils'
 import { database } from '../../resources/database'
 import { env } from '../../resources/env'
+import { mailchimp } from '../../resources/mailchimp'
 import { Path } from '../../routing/Path'
 import { Request } from '../../routing/Router'
 import { ServerError } from '../../ServerError'
@@ -12,6 +13,10 @@ import {
   UNIQUE_EMAIL_HASH_INDEX_NAME,
 } from './guestsCollection'
 import { fetchMailchimpMembers } from './utils/fetchMailchimpMembers'
+import {
+  MailchimpBatchListMembersResponse,
+  MailchimpTagsSearchResponse,
+} from './utils/mailchimpTypes'
 
 interface SyncSecretInput {
   secret: string
@@ -25,6 +30,10 @@ interface UpsertResponse {
   success: true
 }
 
+interface SyncTagInput extends SyncSecretInput {
+  tag: string
+}
+
 export const cleanGuestsDatabasePath = Path.start()
   .literal('sync')
   .literal('clean')
@@ -32,6 +41,8 @@ export const cleanGuestsDatabasePath = Path.start()
 export const upsertGuestsDatabasePath = Path.start()
   .literal('sync')
   .literal('upsert')
+
+export const syncMailchimpTagPath = Path.start().literal('sync').literal('tags')
 
 export async function cleanGuestsDatabase(
   request: Request<unknown, unknown, SyncSecretInput>,
@@ -184,6 +195,85 @@ export async function upsertGuestsDatabase(
         }),
       )
     }),
+  )
+}
+
+export async function syncMailchimpTag(
+  request: Request<unknown, unknown, SyncTagInput>,
+): Promise<Result<ServerError, MailchimpBatchListMembersResponse>> {
+  const guardResult = await verifySecretRequest(request)
+
+  return guardResult.flatMap(() =>
+    env.use(env =>
+      mailchimp.use(async mailchimp => {
+        const tags: Result<ServerError, MailchimpTagsSearchResponse> =
+          await Result.tryCatch(
+            () =>
+              // This is not typed in MailChimp TS package
+              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore
+              mailchimp.lists.tagSearch(env.MAILCHIMP_DATABASE_LIST_ID, {
+                name: request.body.tag,
+              }),
+            error =>
+              new ServerError(
+                500,
+                'Unable to list tags of MailChimp database list',
+                { error },
+              ),
+          )
+
+        const tag = await tags.flatMap(tags => {
+          if (tags.total_items !== 1) {
+            return Result.failure(
+              () =>
+                new ServerError(400, 'Unable to found a distinctive tag', {
+                  tags,
+                }),
+            )
+          } else {
+            // when total_items is 1, the first tags exists
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            return Result.success(() => tags.tags[0]!)
+          }
+        })
+
+        const data = await tag.flatMap(async tag => {
+          const members = await fetchMailchimpMembers(
+            env.MAILCHIMP_EVENT_LIST_ID,
+          )
+          return members.map(members => ({ members, tag }))
+        })
+
+        const result: Result<ServerError, MailchimpBatchListMembersResponse> =
+          await data.flatMap(({ members, tag }) =>
+            Result.tryCatch(
+              () =>
+                // Not typed in MailChimp lib, but this exists
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                // @ts-ignore
+                mailchimp.lists.batchListMembers(
+                  env.MAILCHIMP_DATABASE_LIST_ID,
+                  {
+                    members: members.map(member => ({
+                      email_address: member.email_address,
+                      tags: [tag.name],
+                    })),
+                    skip_merge_validation: true,
+                    update_existing: true,
+                  },
+                ),
+              error =>
+                new ServerError(500, 'Unable to add tags to MailChimp list', {
+                  error,
+                  data,
+                }),
+            ),
+          )
+
+        return result
+      }),
+    ),
   )
 }
 
