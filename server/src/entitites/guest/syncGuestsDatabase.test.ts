@@ -18,7 +18,7 @@ const getListMembersInfo = jest.fn(
       members: [
         options.offset
           ? {
-              email_address: 'mailchimp-user1@example.com',
+              email_address: 'Mailchimp-User1@example.com',
               merge_fields: {
                 FNAME: 'MailChimp',
                 LNAME: 'User1',
@@ -26,7 +26,7 @@ const getListMembersInfo = jest.fn(
               },
             }
           : {
-              email_address: 'mailchimp-user2@example.com',
+              email_address: 'Mailchimp-User2@example.com',
               merge_fields: {
                 FNAME: 'MailChimp',
                 LNAME: 'User2',
@@ -80,8 +80,8 @@ describe('syncGuestsDatabase', () => {
               .find({
                 email: {
                   $in: [
-                    'mailchimp-user1@example.com',
-                    'mailchimp-user2@example.com',
+                    'Mailchimp-User1@example.com',
+                    'Mailchimp-User2@example.com',
                   ],
                 },
               })
@@ -95,9 +95,40 @@ describe('syncGuestsDatabase', () => {
       )
 
       expectResult(emails).toHaveSucceededWith([
-        'mailchimp-user2@example.com',
-        'mailchimp-user1@example.com',
+        'Mailchimp-User2@example.com',
+        'Mailchimp-User1@example.com',
       ])
+
+      return Result.success(constVoid)
+    }))
+
+  it('should return guests that are on local DB but not on MailChimp', () =>
+    env.use(async env => {
+      const oldGuestInsertion = await guestsCollection.insert({
+        firstName: 'Old',
+        lastName: 'Guest',
+        email: 'old-guest@example.com',
+        emailHash: hashGuestEmail('old-guest@example.com'),
+        companyName: null,
+        accountManager: null,
+        source: 'MANUAL',
+        status: 'RSVP',
+      })
+
+      expectResult(oldGuestInsertion).toHaveSucceeded()
+
+      const oldGuest = oldGuestInsertion.unsafeGetValue()
+
+      const result = await cleanGuestsDatabase({
+        body: {
+          secret: env.SYNC_SECRET,
+          delete: false,
+        },
+        params: {},
+        query: {},
+      })
+
+      expectResult(result).toHaveSucceededWith([oldGuest])
 
       return Result.success(constVoid)
     }))
@@ -121,6 +152,7 @@ describe('syncGuestsDatabase', () => {
       const result = await cleanGuestsDatabase({
         body: {
           secret: env.SYNC_SECRET,
+          delete: true,
         },
         params: {},
         query: {},
@@ -142,8 +174,8 @@ describe('syncGuestsDatabase', () => {
       const existingGuestInsertion = await guestsCollection.insert({
         firstName: 'Existing',
         lastName: 'Guest',
-        email: 'mailchimp-user1@example.com',
-        emailHash: hashGuestEmail('mailchimp-user1@example.com'),
+        email: 'Mailchimp-User1@example.com',
+        emailHash: hashGuestEmail('Mailchimp-User1@example.com'),
         companyName: null,
         accountManager: null,
         source: 'RSVP',
@@ -172,8 +204,8 @@ describe('syncGuestsDatabase', () => {
           firstName: 'MailChimp',
           lastName: 'User1',
           companyName: 'MailChimp Inc',
-          email: 'mailchimp-user1@example.com',
-          emailHash: hashGuestEmail('mailchimp-user1@example.com'),
+          email: 'Mailchimp-User1@example.com',
+          emailHash: hashGuestEmail('Mailchimp-User1@example.com'),
           accountManager: null,
           source: 'RSVP',
           status: 'RSVP',
