@@ -15,7 +15,7 @@ const getListMember = jest.fn(async (listId: string, _emailHash: string) => {
     if (listId === env.MAILCHIMP_DATABASE_LIST_ID) {
       return Result.success(() => ({
         status: 'subscribed',
-        email_address: 'email.address@example.com',
+        email_address: 'mailchimp.user@example.com',
         merge_fields: {
           FNAME: 'First name',
           LNAME: 'Last name',
@@ -35,14 +35,17 @@ const getListMember = jest.fn(async (listId: string, _emailHash: string) => {
 })
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const addListMember = jest.fn((_listId: string, _data: AddListMemberBody) =>
+const addListMember = jest.fn((_listId: string, data: AddListMemberBody) =>
   Promise.resolve({
     status: 'subscribed',
-    email_address: 'email.address@example.com',
+    email_address: data.email_address,
     merge_fields: {
-      FNAME: 'First name',
-      LNAME: 'Last name',
-      MMERGE7: 'Company name',
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      FNAME: data.merge_fields!['FNAME'],
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      LNAME: data.merge_fields!['LNAME'],
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      MMERGE7: data.merge_fields!['MMERGE7'],
     },
   }),
 )
@@ -76,15 +79,25 @@ jest.mock('../../resources/mailchimp', function () {
 })
 
 describe('addGuestThroughMailChimp', () => {
+  afterEach(() =>
+    guestsCollection.raw(collection =>
+      Result.tryCatch(
+        () => collection.deleteMany({}),
+        error =>
+          new ServerError(500, 'Unable to clean guests collection', { error }),
+      ),
+    ),
+  )
+
   it('should work', async () => {
     return env.use(async env => {
       const result = await addGuestThroughMailChimp({
-        params: { email: 'email' },
+        params: { email: 'mailchimp.user@example.com' },
         query: {},
         body: {},
       })
 
-      const emailHash = hashGuestEmail('email')
+      const emailHash = hashGuestEmail('mailchimp.user@example.com')
 
       expect(getListMember).toHaveBeenCalledTimes(2)
 
@@ -102,7 +115,7 @@ describe('addGuestThroughMailChimp', () => {
       expect(updateListMemberTags).toHaveBeenCalledTimes(1)
 
       expect(addListMember).toHaveBeenCalledWith(env.MAILCHIMP_EVENT_LIST_ID, {
-        email_address: 'email.address@example.com',
+        email_address: 'mailchimp.user@example.com',
         merge_fields: {
           FNAME: 'First name',
           LNAME: 'Last name',
@@ -123,7 +136,7 @@ describe('addGuestThroughMailChimp', () => {
         _id: expect.any(ObjectId),
         firstName: 'First name',
         lastName: 'Last name',
-        email: 'email.address@example.com',
+        email: 'mailchimp.user@example.com',
         emailHash,
         companyName: 'Company name',
         source: 'RSVP',
@@ -154,7 +167,7 @@ describe('addGuestThroughMailChimp', () => {
     expectResult(insertionResult).toHaveSucceeded()
 
     const result = await addGuestThroughMailChimp({
-      params: { email: 'email' },
+      params: { email: 'mailchimp.user@example.com' },
       query: {},
       body: {},
     })
