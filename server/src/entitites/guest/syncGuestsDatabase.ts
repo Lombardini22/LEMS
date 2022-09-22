@@ -1,3 +1,4 @@
+import { WithId } from 'mongodb'
 import { Guest, hashGuestEmail } from '../../../../shared/models/Guest'
 import { Result } from '../../../../shared/Result'
 import { constVoid } from '../../../../shared/utils'
@@ -17,6 +18,14 @@ interface SyncSecretInput {
   secret: string
 }
 
+interface CleanShowTargetInput extends SyncSecretInput {
+  delete: false
+}
+
+interface CleanDeleteInput extends SyncSecretInput {
+  delete: true
+}
+
 interface CleanResponse {
   deleted: number
 }
@@ -34,8 +43,14 @@ export const upsertGuestsDatabasePath = Path.start()
   .literal('upsert')
 
 export async function cleanGuestsDatabase(
-  request: Request<unknown, unknown, SyncSecretInput>,
-): Promise<Result<ServerError, CleanResponse>> {
+  request: Request<unknown, unknown, CleanShowTargetInput>,
+): Promise<Result<ServerError, WithId<Guest>[]>>
+export async function cleanGuestsDatabase(
+  request: Request<unknown, unknown, CleanDeleteInput>,
+): Promise<Result<ServerError, CleanResponse>>
+export async function cleanGuestsDatabase(
+  request: Request<unknown, unknown, CleanShowTargetInput | CleanDeleteInput>,
+): Promise<Result<ServerError, CleanResponse | WithId<Guest>[]>> {
   const guardResult = await verifySecretRequest(request)
 
   return guardResult.flatMap(() =>
@@ -44,34 +59,53 @@ export async function cleanGuestsDatabase(
         env.MAILCHIMP_EVENT_LIST_ID,
       )
 
-      const result = await mailchimpMembers.flatMap(members =>
-        guestsCollection.raw(collection =>
-          Result.tryCatch(
-            () =>
-              collection.deleteMany({
-                email: { $nin: members.map(_ => _.email_address) },
-              }),
-            error =>
-              new ServerError(500, 'Unable to clean guests database', {
-                error,
-              }),
+      if (request.body.delete) {
+        const result = await mailchimpMembers.flatMap(members =>
+          guestsCollection.raw(collection =>
+            Result.tryCatch(
+              () =>
+                collection.deleteMany({
+                  email: { $nin: members.map(_ => _.email_address) },
+                }),
+              error =>
+                new ServerError(500, 'Unable to clean guests database', {
+                  error,
+                }),
+            ),
           ),
-        ),
-      )
+        )
 
-      return result.flatMap(result => {
-        if (!result.acknowledged) {
-          return Result.failure(
-            () =>
-              new ServerError(
-                500,
-                'Clean operation was not aknowledged by database',
-              ),
-          )
-        } else {
-          return Result.success(() => ({ deleted: result.deletedCount }))
-        }
-      })
+        return result.flatMap(result => {
+          if (!result.acknowledged) {
+            return Result.failure(
+              () =>
+                new ServerError(
+                  500,
+                  'Clean operation was not aknowledged by database',
+                ),
+            )
+          } else {
+            return Result.success(() => ({ deleted: result.deletedCount }))
+          }
+        })
+      } else {
+        return mailchimpMembers.flatMap(members =>
+          guestsCollection.raw(collection =>
+            Result.tryCatch(
+              () =>
+                collection
+                  .find({
+                    email: { $nin: members.map(_ => _.email_address) },
+                  })
+                  .toArray(),
+              error =>
+                new ServerError(500, 'Unable to clean guests database', {
+                  error,
+                }),
+            ),
+          ),
+        )
+      }
     }),
   )
 }
