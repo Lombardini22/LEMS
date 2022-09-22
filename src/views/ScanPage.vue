@@ -41,6 +41,7 @@ import {
 import { ref, watch } from 'vue'
 import { qrCodeOutline } from 'ionicons/icons'
 import axios from 'axios';
+
 const qrString = ref('')
 const qrInput = ref<HTMLInputElement>()
 
