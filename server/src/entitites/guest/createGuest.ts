@@ -45,7 +45,9 @@ export async function createGuest(
     const referrerEmail = req.query.referrerEmail
 
     if (referrerEmail) {
-      const referrer = await guestsCollection.findOne({ email: referrerEmail })
+      const referrer = await guestsCollection.findOne({
+        emailHash: hashGuestEmail(referrerEmail),
+      })
 
       return referrer.flatMap(async referrer => {
         if (localGuest.isSuccess()) {

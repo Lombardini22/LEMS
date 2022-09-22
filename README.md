@@ -4,6 +4,7 @@
 
 - All things shared between client and server (i.e.: interfaces) go into the `shared` directory
 - You should never import anything _into_ the `shared` directory, unless it comes from the `shared` directory itself. If you need anything from any other directory, move it inside the `shared` directory first. This is done because the client and the server have two different TypeScript configurations and they must stay separate.
+- If you are calling the database to find guest(s), never use `email`, always use `emailHash`: it lowercases the email address so we avoid case mismatches.
 
 ## Development
 

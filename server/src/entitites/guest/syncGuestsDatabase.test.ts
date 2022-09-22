@@ -18,7 +18,7 @@ const getListMembersInfo = jest.fn(
       members: [
         options.offset
           ? {
-              email_address: 'mailchimp-user1@example.com',
+              email_address: 'Mailchimp-User1@example.com',
               merge_fields: {
                 FNAME: 'MailChimp',
                 LNAME: 'User1',
@@ -26,7 +26,7 @@ const getListMembersInfo = jest.fn(
               },
             }
           : {
-              email_address: 'mailchimp-user2@example.com',
+              email_address: 'Mailchimp-User2@example.com',
               merge_fields: {
                 FNAME: 'MailChimp',
                 LNAME: 'User2',
@@ -80,8 +80,8 @@ describe('syncGuestsDatabase', () => {
               .find({
                 email: {
                   $in: [
-                    'mailchimp-user1@example.com',
-                    'mailchimp-user2@example.com',
+                    'Mailchimp-User1@example.com',
+                    'Mailchimp-User2@example.com',
                   ],
                 },
               })
@@ -95,8 +95,8 @@ describe('syncGuestsDatabase', () => {
       )
 
       expectResult(emails).toHaveSucceededWith([
-        'mailchimp-user2@example.com',
-        'mailchimp-user1@example.com',
+        'Mailchimp-User2@example.com',
+        'Mailchimp-User1@example.com',
       ])
 
       return Result.success(constVoid)
@@ -174,8 +174,8 @@ describe('syncGuestsDatabase', () => {
       const existingGuestInsertion = await guestsCollection.insert({
         firstName: 'Existing',
         lastName: 'Guest',
-        email: 'mailchimp-user1@example.com',
-        emailHash: hashGuestEmail('mailchimp-user1@example.com'),
+        email: 'Mailchimp-User1@example.com',
+        emailHash: hashGuestEmail('Mailchimp-User1@example.com'),
         companyName: null,
         accountManager: null,
         source: 'RSVP',
@@ -204,8 +204,8 @@ describe('syncGuestsDatabase', () => {
           firstName: 'MailChimp',
           lastName: 'User1',
           companyName: 'MailChimp Inc',
-          email: 'mailchimp-user1@example.com',
-          emailHash: hashGuestEmail('mailchimp-user1@example.com'),
+          email: 'Mailchimp-User1@example.com',
+          emailHash: hashGuestEmail('Mailchimp-User1@example.com'),
           accountManager: null,
           source: 'RSVP',
           status: 'RSVP',
