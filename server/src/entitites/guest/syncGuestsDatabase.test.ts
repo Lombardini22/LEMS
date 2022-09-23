@@ -276,11 +276,11 @@ describe('syncMailchimpTag', () => {
         {
           members: [
             {
-              email_address: 'mailchimp-user2@example.com',
+              email_address: 'Mailchimp-User2@example.com',
               tags: [tag],
             },
             {
-              email_address: 'mailchimp-user1@example.com',
+              email_address: 'Mailchimp-User1@example.com',
               tags: [tag],
             },
           ],

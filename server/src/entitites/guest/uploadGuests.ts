@@ -1,7 +1,7 @@
 import {
   Guest,
   hashGuestEmail,
-  UploadGuestsFileContent,
+  UploadGuestsInput,
   UploadGuestsResult,
 } from '../../../../shared/models/Guest'
 import { Result } from '../../../../shared/Result'
@@ -23,11 +23,11 @@ import { guestToMailchimpListMember } from './utils/subscribeGuest'
 export const uploadGuestsPath = Path.start().literal('upload')
 
 export function uploadGuests(
-  req: Request<unknown, unknown, UploadGuestsFileContent>,
+  req: Request<unknown, unknown, UploadGuestsInput>,
 ): Promise<Result<ServerError, UploadGuestsResult>> {
-  const data = UploadGuestsFileContent.safeParse(req.body)
+  const input = UploadGuestsInput.safeParse(req.body)
 
-  if (data.success) {
+  if (input.success) {
     return env.use(env =>
       mailchimp.use(async mailchimp => {
         const mailchimpResult: Result<
@@ -39,13 +39,14 @@ export function uploadGuests(
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
             mailchimp.lists.batchListMembers(env.MAILCHIMP_EVENT_LIST_ID, {
-              members: data.data.map(guest =>
-                guestToMailchimpListMember({
+              members: input.data.data.map(guest => ({
+                ...guestToMailchimpListMember({
                   ...guest,
                   emailHash: hashGuestEmail(guest.email),
                   companyName: guest.companyName || null,
                 }),
-              ),
+                tags: input.data.tags,
+              })),
               update_existing: true,
             }),
           error =>
@@ -87,7 +88,7 @@ export function uploadGuests(
                     const now = new Date()
 
                     return db.collection(tmpCollectionName).insertMany(
-                      data.data.map(
+                      input.data.data.map(
                         (guest): Guest => ({
                           firstName: guest.firstName,
                           lastName: guest.lastName,
@@ -157,7 +158,7 @@ export function uploadGuests(
           )
 
         return mailchimpResultAfterLocalInsertion.map(response => ({
-          processedCount: data.data.length,
+          processedCount: input.data.data.length,
           uploadedCount: response.total_created + response.total_updated,
           createdCount: response.total_created,
           updatedCount: response.total_updated,
@@ -168,7 +169,7 @@ export function uploadGuests(
     )
   } else {
     return Result.failure(
-      () => new ServerError(400, 'Invalid data format', { error: data.error }),
+      () => new ServerError(400, 'Invalid data format', { error: input.error }),
     )
   }
 }
