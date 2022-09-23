@@ -12,6 +12,7 @@ import { Path } from '../../routing/Path'
 import { Request } from '../../routing/Router'
 import { ServerError } from '../../ServerError'
 import { guestsCollection } from './guestsCollection'
+import { MailchimpBatchListMembersResponse } from './utils/mailchimpTypes'
 import { guestToMailchimpListMember } from './utils/subscribeGuest'
 
 export const uploadGuestsPath = Path.start().literal('upload')
@@ -24,7 +25,10 @@ export function uploadGuests(
   if (data.success) {
     return env.use(env =>
       mailchimp.use(async mailchimp => {
-        const mailchimpResult = await Result.tryCatch(
+        const mailchimpResult: Result<
+          ServerError,
+          MailchimpBatchListMembersResponse
+        > = await Result.tryCatch(
           () =>
             // Not typed in MailChimp lib, but this exists
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment

@@ -5,8 +5,13 @@ import { constVoid } from '../../../../shared/utils'
 import { env } from '../../resources/env'
 import { ServerError } from '../../ServerError'
 import { guestsCollection } from './guestsCollection'
-import { cleanGuestsDatabase, upsertGuestsDatabase } from './syncGuestsDatabase'
+import {
+  cleanGuestsDatabase,
+  syncMailchimpTag,
+  upsertGuestsDatabase,
+} from './syncGuestsDatabase'
 import { MembersListResult } from './utils/fetchMailchimpMembers'
+import { MailchimpBatchListMembersResponse } from './utils/mailchimpTypes'
 
 const getListMembersInfo = jest.fn(
   (
@@ -38,12 +43,41 @@ const getListMembersInfo = jest.fn(
     }),
 )
 
+const tagSearch = jest.fn((_listId, options: { name: string }) => ({
+  total_items: 1,
+  tags: [{ id: 42, name: options.name }],
+}))
+
+const batchListMembers = jest.fn(
+  (
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _listId: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _options: {
+      members: Array<{
+        email_address: string
+        tags: Array<{ id: number; name: string }>
+      }>
+      skip_merge_validation: boolean
+      update_existing: boolean
+    },
+  ): Promise<MailchimpBatchListMembersResponse> =>
+    Promise.resolve({
+      total_created: 0,
+      total_updated: 2,
+      error_count: 0,
+      errors: [],
+    }),
+)
+
 jest.mock('../../resources/mailchimp', () => ({
   mailchimp: {
     use: <T>(op: (mailchimp: any) => T): T => {
       return op({
         lists: {
           getListMembersInfo,
+          tagSearch,
+          batchListMembers,
         },
       })
     },
@@ -210,6 +244,49 @@ describe('syncGuestsDatabase', () => {
           source: 'RSVP',
           status: 'RSVP',
         }),
+      )
+
+      return Result.success(constVoid)
+    }))
+})
+
+describe('syncMailchimpTag', () => {
+  it('should work', () =>
+    env.use(async env => {
+      const tag = 'Some unique tag name'
+      const result = await syncMailchimpTag({
+        params: {},
+        query: {},
+        body: {
+          secret: env.SYNC_SECRET,
+          tag,
+        },
+      })
+
+      expectResult(result).toHaveSucceeded()
+      expect(tagSearch).toHaveBeenCalledTimes(1)
+      expect(batchListMembers).toHaveBeenCalledTimes(1)
+
+      expect(tagSearch).toHaveBeenCalledWith(env.MAILCHIMP_DATABASE_LIST_ID, {
+        name: tag,
+      })
+
+      expect(batchListMembers).toHaveBeenCalledWith(
+        env.MAILCHIMP_DATABASE_LIST_ID,
+        {
+          members: [
+            {
+              email_address: 'mailchimp-user2@example.com',
+              tags: [tag],
+            },
+            {
+              email_address: 'mailchimp-user1@example.com',
+              tags: [tag],
+            },
+          ],
+          skip_merge_validation: true,
+          update_existing: true,
+        },
       )
 
       return Result.success(constVoid)
