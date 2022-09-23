@@ -1,8 +1,9 @@
 <template>
   <ion-page>
-    <ion-header :translucent="true">
+    <ion-header :translucent="true" :fullscreen="false">
       <ion-toolbar>
         <ion-buttons slot="primary">
+
           <ion-button @click="setOpen(!isOpen)">
             <ion-icon slot="icon-only" :icon="addOutline"></ion-icon>
           </ion-button>
@@ -11,25 +12,23 @@
       </ion-toolbar>
       <ion-toolbar>
         <ion-searchbar animated v-model="search"></ion-searchbar>
+        <ion-buttons slot="end">
+          <ion-label>Guests Only</ion-label>
+          <ion-toggle color="primary" :checked="guestsOnly" @ionChange="guestsOnly = !guestsOnly" value="true">
+          </ion-toggle>
+        </ion-buttons>
       </ion-toolbar>
+
     </ion-header>
 
 
-
     <ion-content :fullscreen="true">
-      <ion-header collapse="condense">
-        <ion-toolbar>
-          <ion-title size="large">Guest List</ion-title>
-        </ion-toolbar>
-      </ion-header>
-
       <ion-content :scroll-events="true">
         <div>
           <!-- List of Input Items -->
           <ion-list>
             <ion-item v-for="item in filteredData" :key="item">
               <ion-label>{{ item.node.firstName }} {{ item.node.lastName }} ({{item.node.companyName}})</ion-label>
-              <!-- <ion-toggle color="primary"  :checked="item.node.status=='CHECKED_IN'"></ion-toggle> -->
 
               <ion-button slot="end" @click="guestInfo(item.node)">
                 Guest Info
@@ -91,7 +90,7 @@ import {
   IonIcon,
   IonInput,
   IonAlert,
-  // IonToggle,
+  IonToggle,
   toastController
 } from '@ionic/vue'
 import { personOutline, addOutline } from 'ionicons/icons'
@@ -102,6 +101,8 @@ const serverUrl = process.env.VUE_APP_SERVER_URL
 const data = ref([] as any[])
 const search = ref()
 const isOpen = ref(false)
+const guestsOnly = ref(false)
+
 // Print
 const alert = ref(false)
 const alertMsg = ref()
@@ -136,7 +137,7 @@ const submit = async () => {
       console.log(res)
     })
     .catch(err => {
-      console.log(err)
+      console.error(err)
       // alertMsg.value = err
       // alertTitle.value = 'Error'
       // alertSubTitle.value = 'Error'
@@ -173,8 +174,20 @@ const guestInfo = (item: any) => {
 const filteredData = computed(() => {
   if (search.value) {
     return data.value.filter((item: any) => {
+      if (guestsOnly.value == true) {
+        const fullName = `${item.node.firstName} ${item.node.lastName} ${item.node.email} ${item.node.companyName}`
+        return !fullName.toLowerCase().includes('lombardini22') && fullName.toLowerCase().includes(search.value.toLowerCase())
+      } else {
+        const fullName = `${item.node.firstName} ${item.node.lastName} ${item.node.email} ${item.node.companyName}`
+        return fullName.toLowerCase().includes(search.value.toLowerCase())
+      }
+
+    })
+  } else if (guestsOnly.value) {
+    return data.value.filter((item: any) => {
+
       const fullName = `${item.node.firstName} ${item.node.lastName} ${item.node.email} ${item.node.companyName}`
-      return fullName.toLowerCase().includes(search.value.toLowerCase())
+      return !fullName.toLowerCase().includes('lombardini22')
 
     })
   } else {
@@ -185,6 +198,9 @@ const filteredData = computed(() => {
 
 watch(filteredData, (val) => {
   filteredCount.value = val.length
+})
+watch(guestsOnly, (val) => {
+  console.log(val)
 })
 
 const count = computed(() => {
