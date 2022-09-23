@@ -14,7 +14,8 @@
         <ion-searchbar animated v-model="search"></ion-searchbar>
         <ion-buttons slot="end">
           <ion-label>Guests Only</ion-label>
-          <ion-toggle color="success" :checked="guestsOnly"></ion-toggle>
+          <ion-toggle color="primary" :checked="guestsOnly" @ionChange="guestsOnly = !guestsOnly" value="true">
+          </ion-toggle>
         </ion-buttons>
       </ion-toolbar>
 
@@ -28,7 +29,6 @@
           <ion-list>
             <ion-item v-for="item in filteredData" :key="item">
               <ion-label>{{ item.node.firstName }} {{ item.node.lastName }} ({{item.node.companyName}})</ion-label>
-              <!-- <ion-toggle color="primary"  :checked="item.node.status=='CHECKED_IN'"></ion-toggle> -->
 
               <ion-button slot="end" @click="guestInfo(item.node)">
                 Guest Info
@@ -175,11 +175,19 @@ const filteredData = computed(() => {
   if (search.value) {
     return data.value.filter((item: any) => {
       if (guestsOnly.value == true) {
-        return item.node.email.toLowerCase().includes('@l22.it') && item.node.firstName.toLowerCase().includes(search.value.toLowerCase()) 
+        const fullName = `${item.node.firstName} ${item.node.lastName} ${item.node.email} ${item.node.companyName}`
+        return !fullName.toLowerCase().includes('lombardini22') && fullName.toLowerCase().includes(search.value.toLowerCase())
       } else {
         const fullName = `${item.node.firstName} ${item.node.lastName} ${item.node.email} ${item.node.companyName}`
         return fullName.toLowerCase().includes(search.value.toLowerCase())
       }
+
+    })
+  } else if (guestsOnly.value) {
+    return data.value.filter((item: any) => {
+
+      const fullName = `${item.node.firstName} ${item.node.lastName} ${item.node.email} ${item.node.companyName}`
+      return !fullName.toLowerCase().includes('lombardini22')
 
     })
   } else {
@@ -191,9 +199,10 @@ const filteredData = computed(() => {
 watch(filteredData, (val) => {
   filteredCount.value = val.length
 })
-watch (guestsOnly, (val) => {
+watch(guestsOnly, (val) => {
   console.log(val)
 })
+
 const count = computed(() => {
   return `${filteredCount.value} of ${totalCount.value} guests`
 })
