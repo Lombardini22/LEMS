@@ -16,12 +16,22 @@
       <div id="container">
         <strong>Please Scan A QRCode to Checkin</strong>
         <ion-input rounded outlined v-model="qrString" placeholder="Scan Your QRCode Using the Scanners" autofocus
-          ref="qrInput" v-on:focusout="onFocusOut" :maxlength="32"></ion-input>
+          ref="qrInput" :maxlength="32"></ion-input>
         <p>
           <ion-button @click="presentAlert">
             <ion-icon :icon="qrCodeOutline" /> Scan
           </ion-button>
         </p>
+        <div>
+          <p class="decode-result">Last result: <b>{{ result }}</b></p>
+
+
+          <qrcode-stream :camera="camera" @decode="onDecode" @init="onInit">
+            <div v-show="showScanConfirmation" class="scan-confirmation">
+              <img src="../../public/assets/logos/logo-foresight-bk.png" alt="Checkmark" width="128px" />
+            </div>
+          </qrcode-stream>
+        </div>
       </div>
     </ion-content>
   </ion-page>
@@ -41,16 +51,21 @@ import {
 import { ref, watch } from 'vue'
 import { qrCodeOutline } from 'ionicons/icons'
 import axios from 'axios';
+import { QrcodeStream } from 'vue-qrcode-reader'
 
 const qrString = ref('')
-const qrInput = ref<HTMLInputElement>()
+// const qrInput = ref<HTMLInputElement>()
+const result = ref('')
+const showScanConfirmation = ref(false)
+const camera = ref('auto')
 
-const onFocusOut = () => {
-  if (qrInput.value) {
-    // qrInput.value.focus()
-    console.log('focusout')
-  }
-}
+
+// const onFocusOut = () => {
+//   if (qrInput.value) {
+//     // qrInput.value.focus()
+//     console.log('focusout')
+//   }
+// }
 const presentAlert = async () => {
   const guest = {
     firstName: '',
@@ -59,20 +74,20 @@ const presentAlert = async () => {
     company: ''
   }
   await axios.get(process.env.VUE_APP_SERVER_URL + 'api/guests/' + qrString.value)
-  .then(res => {
-    console.log(res.data)
-    guest.firstName = res.data.firstName
-    guest.lastName = res.data.lastName
-    guest.email = res.data.email
-    guest.company = res.data.company
-    if(res.status === 404) {
-      throw new Error('Guest Not Found')
-    }
-  })
+    .then(res => {
+      console.log(res.data)
+      guest.firstName = res.data.firstName
+      guest.lastName = res.data.lastName
+      guest.email = res.data.email
+      guest.company = res.data.company
+      if (res.status === 404) {
+        throw new Error('Guest Not Found')
+      }
+    })
     .then(async () => {
       await axios.get(process.env.VUE_APP_SERVER_URL + 'api/guests/' + qrString.value + "/check-in").then(res => {
         console.log(res.data)
-        if(res.status===200)
+        if (res.status === 200)
           presentToast('bottom', 'Guest Checked In con Successo!', 'success', 2000)
       }).catch(() => {
         presentToast('bottom', 'An Error Has Occured!', 'danger', 2000)
@@ -113,6 +128,32 @@ const presentToast = async (position: any, message: any, color: any, duration: n
   })
   toast.present()
 }
+
+// QRCODE READER CAMERA
+
+const onInit = async (promise: any) => {
+  try {
+    await promise
+  } catch (e) {
+    console.error(e)
+  } finally {
+    showScanConfirmation.value = camera.value === "off"
+  }
+}
+
+const onDecode = (content: any) => {
+  result.value = content
+  pause()
+  unpause()
+}
+const unpause = () => {
+  camera.value = 'auto'
+}
+
+const pause = () => {
+  camera.value = 'off'
+}
+
 
 
 </script>
