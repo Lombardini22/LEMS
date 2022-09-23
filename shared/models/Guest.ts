@@ -67,8 +67,14 @@ const GuestItem = z.object({
 })
 export type GuestItem = z.infer<typeof GuestItem>
 
-export const UploadGuestsFileContent = z.array(GuestItem).min(1)
-export type UploadGuestsFileContent = z.infer<typeof UploadGuestsFileContent>
+const UploadGuestsFileContent = z.array(GuestItem).min(1)
+const UploadGuestsTagsArray = z.array(z.string())
+
+export const UploadGuestsInput = z.object({
+  data: UploadGuestsFileContent,
+  tags: UploadGuestsTagsArray,
+})
+export type UploadGuestsInput = z.infer<typeof UploadGuestsInput>
 
 interface UploadGuestsError {
   email_address: 'string'
