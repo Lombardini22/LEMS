@@ -3,7 +3,7 @@
     <ion-header :translucent="true" :fullscreen="false">
       <ion-toolbar>
         <ion-buttons slot="primary">
-         
+
           <ion-button @click="setOpen(!isOpen)">
             <ion-icon slot="icon-only" :icon="addOutline"></ion-icon>
           </ion-button>
@@ -14,7 +14,7 @@
         <ion-searchbar animated v-model="search"></ion-searchbar>
         <ion-buttons slot="end">
           <ion-label>Guests Only</ion-label>
-          <ion-toggle color="success" :checked="guestsOnly" :ionChange="setGuestsOnly()"></ion-toggle>
+          <ion-toggle color="success" :checked="guestsOnly"></ion-toggle>
         </ion-buttons>
       </ion-toolbar>
 
@@ -174,8 +174,12 @@ const guestInfo = (item: any) => {
 const filteredData = computed(() => {
   if (search.value) {
     return data.value.filter((item: any) => {
-      const fullName = `${item.node.firstName} ${item.node.lastName} ${item.node.email} ${item.node.companyName}`
-      return fullName.toLowerCase().includes(search.value.toLowerCase())
+      if (guestsOnly.value == true) {
+        return item.node.email.toLowerCase().includes('@l22.it') && item.node.firstName.toLowerCase().includes(search.value.toLowerCase()) 
+      } else {
+        const fullName = `${item.node.firstName} ${item.node.lastName} ${item.node.email} ${item.node.companyName}`
+        return fullName.toLowerCase().includes(search.value.toLowerCase())
+      }
 
     })
   } else {
@@ -187,7 +191,9 @@ const filteredData = computed(() => {
 watch(filteredData, (val) => {
   filteredCount.value = val.length
 })
-
+watch (guestsOnly, (val) => {
+  console.log(val)
+})
 const count = computed(() => {
   return `${filteredCount.value} of ${totalCount.value} guests`
 })
@@ -218,11 +224,6 @@ const setOpen = (value: boolean) => {
 const setAlertStatus = (value: boolean) => {
   alert.value = value
   console.log({ alert: alert.value })
-}
-
-const setGuestsOnly = () => {
-  guestsOnly.value = !guestsOnly.value
-  console.log({ guestsOnly: guestsOnly.value })
 }
 
 </script>
