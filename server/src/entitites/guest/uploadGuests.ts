@@ -5,14 +5,19 @@ import {
   UploadGuestsResult,
 } from '../../../../shared/models/Guest'
 import { Result } from '../../../../shared/Result'
-import { NoTimestamps } from '../../database/Collection'
+import { constVoid } from '../../../../shared/utils'
+import { database } from '../../resources/database'
 import { env } from '../../resources/env'
 import { mailchimp } from '../../resources/mailchimp'
 import { Path } from '../../routing/Path'
 import { Request } from '../../routing/Router'
 import { ServerError } from '../../ServerError'
-import { guestsCollection } from './guestsCollection'
 import { MailchimpBatchListMembersResponse } from './utils/mailchimpTypes'
+import {
+  createGuestsCollectionIndexes,
+  guestsCollection,
+  UNIQUE_EMAIL_HASH_INDEX_NAME,
+} from './guestsCollection'
 import { guestToMailchimpListMember } from './utils/subscribeGuest'
 
 export const uploadGuestsPath = Path.start().literal('upload')
@@ -44,30 +49,112 @@ export function uploadGuests(
               update_existing: true,
             }),
           error =>
-            new ServerError(
-              500,
-              'Unable to get current guests from MailChimp API',
-              { error },
-            ),
+            new ServerError(500, 'Unable to sync guests with MailChimp API', {
+              error,
+            }),
         )
 
-        const mailchimpResultAfterLocalInsertion =
-          await mailchimpResult.flatMap(async mailchimpResponse => {
-            const insertResult = await guestsCollection.insert(
-              data.data.map(
-                (guest): NoTimestamps<Guest> => ({
-                  ...guest,
-                  companyName: guest.companyName || null,
-                  emailHash: hashGuestEmail(guest.email),
-                  source: 'UPLOAD',
-                  status: 'RSVP',
-                  accountManager: null,
-                }),
-              ),
-            )
+        const tmpCollectionName = 'tmp_guests_upload'
 
-            return insertResult.map(() => mailchimpResponse)
-          })
+        const mailchimpResultAfterLocalInsertion =
+          await mailchimpResult.flatMap(async mailchimpResponse =>
+            database.use(async db => {
+              const guestsHasIndex = await guestsCollection.raw(collection =>
+                Result.tryCatch(
+                  () => collection.indexExists(UNIQUE_EMAIL_HASH_INDEX_NAME),
+                  error =>
+                    new ServerError(
+                      500,
+                      'Unable to verify index on guests collection',
+                      { error },
+                    ),
+                ),
+              )
+
+              const indexCreationResult = await guestsHasIndex.flatMap(
+                guestsHasIndex => {
+                  if (!guestsHasIndex) {
+                    return guestsCollection.raw(createGuestsCollectionIndexes)
+                  } else {
+                    return Result.success(constVoid)
+                  }
+                },
+              )
+
+              const insertionResult = await indexCreationResult.flatMap(() =>
+                Result.tryCatch(
+                  () => {
+                    const now = new Date()
+
+                    return db.collection(tmpCollectionName).insertMany(
+                      data.data.map(
+                        (guest): Guest => ({
+                          firstName: guest.firstName,
+                          lastName: guest.lastName,
+                          email: guest.email,
+                          emailHash: hashGuestEmail(guest.email),
+                          companyName: guest.companyName || null,
+                          accountManager: null,
+                          source: 'SYNC',
+                          status: 'RSVP',
+                          createdAt: now,
+                          updatedAt: now,
+                        }),
+                      ),
+                    )
+                  },
+                  error =>
+                    new ServerError(
+                      500,
+                      'Unable to create temporary collection for upserting',
+                      { error },
+                    ),
+                ),
+              )
+
+              const upsertResult = await insertionResult.flatMap(() =>
+                Result.tryCatch(
+                  () =>
+                    db
+                      .collection(tmpCollectionName)
+                      .aggregate([
+                        {
+                          $merge: {
+                            into: guestsCollection.name,
+                            on: 'emailHash',
+                            whenMatched: [
+                              {
+                                $set: {
+                                  firstName: '$$new.firstName',
+                                  lastName: '$$new.lastName',
+                                  companyName: '$$new.companyName',
+                                  updatedAt: '$$new.updatedAt',
+                                },
+                              },
+                            ],
+                            whenNotMatched: 'insert',
+                          },
+                        },
+                      ])
+                      .toArray(),
+                  error =>
+                    new ServerError(
+                      500,
+                      'Unable to perform upsert aggregation',
+                      {
+                        error,
+                      },
+                    ),
+                ),
+              )
+
+              // This needs to happen no matter which failures happened, and we don't care if it fails.
+              // We just really need to drop the temporary collection
+              await db.collection(tmpCollectionName).drop()
+
+              return upsertResult.map(() => mailchimpResponse)
+            }),
+          )
 
         return mailchimpResultAfterLocalInsertion.map(response => ({
           processedCount: data.data.length,
