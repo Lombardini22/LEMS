@@ -9,20 +9,11 @@
     <ion-content :fullscreen="true">
       <div id="container">
         <strong>Please Scan A QRCode to Checkin</strong>
-        <ion-input rounded outlined v-model="qrString" placeholder="Scan Your QRCode Using the Scanners"
-          ref="qrInput" :maxlength="32"></ion-input>
+        <ion-input rounded outlined v-model="qrString" placeholder="Scan Your QRCode Using the Scanners" ref="qrInput"
+          :maxlength="32"></ion-input>
         <div>
           <center>
-            <!-- <StreamBarcodeReader @decode="(a: any) => onDecode(a)" @loaded="() => onLoaded()" class="decoder">
-            </StreamBarcodeReader> -->
-            <!-- <p class="decode-result">Last result: <b>{{ qrString }}</b></p> -->
-            <!-- <qrcode-stream :camera="camera" @decode="onDecode" @init="onInit">
-            <div v-show="showScanConfirmation" class="scan-confirmation">
-              <img src="../../public/assets/logos/logo-foresight-bk.png" alt="Checkmark" width="128px" />
-            </div>
-          </qrcode-stream> -->
-
-            <qr-stream @decode="onDecode" class="mb">
+            <qr-stream @decode="onDecode" class="mb" v-if="validRoute">
               <div style="color: red;" class="frame"></div>
             </qr-stream>
           </center>
@@ -44,30 +35,21 @@ import {
   IonPage,
   IonTitle,
   IonToolbar,
-  // alertController,
   IonInput,
   toastController,
 } from '@ionic/vue'
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { qrCodeOutline } from 'ionicons/icons'
 import axios from 'axios';
-// import { StreamBarcodeReader } from "vue-barcode-reader";
 import { QrStream } from 'vue3-qr-reader'
+import { useRoute } from 'vue-router';
 
-// const result = ref('')
-// const showScanConfirmation = ref(false)
-
-
+const serverUrl = process.env.VUE_APP_CLIENT_URL
 const qrString = ref('')
 const id = ref()
 
+const route = useRoute()
 
-// const onFocusOut = () => {
-//   if (qrInput.value) {
-//     // qrInput.value.focus()
-//     console.log('focusout')
-//   }
-// }
 const presentAlert = async () => {
   const guest = {
     firstName: '',
@@ -75,7 +57,8 @@ const presentAlert = async () => {
     email: '',
     company: ''
   }
-  await axios.get(process.env.VUE_APP_SERVER_URL + 'api/guests/' + qrString.value)
+
+  await axios.get(serverUrl + 'api/guests/' + qrString.value)
     .then(res => {
       console.log(res.data)
       guest.firstName = res.data.firstName
@@ -87,7 +70,7 @@ const presentAlert = async () => {
       }
     })
     .then(async () => {
-      await axios.get(process.env.VUE_APP_SERVER_URL + 'api/guests/' + qrString.value + "/check-in").then(res => {
+      await axios.get(serverUrl + 'api/guests/' + qrString.value + "/check-in").then(res => {
         console.log(res.data)
         if (res.status === 200)
           presentToast('bottom', 'Guest Checked In con Successo!', 'success', 5000)
@@ -100,8 +83,6 @@ const presentAlert = async () => {
       console.error(err)
       presentToast('bottom', `An Error Has Occured! - Guest Not Found`, 'danger', 5000)
     })
-
-
 }
 
 watch(qrString, (val: any) => {
@@ -113,6 +94,12 @@ watch(qrString, (val: any) => {
     }, 2000)
   }
 })
+
+const validRoute = computed(() => {
+  return route.name === "scan"
+
+})
+
 
 const presentToast = async (position: any, message: any, color: any, duration: number) => {
   const toast = await toastController.create({
@@ -131,11 +118,9 @@ const onDecode = (a: any) => {
     console.log(a);
     qrString.value = a;
     if (id.value) clearTimeout(id.value);
-    
+
     id.value = setTimeout(() => {
-      alert('TimeOut 1');
       if (qrString.value === a) {
-        alert('TimeOut 2');
         qrString.value = "";
       }
     }, 5000);
@@ -143,25 +128,6 @@ const onDecode = (a: any) => {
     alert(err)
   }
 }
-
-
-// QRCODE READER CAMERA
-
-// const onInit = async (promise: any) => {
-//   try {
-//     await promise
-//   } catch (e) {
-//     console.error(e)
-//   } finally {
-//     showScanConfirmation.value = camera.value === "off"
-//   }
-// }
-
-// const onDecode = (content: any) => {
-//   qrString.value = content
-
-// }
-
 
 
 </script>

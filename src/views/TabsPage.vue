@@ -12,17 +12,9 @@
           <ion-icon :icon="listOutline" />
           <ion-label>List / Manual</ion-label>
         </ion-tab-button>
-         <!-- <ion-tab-button tab="tab3" href="quasar">
-          <ion-icon :icon="atCircle" />
-          <ion-label>Quasar</ion-label>
-        </ion-tab-button> -->
-        <!-- <ion-tab-button tab="tab4" href="ticket/4cdec2dac7/info@l22.it">
+        <ion-tab-button tab="tab4" href="/ticket">
           <ion-icon :icon="ticketOutline" />
-          <ion-label>Ticket</ion-label>
-        </ion-tab-button> -->
-        <ion-tab-button tab="tab4" href="/ticket/info@l22.it">
-          <ion-icon :icon="ticketOutline" />
-          <ion-label>Ticket</ion-label>
+          <ion-label>Tickets</ion-label>
         </ion-tab-button>
       </ion-tab-bar>
     </ion-tabs>
