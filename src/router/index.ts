@@ -3,7 +3,7 @@ import { RouteRecordRaw } from 'vue-router'
 import ScanPage from '../views/ScanPage.vue'
 import TabsPage from '../views/TabsPage.vue'
 import ManualPage from '../views/ManualPage.vue'
-// import QuasarPage from '../views/QuasarPage.vue'
+import TestPage from '../views/TestPage.vue'
 // import TicketPage from '../views/TicketPage.vue'
 import TicketPage2 from '../views/TicketPage2.vue'
 import AddPlusOne from '@/views/AddPlusOne.vue'
@@ -63,10 +63,10 @@ const routes: Array<RouteRecordRaw> = [
           }
         }
       },
-      // {
-      //   path: 'quasar',
-      //   component: QuasarPage,
-      // },
+      {
+        path: 'test',
+        component: TestPage,
+      },
     ],
   },
   // {
