@@ -43,11 +43,6 @@ const getListMembersInfo = jest.fn(
     }),
 )
 
-const tagSearch = jest.fn((_listId, options: { name: string }) => ({
-  total_items: 1,
-  tags: [{ id: 42, name: options.name }],
-}))
-
 const batchListMembers = jest.fn(
   (
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -76,7 +71,6 @@ jest.mock('../../resources/mailchimp', () => ({
       return op({
         lists: {
           getListMembersInfo,
-          tagSearch,
           batchListMembers,
         },
       })
@@ -264,12 +258,7 @@ describe('syncMailchimpTag', () => {
       })
 
       expectResult(result).toHaveSucceeded()
-      expect(tagSearch).toHaveBeenCalledTimes(1)
       expect(batchListMembers).toHaveBeenCalledTimes(1)
-
-      expect(tagSearch).toHaveBeenCalledWith(env.MAILCHIMP_DATABASE_LIST_ID, {
-        name: tag,
-      })
 
       expect(batchListMembers).toHaveBeenCalledWith(
         env.MAILCHIMP_DATABASE_LIST_ID,
