@@ -7,12 +7,6 @@
     </ion-header>
 
     <ion-content :fullscreen="true">
-      <ion-header collapse="condense">
-        <ion-toolbar>
-          <ion-title size="large">Scan</ion-title>
-        </ion-toolbar>
-      </ion-header>
-
       <div id="container">
         <strong>Please Scan A QRCode to Checkin</strong>
         <ion-input rounded outlined v-model="qrString" placeholder="Scan Your QRCode Using the Scanners"
@@ -137,8 +131,11 @@ const onDecode = (a: any) => {
     console.log(a);
     qrString.value = a;
     if (id.value) clearTimeout(id.value);
+    
     id.value = setTimeout(() => {
+      alert('TimeOut 1');
       if (qrString.value === a) {
+        alert('TimeOut 2');
         qrString.value = "";
       }
     }, 5000);
