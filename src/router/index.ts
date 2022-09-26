@@ -78,6 +78,10 @@ const routes: Array<RouteRecordRaw> = [
     component: TicketPage2,
   },
   {
+    path: '/ticket',
+    component: TicketPage2,
+  },
+  {
     path: '/plusOne',
     redirect: '/guest'
   },

@@ -1,51 +1,69 @@
 <template>
   <ion-page>
+
     <ion-content>
       <div id="block">
-        <h1 class="title">Grazie per aver confermato la tua presenza allo spettacolo!</h1>
-        <Tilt data-tilt data-tilt-full-page-listening gyroscope="false">
-          <div class="ticket ticket-1">
-            <div class="details-block">
-              <div class="logos-block">
-                <img src="../../public/assets/logos/logo-foresight1.png" class="logo-img" />
-                <img src="../../public/assets/logos/Lombardini22.png" class="logo-lomb" />
-              </div>
-
-              <div class="guest">
-                <span class="name"> {{ ticket.firstName }} {{ ticket.lastName }}</span>
-                <br />
-                <span class="company small">{{ ticket.company }}</span>
-              </div>
-
-              <div class="location-block">
-                <span class="location">05.10.2022 ore 9:00</span>
-                <br />
-                <span class="location">Auditorium Fondazione Cariplo Largo G. Mahler, Milano</span>
-              </div>
-              <img src="../../public/assets/logos/Lombardini22.png" class="logo-lomb-mob" />
-
-              <!-- <div class="rip"></div> -->
+        <div class="cerca" v-if="!validEmail">
+          <center>
+            <div class="login-logo">
+              <img src="/assets/logos/logo-foresight-bk.png" alt="logo" />
             </div>
-            <div class="qr-block">
-              <div class="upper_block">
-                <img :src="qrCode" alt="QR Code" class="qr-img" />
-                <h3>Biglietto <br />#{{ tktNumber }}</h3>
+
+            <strong>Inserisci qui la tua email</strong>
+            <ion-input rounded outlined v-model="emailInput" placeholder="email" autofocus ref="qrInput">
+            </ion-input>
+            <ion-button @click="getTicket">
+              <ion-icon :icon="searchOutline" /> Cerca
+            </ion-button>
+          </center>
+        </div>
+        <div v-else>
+          <h1 class="title">Grazie per aver confermato la tua presenza allo spettacolo!</h1>
+          <Tilt data-tilt data-tilt-full-page-listening gyroscope="false">
+            <div class="ticket ticket-1">
+              <div class="details-block">
+                <div class="logos-block">
+                  <img src="../../public/assets/logos/logo-foresight1.png" class="logo-img" />
+                  <img src="../../public/assets/logos/Lombardini22.png" class="logo-lomb" />
+                </div>
+
+                <div class="guest">
+                  <span class="name"> {{ ticket.firstName }} {{ ticket.lastName }}</span>
+                  <br />
+                  <span class="company small">{{ ticket.company }}</span>
+                </div>
+
+                <div class="location-block">
+                  <span class="location">05.10.2022 ore 9:00</span>
+                  <br />
+                  <span class="location">Auditorium Fondazione Cariplo Largo G. Mahler, Milano</span>
+                </div>
+                <img src="../../public/assets/logos/Lombardini22.png" class="logo-lomb-mob" />
+
+                <!-- <div class="rip"></div> -->
               </div>
-              <div class="lower_block">
-                <span class="disclaimer">Il biglietto è strettamente personale</span>
+              <div class="qr-block">
+                <div class="upper_block">
+                  <img :src="qrCode" alt="QR Code" class="qr-img" />
+                  <h3>Biglietto <br />#{{ tktNumber }}</h3>
+                </div>
+                <div class="lower_block">
+                  <span class="disclaimer">Il biglietto è strettamente personale</span>
+                </div>
               </div>
             </div>
+          </Tilt>
+
+          <div class="footer">
+            <AddToCalendar />
+            <!-- <ion-button class="btn mar-20" :href="printUrl">Salva Voucher in PDF</ion-button> -->
+
+            <ion-button class="btn mar-20" :href="plusOne">Invita un ospite</ion-button>
+            <!-- <ManualAddGuest :refererEmail="params.email" /> -->
+            <ion-button class="btn mar-20" href="mailto:info@foresightmilano.it?subject=FORESIGHT 2022">Contattaci Via
+              Mail
+            </ion-button>
           </div>
-        </Tilt>
-        <div class="footer">
-          <AddToCalendar />
-          <!-- <ion-button class="btn mar-20" :href="printUrl">Salva Voucher in PDF</ion-button> -->
-
-          <ion-button class="btn mar-20" :href="plusOne">Invita un ospite</ion-button>
-          <!-- <ManualAddGuest :refererEmail="params.email" /> -->
-          <ion-button class="btn mar-20" href="mailto:info@foresightmilano.it?subject=FORESIGHT 2022">Contattaci Via
-            Mail
-          </ion-button>
         </div>
         <h4 id="believers" style="color: black" class="pad-20">Sound Design and live performance</h4>
         <img src="../../public/assets/logos/orchestra.png" alt="believers" width="100" class="pad-20" />
@@ -57,19 +75,36 @@
 </template>
 
 <script lang="ts" setup>
-import { IonContent, IonPage, IonButton } from '@ionic/vue'
-import { reactive, ref } from 'vue'
+import { IonContent, IonPage, IonButton, IonInput } from '@ionic/vue'
+import { computed, reactive, ref } from 'vue'
+import { searchOutline } from 'ionicons/icons'
 import { MD5 } from 'crypto-js'
 import Tilt from 'vanilla-tilt-vue'
 import axios from 'axios'
 import AddToCalendar from './components/AddToCalendar.vue'
 // import ManualAddGuest from './components/ManualAddGuest.vue'
 
+
+const emailInput = ref('')
+
 const serverUrl = process.env.VUE_APP_SERVER_URL
 
 const params = ref({
   email: window.location.href.split('/').pop()?.toLowerCase() || '',
 })
+
+const validEmail = computed(() => {
+  return !!params.value.email && params.value.email !== "ticket"
+})
+
+
+
+const mailValidator = (email: string) => {
+  const re = /\S+@\S+\.\S+/
+  return re.test(email)
+}
+
+
 
 const ticket = reactive({
   id: MD5(params.value.email).toString(),
@@ -80,6 +115,7 @@ const ticket = reactive({
   qrCode: '',
 })
 const tktNumber = ref(ticket.id.slice(0, 5).toUpperCase())
+
 axios
   .get(serverUrl + `api/guests/${params.value.email}/rsvp/`)
   .then(response => {
@@ -90,8 +126,35 @@ axios
     console.log('data:', response.data)
   })
   .catch(error => {
+
     console.log(error)
   })
+
+const checkIfExists = async (email: string) => {
+  try {
+    const hashEmail = MD5(email).toString()
+    const response = await axios.get(serverUrl + `api/guests/${hashEmail}`)
+    if (response.data) {
+      return true
+    } else {
+      return false
+    }
+  } catch (error) {
+    console.log(error)
+    return false
+  }
+}
+
+
+const getTicket = async () => {
+  !mailValidator(emailInput.value)
+    ? alert('Inserisci una mail valida') :
+    (
+      (await checkIfExists(emailInput.value)) ?
+        (window.location.href = `ticket/${emailInput.value}`) : alert('Non esiste nessun biglietto con questa mail')
+    )
+}
+
 
 const fullName = ref(ticket.firstName + ' ' + ticket.lastName)
 const qrCode = ref(serverUrl + `api/guests/qr/${ticket.email}`)
@@ -127,10 +190,66 @@ axios
 const printUrl = ref('')
 printUrl.value = `/print/${fullName.value}/${ticket.email}`
 
+
 // console.log(qrCode)
 </script>
 
 <style scoped>
+#container {
+  text-align: center;
+
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+#container strong {
+  font-size: 20px;
+  line-height: 26px;
+}
+
+#container p {
+  font-size: 16px;
+  line-height: 22px;
+
+  color: #8c8c8c;
+
+  margin: 0;
+}
+
+#container a {
+  text-decoration: none;
+}
+
+.login-logo {
+  padding: 20px 0;
+  min-height: 200px;
+  text-align: center;
+}
+
+.login-logo img {
+  max-width: 150px;
+}
+.cerca {
+  margin-top: 15px;
+  margin-bottom: 60px;
+}
+
+center {
+  background: white;
+  padding: 25px;
+  border-radius: 25px;
+  box-shadow: 0 10px 16px 0 rgb(0 0 0 / 20%), 0 6px 20px 0 rgb(0 0 0 / 19%) !important;
+}
+
+center strong {
+  font-size: 20px;
+  line-height: 26px;
+  color: black;
+}
+
 *,
 *::after {
   box-sizing: border-box;
