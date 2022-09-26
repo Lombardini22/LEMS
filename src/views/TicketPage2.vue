@@ -98,7 +98,6 @@ const validEmail = computed(() => {
 })
 
 
-
 const mailValidator = (email: string) => {
   const re = /\S+@\S+\.\S+/
   return re.test(email)
@@ -144,6 +143,7 @@ const checkIfExists = async (email: string) => {
     return false
   }
 }
+
 
 
 const getTicket = async () => {
