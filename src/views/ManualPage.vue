@@ -101,7 +101,7 @@ const serverUrl = process.env.VUE_APP_SERVER_URL
 const data = ref([] as any[])
 const search = ref()
 const isOpen = ref(false)
-const guestsOnly = ref(false)
+const guestsOnly = ref(true)
 
 // Print
 const alert = ref(false)
@@ -157,7 +157,7 @@ const submit = async () => {
 
 }
 
-axios.get(serverUrl + 'api/guests/?order=ASC&first=1000').then(res => {
+axios.get(serverUrl + 'api/guests/?order=ASC&first=5000').then(res => {
   data.value = res.data.edges
   totalCount.value = res.data.pageInfo.totalCount
   console.table(data.value)
