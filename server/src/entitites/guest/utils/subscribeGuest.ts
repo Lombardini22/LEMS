@@ -16,6 +16,7 @@ export async function subscribeGuest<G extends MailchimpGuestData>(
 ): Promise<Result<ServerError, G>> {
   return env.use(env =>
     mailchimp.use(async mailchimp => {
+      const sourceListId = env.MAILCHIMP_DATABASE_LIST_ID
       const destinationListId = env.MAILCHIMP_EVENT_LIST_ID
 
       const mailchimpGuest = await Result.tryCatch(
@@ -45,38 +46,63 @@ export async function subscribeGuest<G extends MailchimpGuestData>(
         }
       })
 
-      if (mailchimpGuestData.isSuccess()) {
-        return Result.success(() => guest)
-      } else {
-        const subscriptionResult = await Result.tryCatch(
+      const subscription = await mailchimpGuestData.fold(
+        async () => {
+          const subscriptionResult = await Result.tryCatch(
+            () =>
+              mailchimp.lists.addListMember(
+                destinationListId,
+                guestToMailchimpListMember(guest),
+              ),
+            error =>
+              new ServerError(
+                500,
+                'Unable to add guest to the destination list',
+                { error, guest, destinationListId },
+              ),
+          )
+
+          return await subscriptionResult.flatMap(response => {
+            if (isMailchimpMembersSuccessResponse(response)) {
+              return Result.success(() => guest)
+            } else {
+              return Result.failure(
+                () =>
+                  new ServerError(
+                    500,
+                    'Error in adding guest to destination list',
+                    { response },
+                  ),
+              )
+            }
+          })
+        },
+        () => Result.success(() => guest),
+      )
+
+      return subscription.flatMap(async guest => {
+        const tagSetResult = await Result.tryCatch(
           () =>
-            mailchimp.lists.addListMember(
-              destinationListId,
-              guestToMailchimpListMember(guest),
+            mailchimp.lists.updateListMemberTags(
+              sourceListId,
+              guest.emailHash,
+              {
+                tags: [{ name: env.MAILCHIMP_RSVP_TAG_NAME, status: 'active' }],
+              },
             ),
           error =>
             new ServerError(
               500,
-              'Unable to add guest to the destination list',
-              { error, guest, destinationListId },
+              'Unable to set tag on source list for new guest',
+              {
+                error,
+                guest,
+              },
             ),
         )
 
-        return await subscriptionResult.flatMap(response => {
-          if (isMailchimpMembersSuccessResponse(response)) {
-            return Result.success(() => guest)
-          } else {
-            return Result.failure(
-              () =>
-                new ServerError(
-                  500,
-                  'Error in adding guest to destination list',
-                  { response },
-                ),
-            )
-          }
-        })
-      }
+        return tagSetResult.map(() => guest)
+      })
     }),
   )
 }
