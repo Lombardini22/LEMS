@@ -40,7 +40,7 @@ interface UpsertResponse {
 }
 
 interface SyncTagInput extends SyncSecretInput {
-  tag: string
+  tag?: string
 }
 
 export const cleanGuestsDatabasePath = Path.start()
@@ -252,7 +252,7 @@ export async function syncMailchimpTag(
               // eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore
               mailchimp.lists.tagSearch(env.MAILCHIMP_DATABASE_LIST_ID, {
-                name: request.body.tag,
+                name: request.body.tag || env.MAILCHIMP_RSVP_TAG_NAME,
               }),
             error =>
               new ServerError(
