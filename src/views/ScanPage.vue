@@ -15,7 +15,7 @@
 
       <div id="container">
         <strong>Please Scan A QRCode to Checkin</strong>
-        <ion-input rounded outlined v-model="qrString" placeholder="Scan Your QRCode Using the Scanners" autofocus
+        <ion-input rounded outlined v-model="qrString" placeholder="Scan Your QRCode Using the Scanners"
           ref="qrInput" :maxlength="32"></ion-input>
         <div>
           <center>
@@ -62,11 +62,10 @@ import { QrStream } from 'vue3-qr-reader'
 
 // const result = ref('')
 // const showScanConfirmation = ref(false)
-const camera = ref('auto')
 
 
 const qrString = ref('')
-// const id = ref()
+const id = ref()
 
 
 // const onFocusOut = () => {
@@ -133,24 +132,20 @@ const presentToast = async (position: any, message: any, color: any, duration: n
 
 // QRCODE READER CAMERA
 
-// const onDecode = (a: any) => {
-//   try {
-//     console.log(a);
-//     qrString.value = a;
-//     if (id.value) clearTimeout(id.value);
-//     id.value = setTimeout(() => {
-//       if (qrString.value === a) {
-//         qrString.value = "";
-//       }
-//     }, 5000);
-//   } catch (err) {
-//     alert(err)
-//   }
-// }
-
-// const onLoaded = () => {
-//   console.log("Loaded");
-// }
+const onDecode = (a: any) => {
+  try {
+    console.log(a);
+    qrString.value = a;
+    if (id.value) clearTimeout(id.value);
+    id.value = setTimeout(() => {
+      if (qrString.value === a) {
+        qrString.value = "";
+      }
+    }, 5000);
+  } catch (err) {
+    alert(err)
+  }
+}
 
 
 // QRCODE READER CAMERA
@@ -165,18 +160,10 @@ const presentToast = async (position: any, message: any, color: any, duration: n
 //   }
 // }
 
-const onDecode = (content: any) => {
-  qrString.value = content
-  pause()
-  unpause()
-}
-const unpause = () => {
-  camera.value = 'auto'
-}
+// const onDecode = (content: any) => {
+//   qrString.value = content
 
-const pause = () => {
-  camera.value = 'off'
-}
+// }
 
 
 
