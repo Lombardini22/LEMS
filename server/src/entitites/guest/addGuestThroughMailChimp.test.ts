@@ -47,6 +47,17 @@ const addListMember = jest.fn((_listId: string, _data: AddListMemberBody) =>
   }),
 )
 
+const updateListMemberTags = jest.fn(
+  (
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _listId: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _emailHash: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    _options: { tags: Array<{ name: string; status: 'active' }> },
+  ) => Promise.resolve(),
+)
+
 jest.mock('../../resources/mailchimp', function () {
   return {
     mailchimp: {
@@ -56,6 +67,7 @@ jest.mock('../../resources/mailchimp', function () {
             lists: {
               getListMember,
               addListMember,
+              updateListMemberTags,
             },
           }),
       ),
@@ -87,6 +99,7 @@ describe('addGuestThroughMailChimp', () => {
       )
 
       expect(addListMember).toHaveBeenCalledTimes(1)
+      expect(updateListMemberTags).toHaveBeenCalledTimes(1)
 
       expect(addListMember).toHaveBeenCalledWith(env.MAILCHIMP_EVENT_LIST_ID, {
         email_address: 'email.address@example.com',
@@ -97,6 +110,14 @@ describe('addGuestThroughMailChimp', () => {
         },
         status: 'subscribed',
       })
+
+      expect(updateListMemberTags).toHaveBeenCalledWith(
+        env.MAILCHIMP_DATABASE_LIST_ID,
+        emailHash,
+        {
+          tags: [{ name: env.MAILCHIMP_RSVP_TAG_NAME, status: 'active' }],
+        },
+      )
 
       expectResult(result).toHaveSucceededWith({
         _id: expect.any(ObjectId),

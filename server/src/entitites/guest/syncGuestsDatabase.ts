@@ -14,10 +14,7 @@ import {
   UNIQUE_EMAIL_HASH_INDEX_NAME,
 } from './guestsCollection'
 import { fetchMailchimpMembers } from './utils/fetchMailchimpMembers'
-import {
-  MailchimpBatchListMembersResponse,
-  MailchimpTagsSearchResponse,
-} from './utils/mailchimpTypes'
+import { MailchimpBatchListMembersResponse } from './utils/mailchimpTypes'
 
 interface SyncSecretInput {
   secret: string
@@ -40,7 +37,7 @@ interface UpsertResponse {
 }
 
 interface SyncTagInput extends SyncSecretInput {
-  tag: string
+  tag?: string
 }
 
 export const cleanGuestsDatabasePath = Path.start()
@@ -245,47 +242,11 @@ export async function syncMailchimpTag(
   return guardResult.flatMap(() =>
     env.use(env =>
       mailchimp.use(async mailchimp => {
-        const tags: Result<ServerError, MailchimpTagsSearchResponse> =
-          await Result.tryCatch(
-            () =>
-              // This is not typed in MailChimp TS package
-              // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore
-              mailchimp.lists.tagSearch(env.MAILCHIMP_DATABASE_LIST_ID, {
-                name: request.body.tag,
-              }),
-            error =>
-              new ServerError(
-                500,
-                'Unable to list tags of MailChimp database list',
-                { error },
-              ),
-          )
-
-        const tag = await tags.flatMap(tags => {
-          if (tags.total_items !== 1) {
-            return Result.failure(
-              () =>
-                new ServerError(400, 'Unable to found a distinctive tag', {
-                  tags,
-                }),
-            )
-          } else {
-            // when total_items is 1, the first tags exists
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            return Result.success(() => tags.tags[0]!)
-          }
-        })
-
-        const data = await tag.flatMap(async tag => {
-          const members = await fetchMailchimpMembers(
-            env.MAILCHIMP_EVENT_LIST_ID,
-          )
-          return members.map(members => ({ members, tag }))
-        })
+        const tag = request.body.tag || env.MAILCHIMP_RSVP_TAG_NAME
+        const members = await fetchMailchimpMembers(env.MAILCHIMP_EVENT_LIST_ID)
 
         const result: Result<ServerError, MailchimpBatchListMembersResponse> =
-          await data.flatMap(({ members, tag }) =>
+          await members.flatMap(members =>
             Result.tryCatch(
               () =>
                 // Not typed in MailChimp lib, but this exists
@@ -296,7 +257,7 @@ export async function syncMailchimpTag(
                   {
                     members: members.map(member => ({
                       email_address: member.email_address,
-                      tags: [tag.name],
+                      tags: [tag],
                     })),
                     skip_merge_validation: true,
                     update_existing: true,
@@ -305,7 +266,7 @@ export async function syncMailchimpTag(
               error =>
                 new ServerError(500, 'Unable to add tags to MailChimp list', {
                   error,
-                  data,
+                  tag,
                 }),
             ),
           )
