@@ -16,6 +16,10 @@
           <ion-icon :icon="ticketOutline" />
           <ion-label>Tickets</ion-label>
         </ion-tab-button>
+        <ion-tab-button tab="tab5" href="reports">
+          <ion-icon :icon="pieChartOutline" />
+          <ion-label>Reports</ion-label>
+        </ion-tab-button>
       </ion-tab-bar>
     </ion-tabs>
   </ion-page>
@@ -31,5 +35,5 @@ import {
   IonPage,
   IonRouterOutlet,
 } from '@ionic/vue'
-import {  listOutline,  qrCodeOutline, ticketOutline } from 'ionicons/icons'
+import {  listOutline,  pieChartOutline,  qrCodeOutline, ticketOutline } from 'ionicons/icons'
 </script>
