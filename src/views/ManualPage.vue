@@ -31,7 +31,6 @@
               <ion-label>{{ item.node.firstName }} {{ item.node.lastName }} ({{item.node.companyName}})</ion-label>
 
               <ion-button slot="end" @click="guestInfo(item.node)">
-                Guest Info
                 <ion-icon :icon="personOutline" />
               </ion-button>
             </ion-item>

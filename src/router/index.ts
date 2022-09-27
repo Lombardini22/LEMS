@@ -4,7 +4,7 @@ import ScanPage from '../views/ScanPage.vue'
 import TabsPage from '../views/TabsPage.vue'
 import ManualPage from '../views/ManualPage.vue'
 import TestPage from '../views/TestPage.vue'
-// import TicketPage from '../views/TicketPage.vue'
+import ReportsPage from '../views/ReportsPage.vue'
 import TicketPage2 from '../views/TicketPage2.vue'
 import AddPlusOne from '@/views/AddPlusOne.vue'
 import LoginPage from '@/views/LoginPage.vue'
@@ -53,6 +53,19 @@ const routes: Array<RouteRecordRaw> = [
       {
         path: 'manual',
         component: ManualPage,
+        beforeEnter: () => {
+          const { isAuth, check } = authCheck()
+          check()
+          if (isAuth.value) {
+            return true
+          } else {
+            return '/login'
+          }
+        }
+      },
+      {
+        path: 'reports',
+        component: ReportsPage,
         beforeEnter: () => {
           const { isAuth, check } = authCheck()
           check()

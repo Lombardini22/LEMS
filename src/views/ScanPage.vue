@@ -11,13 +11,16 @@
         <strong>Please Scan A QRCode to Checkin</strong>
         <ion-input rounded outlined v-model="qrString" placeholder="Scan Your QRCode Using the Scanners" ref="qrInput"
           :maxlength="32"></ion-input>
-        <div>
+        <div v-if="hasWebcam">
           <center>
             <qr-stream @decode="onDecode" class="mb" v-if="validRoute">
               <div style="color: red;" class="frame"></div>
             </qr-stream>
           </center>
         </div>
+        <p v-else>
+          <em>Webcam not found</em>
+        </p>
         <p>
           <ion-button @click="presentAlert">
             <ion-icon :icon="qrCodeOutline" /> Scan
@@ -38,7 +41,7 @@ import {
   IonInput,
   toastController,
 } from '@ionic/vue'
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeMount, ref, watch } from 'vue'
 import { qrCodeOutline } from 'ionicons/icons'
 import axios from 'axios';
 import { QrStream } from 'vue3-qr-reader'
@@ -47,6 +50,7 @@ import { useRoute } from 'vue-router';
 const serverUrl = process.env.VUE_APP_CLIENT_URL
 const qrString = ref('')
 const id = ref()
+const hasWebcam = ref(false)
 
 const route = useRoute()
 
@@ -93,6 +97,17 @@ watch(qrString, (val: any) => {
       qrString.value = ''
     }, 2000)
   }
+})
+
+onBeforeMount(async () => {
+  try {
+    if (navigator.mediaDevices && await navigator.mediaDevices.getUserMedia({ video: true })) {
+      hasWebcam.value = true
+    }
+  } catch (err) {
+    hasWebcam.value = false
+  }
+
 })
 
 const validRoute = computed(() => {

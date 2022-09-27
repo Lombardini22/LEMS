@@ -307,7 +307,7 @@ body {
   background-position: top;
   background-size: 100%;
   width: 700px;
-  height: 300px;
+  height: 325px;
   border-radius: 15px;
   -webkit-filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
   filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
@@ -472,7 +472,7 @@ h2#believers {
     background-position: top;
     background-size: 100%;
     width: 95%;
-    height: 600px;
+    height: 680px;
     border-radius: 15px;
     filter: drop-shadow(1px 1px 3px rgba(0, 0, 0, 0.3));
     display: flex;
