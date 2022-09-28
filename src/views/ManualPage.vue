@@ -3,7 +3,6 @@
     <ion-header :translucent="true" :fullscreen="false">
       <ion-toolbar>
         <ion-buttons slot="primary">
-
           <ion-button @click="setOpen(!isOpen)">
             <ion-icon slot="icon-only" :icon="addOutline"></ion-icon>
           </ion-button>
@@ -23,7 +22,13 @@
 
 
     <ion-content :fullscreen="true">
+
       <ion-content :scroll-events="true">
+        <ion-refresher slot="fixed" @ionRefresh="doRefresh($event)">
+          <ion-refresher-content :pulling-icon="chevronDownCircleOutline" pulling-text="Pull to refresh"
+            refreshing-spinner="circles" refreshing-text="Refreshing...">
+          </ion-refresher-content>
+        </ion-refresher>
         <div>
           <!-- List of Input Items -->
           <ion-list>
@@ -71,7 +76,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
+import { onBeforeMount, ref, watch } from 'vue'
 import axios from 'axios'
 import {
   IonContent,
@@ -90,9 +95,11 @@ import {
   IonInput,
   IonAlert,
   IonToggle,
+  IonRefresher,
+  IonRefresherContent,
   toastController
 } from '@ionic/vue'
-import { personOutline, addOutline } from 'ionicons/icons'
+import { personOutline, addOutline, chevronDownCircleOutline } from 'ionicons/icons'
 import { computed } from '@vue/reactivity';
 
 const serverUrl = process.env.VUE_APP_SERVER_URL
@@ -120,7 +127,7 @@ const email = ref('')
 const company = ref('')
 
 const submit = async () => {
-  console.log('submit')
+  // console.log('submit')
 
   const newGuest = {
     firstName: firstName.value,
@@ -129,7 +136,7 @@ const submit = async () => {
     companyName: company.value,
   }
 
-  console.log(newGuest)
+  // console.log(newGuest)
   await axios
     .post(serverUrl + 'api/guests', newGuest)
     .then(res => {
@@ -155,15 +162,17 @@ const submit = async () => {
     })
 
 }
+const getList = async () => {
+  await axios.get(serverUrl + 'api/guests/?order=ASC&first=5000').then(res => {
+    data.value = res.data.edges
+    totalCount.value = res.data.pageInfo.totalCount
+    // console.table(data.value)
+  })
 
-axios.get(serverUrl + 'api/guests/?order=ASC&first=5000').then(res => {
-  data.value = res.data.edges
-  totalCount.value = res.data.pageInfo.totalCount
-  console.table(data.value)
-})
+}
 
 const guestInfo = (item: any) => {
-  console.log(item)
+  // console.log(item)
   setAlertStatus(true)
   alertMsg.value = `${item.email} `
   alertTitle.value = `${item.firstName} ${item.lastName}`
@@ -195,12 +204,20 @@ const filteredData = computed(() => {
 
 })
 
+const doRefresh = (event: CustomEvent) => {
+  // console.log('Begin async operation');
+  getList()
+  event.target?.complete();
+}
+
+
+
 watch(filteredData, (val) => {
   filteredCount.value = val.length
 })
-watch(guestsOnly, (val) => {
-  console.log(val)
-})
+// watch(guestsOnly, (val) => {
+//   console.log(val)
+// })
 
 const count = computed(() => {
   return `${filteredCount.value} of ${totalCount.value} guests`
@@ -226,13 +243,17 @@ const presentToast = async (position: any, message: any, color: any, duration: n
 
 const setOpen = (value: boolean) => {
   isOpen.value = value
-  console.log({ isOpen: isOpen.value })
+  // console.log({ isOpen: isOpen.value })
 }
 
 const setAlertStatus = (value: boolean) => {
   alert.value = value
-  console.log({ alert: alert.value })
+  // console.log({ alert: alert.value })
 }
+
+onBeforeMount(() => {
+  getList()
+})
 
 </script>
 
