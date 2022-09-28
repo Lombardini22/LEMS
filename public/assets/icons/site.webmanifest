@@ -15,6 +15,6 @@
     ],
     "theme_color": "#cc6cff",
     "background_color": "#cc6cff",
-    "start_url": "https://iscrizioni.foresightmilano.it/lems/management/",
+    "start_url": "https://iscrizioni.foresightmilano.it/lems/management",
     "display": "standalone"
 }
