@@ -15,12 +15,12 @@ interface GuestCommonData {
   updatedAt: Date
 }
 
-interface Referree extends GuestCommonData {
+export interface Referree extends GuestCommonData {
   source: 'REFERRER'
   referrerId: ObjectId
 }
 
-interface Subscriber extends GuestCommonData {
+export interface Subscriber extends GuestCommonData {
   source: 'MANUAL' | 'RSVP' | 'UPLOAD' | 'SYNC'
 }
 

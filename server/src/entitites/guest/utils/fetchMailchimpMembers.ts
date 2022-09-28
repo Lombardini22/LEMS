@@ -1,30 +1,20 @@
+import {
+  MailchimpEventListMember,
+  MailchimpEventListMembersResult,
+} from './mailchimpTypes'
 import { Result } from '../../../../../shared/Result'
 import { mailchimp } from '../../../resources/mailchimp'
 import { ServerError } from '../../../ServerError'
 
-interface Member {
-  email_address: string
-  merge_fields: {
-    FNAME: string
-    LNAME: string
-    MMERGE4?: string
-  }
-}
-
-export interface MembersListResult {
-  members: Member[]
-  total_items: number
-}
-
 export function fetchMailchimpMembers(
   listId: string,
-): Promise<Result<ServerError, Member[]>> {
+): Promise<Result<ServerError, MailchimpEventListMember[]>> {
   return mailchimp.use(async mailchimp => {
     const getMailchimpMembers = async (
-      accumulator: Member[],
+      accumulator: MailchimpEventListMember[],
       offset = 0,
-    ): Promise<Result<ServerError, Member[]>> => {
-      const currentPage: Result<ServerError, MembersListResult> =
+    ): Promise<Result<ServerError, MailchimpEventListMember[]>> => {
+      const currentPage: Result<ServerError, MailchimpEventListMembersResult> =
         await Result.tryCatch(
           () =>
             // This call is not part of mailchimp types

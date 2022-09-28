@@ -1,3 +1,5 @@
+import { AddListMemberBody } from '@mailchimp/mailchimp_marketing'
+
 export interface MailchimpTagsSearchResponse {
   total_items: number
   tags: Array<{
@@ -17,4 +19,33 @@ export interface MailchimpBatchListMembersResponse {
     field: 'string'
     field_message: 'string'
   }>
+}
+
+interface MailchimpMember extends Omit<AddListMemberBody, 'merge_fields'> {
+  merge_fields: {
+    FNAME: string
+    LNAME: string
+  }
+}
+
+export type MailchimpDatabaseListMember = MailchimpMember & {
+  merge_fields: MailchimpMember['merge_fields'] & {
+    MMERGE7?: string
+  }
+}
+
+export type MailchimpEventListMember = MailchimpMember & {
+  merge_fields: MailchimpMember['merge_fields'] & {
+    MMERGE4?: string
+  }
+}
+
+export interface MailchimpDatabaseListMembersResult {
+  members: MailchimpDatabaseListMember[]
+  total_items: number
+}
+
+export interface MailchimpEventListMembersResult {
+  members: MailchimpEventListMember[]
+  total_items: number
 }
