@@ -5,6 +5,7 @@ import { Result } from '../../../../shared/Result'
 import { ServerError } from '../../ServerError'
 import { constVoid } from '../../../../shared/utils'
 
+export const UNIQUE_EMAIL_INDEX_NAME = 'uniqueEmail'
 export const UNIQUE_EMAIL_HASH_INDEX_NAME = 'uniqueEmailHash'
 
 export const guestsCollection = new Collection<Guest>(
@@ -22,6 +23,11 @@ export async function createGuestsCollectionIndexes(
           key: { emailHash: 1 },
           unique: true,
           name: UNIQUE_EMAIL_HASH_INDEX_NAME,
+        },
+        {
+          key: { email: 1 },
+          unique: true,
+          name: UNIQUE_EMAIL_INDEX_NAME,
         },
       ]),
     () => new ServerError(500, 'Unable to create index on guests collection'),

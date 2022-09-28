@@ -123,8 +123,8 @@ describe('syncGuestsDatabase', () => {
       )
 
       expectResult(emails).toHaveSucceededWith([
-        'Mailchimp-User2@example.com',
         'Mailchimp-User1@example.com',
+        'Mailchimp-User2@example.com',
       ])
 
       return Result.success(constVoid)
