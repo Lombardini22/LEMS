@@ -3,6 +3,7 @@ import {
   Guest,
   GuestCreationInput,
   hashGuestEmail,
+  Referree,
 } from '../../../../shared/models/Guest'
 import { Result } from '../../../../shared/Result'
 import { NoTimestamps } from '../../database/Collection'
@@ -51,20 +52,25 @@ export async function createGuest(
 
       return referrer.flatMap(async referrer => {
         if (localGuest.isSuccess()) {
-          return guestsCollection.update({ emailHash: guestEmailHash }, {
+          const data: Referree = {
             ...localGuest.unsafeGetValue(),
             ...req.body,
             source: 'REFERRER',
             referrerId: referrer._id,
-          } as Guest)
+          }
+
+          return guestsCollection.update({ emailHash: guestEmailHash }, data)
         } else {
-          return await guestsCollection.insert({
+          const data: NoTimestamps<Referree> = {
             ...req.body,
             emailHash: guestEmailHash,
+            companyName: req.body.companyName || null,
             source: 'REFERRER',
             referrerId: referrer._id,
             status: 'RSVP',
-          } as NoTimestamps<Guest>)
+          }
+
+          return await guestsCollection.insert(data)
         }
       })
     } else {

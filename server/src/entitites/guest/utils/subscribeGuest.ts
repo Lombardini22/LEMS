@@ -1,10 +1,10 @@
-import { AddListMemberBody } from '@mailchimp/mailchimp_marketing'
 import { Guest } from '../../../../../shared/models/Guest'
 import { Result } from '../../../../../shared/Result'
 import { env } from '../../../resources/env'
 import { mailchimp } from '../../../resources/mailchimp'
 import { ServerError } from '../../../ServerError'
 import { isMailchimpMembersSuccessResponse } from './isMailchimpMembersSuccessResponse'
+import { MailchimpEventListMember } from './mailchimpTypes'
 
 type MailchimpGuestData = Pick<
   Guest,
@@ -109,7 +109,7 @@ export async function subscribeGuest<G extends MailchimpGuestData>(
 
 export function guestToMailchimpListMember(
   guest: MailchimpGuestData,
-): AddListMemberBody {
+): MailchimpEventListMember {
   return {
     email_address: guest.email,
     status: 'subscribed',
