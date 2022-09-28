@@ -40,11 +40,11 @@
           <ion-col>
             <ion-button type="submit" expand="block" @click="onLogin"> Login</ion-button>
           </ion-col>
-          <ion-col>
+          <!-- <ion-col>
             <ion-button color="light" expand="block" @click="onSignup">
               Signup</ion-button
             >
-          </ion-col>
+          </ion-col> -->
         </ion-row>
       </div>
       <!-- </form> -->
@@ -99,9 +99,6 @@ axios
     });
 };
 
-const onSignup = () => {
-  console.log("Signup successful");
-};
 </script>
 
 <style scoped>

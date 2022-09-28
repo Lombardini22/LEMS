@@ -5,6 +5,8 @@ import router from './router'
 
 import { IonicVue } from '@ionic/vue'
 import { Vue3SimpleHtml2pdf } from "vue3-simple-html2pdf";
+import VueApexCharts from 'vue3-apexcharts'
+
 
 
 /* Core CSS required for Ionic components to work properly */
@@ -30,7 +32,7 @@ import QrReader from 'vue3-qr-reader';
 
 // const pinia = createPinia()
 
-const app = createApp(App).use(IonicVue).use(router).use(Vue3SimpleHtml2pdf).use(QrReader);
+const app = createApp(App).use(IonicVue).use(router).use(Vue3SimpleHtml2pdf).use(QrReader).use(VueApexCharts);
 // .use(pinia)
 
 router.isReady().then(() => {
