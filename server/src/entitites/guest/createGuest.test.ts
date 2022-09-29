@@ -127,13 +127,16 @@ describe('createGuest', () => {
 
     const guest = result.unsafeGetValue()
 
-    expect(subscribeGuest).toHaveBeenCalledWith({
-      firstName: guest.firstName,
-      lastName: guest.lastName,
-      email: guest.email,
-      emailHash: guest.emailHash,
-      companyName: guest.companyName,
-    })
+    expect(subscribeGuest).toHaveBeenCalledWith(
+      {
+        firstName: guest.firstName,
+        lastName: guest.lastName,
+        email: guest.email,
+        emailHash: guest.emailHash,
+        companyName: guest.companyName,
+      },
+      true,
+    )
   })
 
   it('should update a guest with a referrer if it already exists, without subscribing it', async () => {

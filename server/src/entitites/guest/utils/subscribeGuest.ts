@@ -13,6 +13,7 @@ type MailchimpGuestData = Pick<
 
 export async function subscribeGuest<G extends MailchimpGuestData>(
   guest: G,
+  isNewGuest: boolean,
 ): Promise<Result<ServerError, G>> {
   return env.use(env =>
     mailchimp.use(async mailchimp => {
@@ -101,7 +102,16 @@ export async function subscribeGuest<G extends MailchimpGuestData>(
             ),
         )
 
-        return tagSetResult.map(() => guest)
+        return tagSetResult.fold(
+          error => {
+            if (isNewGuest) {
+              return Result.success(() => guest)
+            } else {
+              return Result.failure(() => error)
+            }
+          },
+          () => Result.success(() => guest),
+        )
       })
     }),
   )

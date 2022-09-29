@@ -32,13 +32,16 @@ export async function createGuest(
     Result<ServerError, unknown>
   >(
     () =>
-      subscribeGuest({
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        email: req.body.email,
-        emailHash: guestEmailHash,
-        companyName: req.body.companyName || null,
-      }),
+      subscribeGuest(
+        {
+          firstName: req.body.firstName,
+          lastName: req.body.lastName,
+          email: req.body.email,
+          emailHash: guestEmailHash,
+          companyName: req.body.companyName || null,
+        },
+        true,
+      ),
     guest => Result.success(() => guest),
   )
 
