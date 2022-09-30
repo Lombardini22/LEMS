@@ -10,15 +10,17 @@ import {
   syncMailchimpTag,
   upsertGuestsDatabase,
 } from './syncGuestsDatabase'
-import { MembersListResult } from './utils/fetchMailchimpMembers'
-import { MailchimpBatchListMembersResponse } from './utils/mailchimpTypes'
+import {
+  MailchimpBatchListMembersResponse,
+  MailchimpEventListMembersResult,
+} from './utils/mailchimpTypes'
 
 const getListMembersInfo = jest.fn(
   (
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     _listId: string,
     options: { count: number; offset?: number },
-  ): Promise<MembersListResult> =>
+  ): Promise<MailchimpEventListMembersResult> =>
     Promise.resolve({
       members: [
         options.offset
@@ -123,8 +125,8 @@ describe('syncGuestsDatabase', () => {
       )
 
       expectResult(emails).toHaveSucceededWith([
-        'Mailchimp-User2@example.com',
         'Mailchimp-User1@example.com',
+        'Mailchimp-User2@example.com',
       ])
 
       return Result.success(constVoid)

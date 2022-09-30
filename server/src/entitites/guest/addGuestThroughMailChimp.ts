@@ -95,7 +95,7 @@ export function addGuestThroughMailChimp(
           async error => {
             if (error.status === 404) {
               const guest = await guestsCollection.insert(guestData)
-              return guest.flatMap(guest => subscribeGuest(guest))
+              return guest.flatMap(guest => subscribeGuest(guest, false))
             } else {
               return locallyExistingGuestResult
             }

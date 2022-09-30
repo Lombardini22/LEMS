@@ -95,7 +95,7 @@ export function uploadGuests(
                           email: guest.email,
                           emailHash: hashGuestEmail(guest.email),
                           companyName: guest.companyName || null,
-                          accountManager: null,
+                          accountManager: guest.accountManager || null,
                           source: 'SYNC',
                           status: 'RSVP',
                           createdAt: now,

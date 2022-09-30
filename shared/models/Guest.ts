@@ -15,12 +15,12 @@ interface GuestCommonData {
   updatedAt: Date
 }
 
-interface Referree extends GuestCommonData {
+export interface Referree extends GuestCommonData {
   source: 'REFERRER'
   referrerId: ObjectId
 }
 
-interface Subscriber extends GuestCommonData {
+export interface Subscriber extends GuestCommonData {
   source: 'MANUAL' | 'RSVP' | 'UPLOAD' | 'SYNC'
 }
 
@@ -64,6 +64,7 @@ const GuestItem = z.object({
   lastName: NonEmptyString,
   email: Email,
   companyName: z.optional(NonEmptyString),
+  accountManager: z.optional(Email),
 })
 export type GuestItem = z.infer<typeof GuestItem>
 
