@@ -64,6 +64,7 @@ const GuestItem = z.object({
   lastName: NonEmptyString,
   email: Email,
   companyName: z.optional(NonEmptyString),
+  accountManager: z.optional(Email),
 })
 export type GuestItem = z.infer<typeof GuestItem>
 
