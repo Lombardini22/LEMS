@@ -23,8 +23,8 @@ export class Server extends Resource<express.Express> {
             process.env['NODE_ENV'] === 'production'
               ? {
                   origin: [
-                    'iscrizioni.foresightmilano.it',
-                    'lems-staging.herokuapp.com',
+                    'https://iscrizioni.foresightmilano.it/',
+                    'https://lems-staging.herokuapp.com/',
                   ],
                 }
               : {},
