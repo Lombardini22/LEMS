@@ -7,6 +7,7 @@ import { ServerError } from '../ServerError'
 import { Server as HttpServer } from 'http'
 import { constVoid } from '../../../shared/utils'
 import { Resource } from './Resource'
+import { cron } from '../cron'
 
 export class Server extends Resource<express.Express> {
   private readonly routers: Router[]
@@ -17,7 +18,11 @@ export class Server extends Resource<express.Express> {
       const app = express()
         .use(express.json())
         .use(express.urlencoded({ extended: true }))
-        .use(cors())
+        .use(cron)
+
+      if (process.env['NODE_ENV'] !== 'production') {
+        app.use(cors())
+      }
 
       const apiRouter = this.routers
         .reduce(
