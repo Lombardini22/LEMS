@@ -10,7 +10,7 @@
             </div>
 
             <strong>Inserisci qui la tua email</strong>
-            <ion-input rounded outlined v-model="emailInput" placeholder="email" autofocus ref="qrInput">
+            <ion-input rounded outlined v-model="emailInput" placeholder="email" class="input" autofocus ref="qrInput">
             </ion-input>
             <ion-button @click="getTicket">
               <ion-icon :icon="searchOutline" /> Cerca
@@ -223,6 +223,14 @@ printUrl.value = `/print/${fullName.value}/${ticket.email}`
   text-decoration: none;
 }
 
+.input {
+  background:rgb(158, 200, 255, 0.3);
+  border-radius: 10px;
+  border: none;
+  color: black;
+  margin-bottom: 5px;
+  margin-top: 2px;
+}
 .login-logo {
   padding: 20px 0;
   min-height: 200px;

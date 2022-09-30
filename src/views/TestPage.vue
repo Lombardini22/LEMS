@@ -1,46 +1,315 @@
 <template>
-  <div class="hello">
-    <StreamBarcodeReader
-      @decode="(a, b, c) => onDecode(a, b, c)"
-      @loaded="() => onLoaded()"
-    ></StreamBarcodeReader>
-    Input Value: {{ text || "Nothing" }}
-  </div>
+  <ion-page>
+    <ion-header :translucent="true" :fullscreen="false">
+      <ion-toolbar>
+        <ion-buttons slot="primary">
+          <ion-button @click="setOpen(!isOpen)">
+            <ion-icon slot="icon-only" :icon="addOutline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+        <ion-title>Guest List - {{count}} </ion-title>
+      </ion-toolbar>
+      <ion-toolbar>
+        <ion-searchbar animated v-model="search"></ion-searchbar>
+        <ion-buttons slot="end">
+          <ion-label>Guests Only</ion-label>
+          <ion-toggle color="primary" :checked="guestsOnly" @ionChange="guestsOnly = !guestsOnly" value="true">
+          </ion-toggle>
+        </ion-buttons>
+      </ion-toolbar>
+
+    </ion-header>
+
+
+    <ion-content :fullscreen="true">
+
+      <ion-content :scroll-events="true">
+        <ion-refresher slot="fixed" @ionRefresh="doRefresh($event)">
+          <ion-refresher-content :pulling-icon="chevronDownCircleOutline" pulling-text="Pull to refresh"
+            refreshing-spinner="circles" refreshing-text="Refreshing...">
+          </ion-refresher-content>
+        </ion-refresher>
+        <div>
+          <!-- List of Input Items -->
+          <!-- <ion-list>
+            <ion-item v-for="item in filteredData" :key="item.id">
+              <ion-label>{{ item.node.firstName }} {{ item.node.lastName }} ({{item.node.companyName}})</ion-label>
+              <ion-button slot="end" @click="guestInfo(item.node)">
+                <ion-icon :icon="personOutline" />
+              </ion-button>
+            </ion-item>
+            <ion-item v-if="search&&!filteredData.length">
+              <p>No results found!</p>
+            </ion-item>
+          </ion-list> -->
+
+          <ion-list>
+            <ion-item v-for="item in items" :key="item">
+              <ion-label>{{ item }}</ion-label>
+            </ion-item>
+          </ion-list>
+          <ion-infinite-scroll @ionInfinite="loadData($event)" threshold="100px" id="infinite-scroll"
+            :disabled="isDisabled">
+            <ion-infinite-scroll-content loading-spinner="bubbles" loading-text="Loading more data...">
+            </ion-infinite-scroll-content>
+          </ion-infinite-scroll>
+
+        </div>
+        <!-- ALERT -->
+        <ion-alert :is-open="alert" :header="alertTitle" :sub-header="alertSubTitle" :message="alertMsg"
+          :buttons="['OK']" @didDismiss="setAlertStatus(false)"></ion-alert>
+        <!-- MODAL  -->
+        <ion-modal :is-open="isOpen">
+          <ion-header>
+            <ion-toolbar>
+              <ion-title>Add Guest</ion-title>
+              <ion-buttons slot="end">
+                <ion-button @click="submit">Confirm</ion-button>
+              </ion-buttons>
+              <ion-buttons slot="start">
+                <ion-button @click="setOpen(false)">Cancel</ion-button>
+              </ion-buttons>
+            </ion-toolbar>
+          </ion-header>
+          <ion-content class="ion-padding">
+            <ion-input v-model="firstName" placeholder="First Name"></ion-input>
+            <ion-input v-model="lastName" placeholder="Last Name"></ion-input>
+            <ion-input v-model="email" placeholder="Email"></ion-input>
+            <ion-input v-model="company" placeholder="Company"></ion-input>
+          </ion-content>
+        </ion-modal>
+      </ion-content>
+    </ion-content>
+    <!-- <ion-button expand="block" @click="presentToast('bottom')">Present Toast At the Bottom</ion-button> -->
+
+  </ion-page>
 </template>
 
-<script>
-import { StreamBarcodeReader } from "vue-barcode-reader";
+<script lang="ts" setup>
+import { onBeforeMount, ref, watch } from 'vue'
+import axios from 'axios'
+import {
+  IonContent,
+  IonHeader,
+  IonPage,
+  IonTitle,
+  IonToolbar,
+  IonItem,
+  IonList,
+  IonLabel,
+  IonButton,
+  IonButtons,
+  IonSearchbar,
+  IonModal,
+  IonIcon,
+  IonInput,
+  IonAlert,
+  IonToggle,
+  IonRefresher,
+  IonRefresherContent,
+  toastController,
+  IonInfiniteScroll,
+  IonInfiniteScrollContent,
+  InfiniteScrollCustomEvent
+} from '@ionic/vue'
+import { personOutline, addOutline, chevronDownCircleOutline } from 'ionicons/icons'
+import { computed } from '@vue/reactivity';
 
-export default {
-  name: "HelloWorld",
-  components: {
-    StreamBarcodeReader,
-  },
-  data() {
-    return {
-      text: "",
-      id: null,
-    };
-  },
-  props: {
-    msg: String,
-  },
-  methods: {
-    onDecode(a, b, c) {
-      console.log(a, b, c);
-      this.text = a;
-      if (this.id) clearTimeout(this.id);
-      this.id = setTimeout(() => {
-        if (this.text === a) {
-          this.text = "";
-        }
-      }, 5000);
-    },
-    onLoaded() {
-      console.log("load");
-    },
-  },
-};
+const serverUrl = process.env.VUE_APP_SERVER_URL
+const data = ref([] as any[])
+const search = ref()
+const isOpen = ref(false)
+const guestsOnly = ref(true)
+
+const isDisabled = ref(false);
+
+const toggleInfiniteScroll = () => {
+  isDisabled.value = !isDisabled.value;
+}
+
+// Print
+const alert = ref(false)
+const alertMsg = ref()
+const alertTitle = ref()
+const alertSubTitle = ref()
+
+// Counts
+const totalCount = ref(0)
+const filteredCount = ref(0)
+
+// Form
+const firstName = ref('')
+const lastName = ref('')
+const email = ref('')
+const company = ref('')
+
+const submit = async () => {
+
+  const newGuest = {
+    firstName: firstName.value,
+    lastName: lastName.value,
+    email: email.value,
+    companyName: company.value,
+  }
+
+  await axios
+    .post(serverUrl + 'api/guests', newGuest)
+    .then(res => {
+      console.log(res)
+    })
+    .catch(err => {
+      console.error(err)
+      presentToast('bottom', `Errore! qualcosa è andato storto! - ${err}`, 'danger', 5000)
+    })
+    .finally(() => {
+      setTimeout(() => {
+        newGuest.firstName = ''
+        newGuest.lastName = ''
+        newGuest.email = ''
+        newGuest.companyName = ''
+        setOpen(false)
+        presentToast('bottom', 'Guest Registrato con Successo!', 'success', 2000)
+      }, 2000)
+    })
+
+}
+const getList = async () => {
+  await axios.get(serverUrl + 'api/guests/?order=ASC&first=5000').then(res => {
+    data.value = res.data.edges
+    totalCount.value = res.data.pageInfo.totalCount
+    // console.table(data.value)
+  })
+
+}
+
+const guestInfo = (item: any) => {
+  // console.log(item)
+  setAlertStatus(true)
+  alertMsg.value = `${item.email} `
+  alertTitle.value = `${item.firstName} ${item.lastName}`
+  alertSubTitle.value = `${item.companyName}`
+}
+
+const filteredData = computed(() => {
+  if (search.value) {
+    return data.value.filter((item: any) => {
+      if (guestsOnly.value == true) {
+        const fullName = `${item.node.firstName} ${item.node.lastName} ${item.node.email} ${item.node.companyName}`
+        return !fullName.toLowerCase().includes('lombardini22') && fullName.toLowerCase().includes(search.value.toLowerCase())
+      } else {
+        const fullName = `${item.node.firstName} ${item.node.lastName} ${item.node.email} ${item.node.companyName}`
+        return fullName.toLowerCase().includes(search.value.toLowerCase())
+      }
+
+    })
+  } else if (guestsOnly.value) {
+    return data.value.filter((item: any) => {
+
+      const fullName = `${item.node.firstName} ${item.node.lastName} ${item.node.email} ${item.node.companyName}`
+      return !fullName.toLowerCase().includes('lombardini22')
+
+    })
+  } else {
+    return data.value
+  }
+
+})
+
+const doRefresh = (event: CustomEvent) => {
+  // console.log('Begin async operation');
+  getList()
+  event.target?.complete();
+}
+
+
+
+watch(filteredData, (val) => {
+  filteredCount.value = val.length
+})
+
+const count = computed(() => {
+  return `${filteredCount.value} of ${totalCount.value} guests`
+})
+
+const presentToast = async (position: any, message: any, color: any, duration: number) => {
+  const toast = await toastController.create({
+    message: message,
+    duration: duration,
+    position: position,
+    color: color,
+  })
+  toast.present()
+}
+
+const setOpen = (value: boolean) => {
+  isOpen.value = value
+  // console.log({ isOpen: isOpen.value })
+}
+
+const setAlertStatus = (value: boolean) => {
+  alert.value = value
+  // console.log({ alert: alert.value })
+}
+
+const items = ref(filteredData.value)
+
+const pushData = () => {
+  const max = items.value.length + 20;
+  const min = max - 20;
+  for (let i = min; i < max; i++) {
+    items.value.push(i);
+  }
+}
+
+const loadData = (ev: InfiniteScrollCustomEvent) => {
+  setTimeout(() => {
+    pushData();
+    console.log('Loaded data');
+    ev.target.complete();
+
+    // App logic to determine if all data is loaded
+    // and disable the infinite scroll
+    if (items.value.length === 200) {
+      ev.target.disabled = true;
+    }
+  }, 500);
+}
+
+pushData();
+
+
+
+
+onBeforeMount(() => {
+  getList()
+})
+
 </script>
+
 <style scoped>
+#container {
+  text-align: center;
+
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+#container strong {
+  font-size: 20px;
+  line-height: 26px;
+}
+
+#container p {
+  font-size: 16px;
+  line-height: 22px;
+  color: #8c8c8c;
+  margin: 0;
+}
+
+#container a {
+  text-decoration: none;
+}
 </style>
