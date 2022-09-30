@@ -8,21 +8,21 @@
 
     <ion-content :fullscreen="true">
       <div id="container">
-        <strong>Please Scan A QRCode to Checkin</strong>
-        <ion-input rounded outlined v-model="qrString" placeholder="Scan Your QRCode Using the Scanners" ref="qrInput"
-          :maxlength="32"></ion-input>
-        <div v-if="hasWebcam">
-          <center>
+        <center>
+          <strong>Please Scan A QRCode to Checkin</strong>
+          <ion-input rounded outlined v-model="qrString" placeholder="Scan Your QRCode Using the Scanners" ref="qrInput"
+            class="input" :maxlength="32"></ion-input>
+          <div v-if="hasWebcam">
             <qr-stream @decode="onDecode" class="mb" v-if="validRoute">
               <div style="color: red;" class="frame"></div>
             </qr-stream>
-          </center>
-        </div>
-        <p v-else>
-          <em>Webcam not found</em>
-        </p>
+          </div>
+          <p v-else>
+            <em style="color: red;">Webcam not found</em>
+          </p>
+        </center>
         <p>
-          <ion-button @click="presentAlert">
+          <ion-button @click="searchTicket">
             <ion-icon :icon="qrCodeOutline" /> Scan
           </ion-button>
         </p>
@@ -47,19 +47,23 @@ import axios from 'axios';
 import { QrStream } from 'vue3-qr-reader'
 import { useRoute } from 'vue-router';
 
-const serverUrl = process.env.VUE_APP_CLIENT_URL
+const serverUrl = process.env.VUE_APP_SERVER_URL
 const qrString = ref('')
 const id = ref()
 const hasWebcam = ref(false)
 
 const route = useRoute()
 
-const presentAlert = async () => {
+const searchTicket = async () => {
   const guest = {
     firstName: '',
     lastName: '',
     email: '',
-    company: ''
+    company: '',
+    status: '',
+    accountManager: '',
+    source: '',
+    previousStatus: '',
   }
 
   await axios.get(serverUrl + 'api/guests/' + qrString.value)
@@ -69,29 +73,39 @@ const presentAlert = async () => {
       guest.lastName = res.data.lastName
       guest.email = res.data.email
       guest.company = res.data.company
+      guest.status = res.data.status
+      guest.previousStatus = res.data.previousStatus
+      console.log(guest)
       if (res.status === 404) {
         throw new Error('Guest Not Found')
       }
     })
     .then(async () => {
-      await axios.get(serverUrl + 'api/guests/' + qrString.value + "/check-in").then(res => {
-        console.log(res.data)
-        if (res.status === 200)
-          presentToast('bottom', 'Guest Checked In con Successo!', 'success', 5000)
-      }).catch(() => {
-        presentToast('bottom', 'An Error Has Occured!', 'danger', 5000)
-      })
+      if (guest.status === 'CHECKED_IN') {
+        presentToast('bottom', 'Guest già registrato ', 'warning', 4000)
+        window.navigator.vibrate(200);
+      } else {
+        await axios.get(serverUrl + 'api/guests/' + qrString.value + "/check-in").then(res => {
+          console.log(res.data)
+          if (res.status === 200)
+            presentToast('bottom', 'Guest Checked In con Successo!', 'success', 4000)
+          window.navigator.vibrate(200);
+        }).catch(() => {
+          presentToast('bottom', 'An Error Has Occured!', 'danger', 4000)
+          window.navigator.vibrate(400);
+        })
+      }
     }
     )
     .catch(err => {
       console.error(err)
-      presentToast('bottom', `An Error Has Occured! - Guest Not Found`, 'danger', 5000)
+      presentToast('bottom', `An Error Has Occured! ${err} - Guest Not Found`, 'danger', 4000)
     })
 }
 
 watch(qrString, (val: any) => {
   if (val.length === 32) {
-    presentAlert()
+    searchTicket()
     console.log(val)
     setTimeout(() => {
       qrString.value = ''
@@ -178,5 +192,15 @@ const onDecode = (a: any) => {
 
 .decoder {
   width: 350px;
+}
+
+.input {
+  background: rgb(158, 200, 255, 0.3);
+  border-radius: 10px;
+  border: none;
+  color: black;
+  margin-bottom: 5px;
+  margin-top: 2px;
+  max-width: 500px;
 }
 </style>

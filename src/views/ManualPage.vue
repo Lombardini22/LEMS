@@ -32,9 +32,8 @@
         <div>
           <!-- List of Input Items -->
           <ion-list>
-            <ion-item v-for="item in filteredData" :key="item">
+            <ion-item v-for="item in filteredData" :key="item.id" :color="item.node.status==='RSVP'?'' : 'success'">
               <ion-label>{{ item.node.firstName }} {{ item.node.lastName }} ({{item.node.companyName}})</ion-label>
-
               <ion-button slot="end" @click="guestInfo(item.node)">
                 <ion-icon :icon="personOutline" />
               </ion-button>
@@ -62,10 +61,10 @@
             </ion-toolbar>
           </ion-header>
           <ion-content class="ion-padding">
-            <ion-input v-model="firstName" placeholder="First Name"></ion-input>
-            <ion-input v-model="lastName" placeholder="Last Name"></ion-input>
-            <ion-input v-model="email" placeholder="Email"></ion-input>
-            <ion-input v-model="company" placeholder="Company"></ion-input>
+            <ion-input v-model="firstName" placeholder="Nome*" class="input" required></ion-input>
+            <ion-input v-model="lastName" placeholder="Cognome*" class="input" required></ion-input>
+            <ion-input v-model="email" placeholder="Email*" class="input" required></ion-input>
+            <ion-input v-model="company" placeholder="Azienda*" class="input" required></ion-input>
           </ion-content>
         </ion-modal>
       </ion-content>
@@ -118,7 +117,6 @@ const alertSubTitle = ref()
 // Counts
 const totalCount = ref(0)
 const filteredCount = ref(0)
-// const chekedCount = ref(0)
 
 // Form
 const firstName = ref('')
@@ -126,9 +124,8 @@ const lastName = ref('')
 const email = ref('')
 const company = ref('')
 
+// Submit function
 const submit = async () => {
-  // console.log('submit')
-
   const newGuest = {
     firstName: firstName.value,
     lastName: lastName.value,
@@ -136,37 +133,38 @@ const submit = async () => {
     companyName: company.value,
   }
 
-  // console.log(newGuest)
-  await axios
-    .post(serverUrl + 'api/guests', newGuest)
-    .then(res => {
-      console.log(res)
-    })
-    .catch(err => {
-      console.error(err)
-      // alertMsg.value = err
-      // alertTitle.value = 'Error'
-      // alertSubTitle.value = 'Error'
-      // alert.value = true
-      presentToast('bottom', `Errore! qualcosa è andato storto! - ${err}`, 'danger', 5000)
-    })
-    .finally(() => {
-      setTimeout(() => {
-        newGuest.firstName = ''
-        newGuest.lastName = ''
-        newGuest.email = ''
-        newGuest.companyName = ''
-        setOpen(false)
-        presentToast('bottom', 'Guest Registrato con Successo!', 'success', 2000)
-      }, 2000)
-    })
-
+  if (firstName.value == '' || lastName.value == '' || email.value == '' || company.value == '') {
+    presentToast('bottom', 'Tutti i campi sono obbligatori', 'danger', 2000)
+  }
+  else {
+    try {
+      await axios
+        .post(serverUrl + 'api/guests', newGuest)
+        .then(res => {
+          console.log(res)
+          setTimeout(() => {
+            newGuest.firstName = ''
+            newGuest.lastName = ''
+            newGuest.email = ''
+            newGuest.companyName = ''
+            setOpen(false)
+            presentToast('bottom', 'Guest Registrato con Successo!', 'success', 2000)
+          }, 2000)
+        })
+        .catch(err => {
+          console.error({ 'userCreation': err })
+          presentToast('bottom', `Errore! qualcosa è andato storto! - ${err}`, 'danger', 3000)
+        })
+    } catch (err) {
+      presentToast('bottom', `Errore! qualcosa è andato storto! - ${err}`, 'danger', 3000)
+    }
+  }
 }
+
 const getList = async () => {
   await axios.get(serverUrl + 'api/guests/?order=ASC&first=5000').then(res => {
     data.value = res.data.edges
     totalCount.value = res.data.pageInfo.totalCount
-    // console.table(data.value)
   })
 
 }
@@ -233,14 +231,6 @@ const presentToast = async (position: any, message: any, color: any, duration: n
   toast.present()
 }
 
-// const logScrollStart = () => {
-//   console.log('scrolling started')
-// }
-
-// const logScrollEnd = () => {
-//   console.log('scrolling ended')
-// }
-
 const setOpen = (value: boolean) => {
   isOpen.value = value
   // console.log({ isOpen: isOpen.value })
@@ -282,5 +272,14 @@ onBeforeMount(() => {
 
 #container a {
   text-decoration: none;
+}
+
+.input {
+  background: rgb(158, 200, 255, 0.3);
+  border-radius: 10px;
+  border: none;
+  color: black;
+  margin-bottom: 5px;
+  margin-top: 2px;
 }
 </style>
