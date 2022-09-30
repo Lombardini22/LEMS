@@ -1,6 +1,7 @@
 import { config } from 'dotenv'
 import { z, ZodError } from 'zod'
 import { Result } from '../../../shared/Result'
+import { ISODate } from '../globalDomain'
 import { ServerError } from '../ServerError'
 import { Resource } from './Resource'
 
@@ -16,6 +17,7 @@ const Env = z.object({
   BASIC_USERNAME: z.string(),
   BASIC_PASSWORD: z.string(),
   CLIENT_URL: z.string(),
+  EVENT_ISO_DATE: ISODate,
   MAILCHIMP_API_KEY: z.string(),
   MAILCHIMP_DATABASE_LIST_ID: z.string(),
   MAILCHIMP_EVENT_LIST_ID: z.string(),
