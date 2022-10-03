@@ -29,7 +29,7 @@ const Env = z.object({
   SYNC_SECRET: z.string(),
   VUE_APP_SERVER_URL: z.string(),
 })
-type Env = z.infer<typeof Env>
+export type Env = z.infer<typeof Env>
 
 export const env = Resource.make(
   () =>
