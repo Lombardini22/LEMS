@@ -18,11 +18,19 @@ export class Server extends Resource<express.Express> {
       const app = express()
         .use(express.json())
         .use(express.urlencoded({ extended: true }))
+        .use(
+          cors(
+            process.env['NODE_ENV'] === 'production'
+              ? {
+                  origin: [
+                    'https://iscrizioni.foresightmilano.it/',
+                    'https://lems-staging.herokuapp.com/',
+                  ],
+                }
+              : {},
+          ),
+        )
         .use(cron)
-
-      if (process.env['NODE_ENV'] !== 'production') {
-        app.use(cors())
-      }
 
       const apiRouter = this.routers
         .reduce(
