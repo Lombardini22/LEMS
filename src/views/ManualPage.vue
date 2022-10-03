@@ -33,7 +33,8 @@
           <!-- List of Input Items -->
           <ion-list>
             <ion-item v-for="item in filteredData" :key="item.id" :color="item.node.status==='RSVP'?'' : 'success'">
-              <ion-label>{{ item.node.firstName }} {{ item.node.lastName }} ({{item.node.companyName}})</ion-label>
+              <ion-label class="guest-name">{{ item.node.firstName }} {{ item.node.lastName }} <span class="company" v-if="!!item.node.companyName">- {{item.node.companyName}} </span>
+              </ion-label>
               <ion-button slot="end" @click="guestInfo(item.node)">
                 <ion-icon :icon="personOutline" />
               </ion-button>
@@ -273,6 +274,15 @@ onBeforeMount(() => {
 
 #container a {
   text-decoration: none;
+}
+.guest-name{
+  /* color: rgb(56,128,255); */
+  font-weight: 700;
+}
+.company{
+  font-size: 12px;
+  color: #7c7c7c;
+  font-weight: 600;
 }
 
 .input {
