@@ -1,6 +1,7 @@
 import { MD5 } from 'crypto-js'
 import { ObjectId } from 'mongodb'
 import { z } from 'zod'
+import { Email, NonEmptyString } from '../../server/src/globalDomain'
 
 interface GuestCommonData {
   _id?: ObjectId
@@ -55,9 +56,6 @@ export function foldGuestBySource<T>(
       return whenSubscriber(guest)
   }
 }
-
-const NonEmptyString = z.string().min(1).brand<'NonEmptyString'>()
-const Email = z.string().trim().email().brand<'Email'>()
 
 const GuestItem = z.object({
   firstName: NonEmptyString,
