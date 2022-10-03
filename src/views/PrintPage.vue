@@ -1,16 +1,12 @@
 <template>
     <ion-page>
         <ion-content>
-            <center>
 
-                <ion-button @click="onPrint">Download PDF
-                </ion-button>
-            </center>
             <!-- <vue3-simple-html2pdf ref="Vue3SimpleHtml2pdf" id="PageToPrint" :options="pdfOptions" :filename="exportFilename"> -->
             <center>
                 <div class="voucher " id="PageToPrint">
                     <center>
-                        <h1>Ecco il tuo biglietto, <br /> portalo con te per partecipare allo spettacolo.</h1>
+                        <!-- <h1>Ecco il tuo biglietto, <br /> portalo con te per partecipare allo spettacolo.</h1> -->
 
                         <img src="../../public/assets/media/foresight-poster.jpg" alt="poster" class="poster spacer">
                         <span class="spacer"></span>
@@ -19,12 +15,15 @@
                                 Auditorium Fondazione Cariplo <br />
                                 Largo Gustav Mahler, Milano</p>
                             <h3 class="spacer">{{name}}</h3>
-                            <center><img class="qrCode" :src="img64" /></center>
+                            <center><img class="qrCode" :src="img64" id="qr-code" /></center>
                             <p class="footer">Un’iniziativa di</p>
                             <img class="logo" src="../../public/assets/logos/Lombardini22-blk.png" alt="Lombardini22">
                         </div>
                     </center>
                 </div>
+                <center>
+                    <ion-button @click="onPrint">Download PDF</ion-button>
+                </center>
             </center>
             <!-- </vue3-simple-html2pdf> -->
         </ion-content>
@@ -75,17 +74,25 @@ const pdfOptions = {
 
 const exportFilename = `Foresight 2022 Voucher ${name.value}.pdf`;
 
+// il codice e' troppo veloce e non riesce a caricare l'immagine
 const onPrint = () => {
     const el = document.getElementById(`PageToPrint`)
-    if (!el) {
+    const qrc = document.getElementById(`qr-code`)
+    console.log({ el, qrc })
+
+    if (!el || !qrc) {
+        setTimeout(() => {
+            onPrint()
+        }, 1000)
         return
     }
     html2pdf().from(el).set(pdfOptions).save(exportFilename);
 }
 
 onMounted(() => {
-    console.log('before mount')
-    onPrint()
+    setTimeout(() => {
+        onPrint()
+    }, 2000)
 })
 
 
@@ -132,5 +139,8 @@ p {
 .footer {
     margin-top: 25px;
     font-size: 0.7em;
+}
+.logo{
+    padding-bottom: 120px;
 }
 </style>

@@ -19,6 +19,7 @@
         </div>
         <div v-else>
           <h1 class="title">Grazie per aver confermato la tua presenza allo spettacolo!</h1>
+          <h2 class="subtitle">{{fullName}}</h2>
           <Tilt data-tilt data-tilt-full-page-listening gyroscope="false">
             <div class="ticket ticket-1">
               <div class="details-block">
@@ -56,7 +57,7 @@
 
           <div class="footer">
             <AddToCalendar />
-            <!-- <ion-button class="btn mar-20" :href="printUrl">Salva Voucher in PDF</ion-button> -->
+            <ion-button class="btn mar-20" :href="printUrl">Salva Voucher in PDF</ion-button>
 
             <ion-button class="btn mar-20" :href="plusOne">Invita un ospite</ion-button>
             <!-- <ManualAddGuest :refererEmail="params.email" /> -->
@@ -156,8 +157,12 @@ const getTicket = async () => {
 }
 
 
-const fullName = ref(ticket.firstName + ' ' + ticket.lastName)
-const qrCode = ref(serverUrl + `api/guests/qr/${ticket.email}`)
+const fullName = computed(() => {
+  return ticket.firstName + ' ' + ticket.lastName
+})
+const qrCode = computed(() => {
+  return serverUrl + `api/guests/qr/${ticket.email}`
+})
 const plusOne = `mailto:?subject=Ti invito a FORESIGHT 2022 | 5 ottobre &body=FORESIGHT 2022%0D%0A
 5 ottobre 2022 | ore 9:00%0D%0A
 Auditorium Fondazione Cariplo%0D%0A
@@ -187,8 +192,9 @@ axios
     console.log(err)
   })
 
-const printUrl = ref('')
-printUrl.value = `/print/${fullName.value}/${ticket.email}`
+const printUrl = computed(() => {
+  return `/print/${fullName.value}/${ticket.email}`
+})
 
 
 // console.log(qrCode)
@@ -224,13 +230,14 @@ printUrl.value = `/print/${fullName.value}/${ticket.email}`
 }
 
 .input {
-  background:rgb(158, 200, 255, 0.3);
+  background: rgb(158, 200, 255, 0.3);
   border-radius: 10px;
   border: none;
   color: black;
   margin-bottom: 5px;
   margin-top: 2px;
 }
+
 .login-logo {
   padding: 20px 0;
   min-height: 200px;
@@ -240,6 +247,7 @@ printUrl.value = `/print/${fullName.value}/${ticket.email}`
 .login-logo img {
   max-width: 150px;
 }
+
 .cerca {
   margin-top: 15px;
   margin-bottom: 60px;
