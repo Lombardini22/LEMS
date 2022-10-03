@@ -161,6 +161,7 @@ const submit = async () => {
   }
 }
 
+// test
 const getList = async () => {
   await axios.get(serverUrl + 'api/guests/?order=ASC&first=5000').then(res => {
     data.value = res.data.edges
