@@ -31,17 +31,22 @@ export async function createGuest(
   const subscriptionResult = await localGuest.fold<
     Result<ServerError, unknown>
   >(
-    () =>
-      subscribeGuest(
-        {
-          firstName: req.body.firstName,
-          lastName: req.body.lastName,
-          email: req.body.email,
-          emailHash: guestEmailHash,
-          companyName: req.body.companyName || null,
-        },
-        true,
-      ),
+    () => {
+      try {
+        return subscribeGuest(
+          {
+            firstName: req.body.firstName,
+            lastName: req.body.lastName,
+            email: req.body.email,
+            emailHash: guestEmailHash,
+            companyName: req.body.companyName || null,
+          },
+          true,
+        )
+      } catch (error) {
+        throw new Error(`error: ${error}`)
+      }
+    },
     guest => Result.success(() => guest),
   )
 

@@ -22,40 +22,48 @@ export const sendQrCode: RequestHandler<
   unknown
 > = (req, res) => {
   env.use(async env => {
-    const emailHash = hashGuestEmail(req.params.email)
+    try {
 
-    const guest = await fetchGuest(
-      emailHash,
-      env.MAILCHIMP_EVENT_LIST_ID,
-      member => ({
-        firstName: member.merge_fields['FNAME'],
-        lastName: member.merge_fields['LNAME'],
-        email: member.email_address,
+      const emailHash = hashGuestEmail(req.params.email)
+
+      const guest = await fetchGuest(
         emailHash,
-        companyName: member.merge_fields['MMERGE4'] || null,
-        source: 'RSVP',
-        status: 'RSVP',
-        accountManager: null,
-      }),
-    )
+        env.MAILCHIMP_EVENT_LIST_ID,
+        member => ({
+          firstName: member.merge_fields['FNAME'],
+          lastName: member.merge_fields['LNAME'],
+          email: member.email_address,
+          emailHash,
+          companyName: member.merge_fields['MMERGE4'] || null,
+          source: 'RSVP',
+          status: 'RSVP',
+          accountManager: null,
+        }),
 
-    await guest.fold(
-      error => {
-        Router.handleError(error, res)
-      },
-      async () => {
-        const stream = new PassThrough()
+      )
 
-        await toFileStream(stream, emailHash, {
-          type: 'png',
-          width: 200,
-          margin: 1,
-        })
+      await guest.fold(
+        error => {
+          Router.handleError(error, res)
+        },
+        async () => {
+          const stream = new PassThrough()
 
-        stream.pipe(res)
-      },
-    )
+          await toFileStream(stream, emailHash, {
+            type: 'png',
+            width: 200,
+            margin: 1,
+          })
 
-    return Result.success(constVoid)
+          stream.pipe(res)
+        },
+      )
+
+      return Result.success(constVoid)
+    } catch (e) {
+      console.log(e)
+      throw new Error(`Errore!!!! - ${e}`)
+    }
   })
+
 }

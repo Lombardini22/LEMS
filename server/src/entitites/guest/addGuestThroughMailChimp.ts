@@ -80,8 +80,8 @@ export function addGuestThroughMailChimp(
           },
           ...(mcGuest.merge_fields['MMERGE7']
             ? {
-                companyName: mcGuest.merge_fields['MMERGE7'],
-              }
+              companyName: mcGuest.merge_fields['MMERGE7'],
+            }
             : {}),
         }
 
@@ -95,7 +95,13 @@ export function addGuestThroughMailChimp(
           async error => {
             if (error.status === 404) {
               const guest = await guestsCollection.insert(guestData)
-              return guest.flatMap(guest => subscribeGuest(guest, false))
+              return guest.flatMap(guest => {
+                try {
+                  return subscribeGuest(guest, false)
+                } catch (error) {
+                  throw new Error(`error: ${error}`)
+                }
+              })
             } else {
               return locallyExistingGuestResult
             }
