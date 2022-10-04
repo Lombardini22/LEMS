@@ -135,7 +135,9 @@ export async function upsertGuestsDatabase(
         env.MAILCHIMP_EVENT_LIST_ID,
       )
 
-      const tmpCollectionName = 'tmp_guests_sync'
+      const tmpCollectionName = `tmp_guests_sync_${Date.now()}_${Math.random()
+        .toString(10)
+        .replace('.', '')}`
 
       return mailchimpMembers.flatMap(members =>
         database.use(async db => {

@@ -55,7 +55,9 @@ export function uploadGuests(
             }),
         )
 
-        const tmpCollectionName = 'tmp_guests_upload'
+        const tmpCollectionName = `tmp_guests_upload_${Date.now()}_${Math.random()
+          .toString()
+          .replace('.', '')}`
 
         const mailchimpResultAfterLocalInsertion =
           await mailchimpResult.flatMap(async mailchimpResponse =>
