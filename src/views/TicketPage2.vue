@@ -18,7 +18,7 @@
           </center>
         </div>
         <div v-else>
-          <h1 class="title">Grazie per aver confermato la tua presenza allo spettacolo!</h1>
+          <!-- <h1 class="title">Grazie per aver confermato la tua presenza allo spettacolo!</h1> -->
           <Tilt data-tilt data-tilt-full-page-listening gyroscope="false">
             <div class="ticket ticket-1">
               <div class="details-block">
@@ -55,20 +55,20 @@
           </Tilt>
 
           <div class="footer">
-            <AddToCalendar />
+            <!-- <AddToCalendar /> -->
             <ion-button class="btn mar-20" :href="printUrl">Salva Voucher in PDF</ion-button>
-
+<!-- 
             <ion-button class="btn mar-20" :href="plusOne">Invita un ospite</ion-button>
-            <!-- <ManualAddGuest :refererEmail="params.email" /> -->
+             <ManualAddGuest :refererEmail="params.email" /> 
             <ion-button class="btn mar-20" href="mailto:info@foresightmilano.it?subject=FORESIGHT 2022">Contattaci Via
               Mail
-            </ion-button>
+            </ion-button> -->
           </div>
         </div>
-        <h4 id="believers" style="color: black" class="pad-20">Sound Design and live performance</h4>
+        <!-- <h4 id="believers" style="color: black" class="pad-20">Sound Design and live performance</h4>
         <img src="../../public/assets/logos/orchestra.png" alt="believers" width="100" class="pad-20" />
         <h4 id="believers" style="color: black" class="pad-20">Our Believers</h4>
-        <img src="../../public/assets/logos/foresight-supporters1.png" alt="believers" width="700" class="pad-20" />
+        <img src="../../public/assets/logos/foresight-supporters1.png" alt="believers" width="700" class="pad-20" /> -->
       </div>
     </ion-content>
   </ion-page>
@@ -162,23 +162,23 @@ const fullName = computed(() => {
 const qrCode = computed(() => {
   return serverUrl + `api/guests/qr/${ticket.email}`
 })
-const plusOne = `mailto:?subject=Ti invito a FORESIGHT 2022 | 5 ottobre &body=FORESIGHT 2022%0D%0A
-5 ottobre 2022 | ore 9:00%0D%0A
-Auditorium Fondazione Cariplo%0D%0A
-Largo Gustav Mahler, Milano%0D%0A
-%0D%0A
-%0D%0A
-Per iscriverti clicca qui https://iscrizioni.foresightmilano.it/guest %0D%0A
-%0D%0A
-%0D%0A
-FORESIGHT è lo spettacolo live di Lombardini22, unico e irripetibile, tra cultura e intrattenimento.%0D%0A
-In-Between è il tema di questa edizione, ovvero gli stati transitori, intermedi, i “tra”, quei luoghi ai margini dove nasce il confronto e si scatena il cambiamento.%0D%0A
-Ne parleremo in tre diversi atti scanditi dall’Orchestra Sinfonica di Milano, con personaggi, linguaggi, saperi, ed enfasi diverse, e con la partecipazione straordinaria di Alessandro Baricco.%0D%0A
-%0D%0A
-%0D%0A
+// const plusOne = `mailto:?subject=Ti invito a FORESIGHT 2022 | 5 ottobre &body=FORESIGHT 2022%0D%0A
+// 5 ottobre 2022 | ore 9:00%0D%0A
+// Auditorium Fondazione Cariplo%0D%0A
+// Largo Gustav Mahler, Milano%0D%0A
+// %0D%0A
+// %0D%0A
+// Per iscriverti clicca qui https://iscrizioni.foresightmilano.it/guest %0D%0A
+// %0D%0A
+// %0D%0A
+// FORESIGHT è lo spettacolo live di Lombardini22, unico e irripetibile, tra cultura e intrattenimento.%0D%0A
+// In-Between è il tema di questa edizione, ovvero gli stati transitori, intermedi, i “tra”, quei luoghi ai margini dove nasce il confronto e si scatena il cambiamento.%0D%0A
+// Ne parleremo in tre diversi atti scanditi dall’Orchestra Sinfonica di Milano, con personaggi, linguaggi, saperi, ed enfasi diverse, e con la partecipazione straordinaria di Alessandro Baricco.%0D%0A
+// %0D%0A
+// %0D%0A
 
-info@foresightmilano.it%0D%0A
-www.foresightmilano.it`
+// info@foresightmilano.it%0D%0A
+// www.foresightmilano.it`
 
 axios
   .get(serverUrl + `api/guests/${ticket.id}`)

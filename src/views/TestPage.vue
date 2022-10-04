@@ -31,28 +31,25 @@
         </ion-refresher>
         <div>
           <!-- List of Input Items -->
-          <!-- <ion-list>
-            <ion-item v-for="item in filteredData" :key="item.id">
-              <ion-label>{{ item.node.firstName }} {{ item.node.lastName }} ({{item.node.companyName}})</ion-label>
+          <ion-list>
+            <ion-item v-for="item in infiniteItems" :key="item.id" :color="item.node.status==='RSVP'?'' : 'success'"
+              @click="guestInfo(item.node)" class="list-item">
+              <ion-label class="guest-name">{{ item.node.firstName }} {{ item.node.lastName }} <span class="company"
+                  v-if="!!item.node.companyName">- {{item.node.companyName}} </span>
+              </ion-label>
               <ion-button slot="end" @click="guestInfo(item.node)">
                 <ion-icon :icon="personOutline" />
               </ion-button>
             </ion-item>
-            <ion-item v-if="search&&!filteredData.length">
+            <ion-item v-if="search&&!infiniteItems.length">
               <p>No results found!</p>
             </ion-item>
-          </ion-list> -->
-
-          <ion-list>
-            <ion-item v-for="item in items" :key="item">
-              <ion-label>{{ item }}</ion-label>
-            </ion-item>
+            <!-- <ion-item v-for="item in infiniteItems" :key="item" class="list-item">
+              {{item}}
+            </ion-item> -->
           </ion-list>
-          <ion-infinite-scroll @ionInfinite="loadData($event)" threshold="100px" id="infinite-scroll"
-            :disabled="isDisabled">
-            <ion-infinite-scroll-content loading-spinner="bubbles" loading-text="Loading more data...">
-            </ion-infinite-scroll-content>
-          </ion-infinite-scroll>
+
+          <infinite-guest @moreData="onInfinite" :all-items="filteredData"></infinite-guest>
 
         </div>
         <!-- ALERT -->
@@ -72,10 +69,10 @@
             </ion-toolbar>
           </ion-header>
           <ion-content class="ion-padding">
-            <ion-input v-model="firstName" placeholder="First Name"></ion-input>
-            <ion-input v-model="lastName" placeholder="Last Name"></ion-input>
-            <ion-input v-model="email" placeholder="Email"></ion-input>
-            <ion-input v-model="company" placeholder="Company"></ion-input>
+            <ion-input v-model="firstName" placeholder="Nome*" class="input" required></ion-input>
+            <ion-input v-model="lastName" placeholder="Cognome*" class="input" required></ion-input>
+            <ion-input v-model="email" placeholder="Email*" class="input" required></ion-input>
+            <ion-input v-model="company" placeholder="Azienda*" class="input" required></ion-input>
           </ion-content>
         </ion-modal>
       </ion-content>
@@ -108,24 +105,18 @@ import {
   IonRefresher,
   IonRefresherContent,
   toastController,
-  IonInfiniteScroll,
-  IonInfiniteScrollContent,
-  InfiniteScrollCustomEvent
+
 } from '@ionic/vue'
 import { personOutline, addOutline, chevronDownCircleOutline } from 'ionicons/icons'
 import { computed } from '@vue/reactivity';
+import InfiniteGuest from './components/InfiniteGuest.vue';
 
 const serverUrl = process.env.VUE_APP_SERVER_URL
+// console.log({"serverUrl": serverUrl})
 const data = ref([] as any[])
 const search = ref()
 const isOpen = ref(false)
-const guestsOnly = ref(true)
-
-const isDisabled = ref(false);
-
-const toggleInfiniteScroll = () => {
-  isDisabled.value = !isDisabled.value;
-}
+const guestsOnly = ref(false)
 
 // Print
 const alert = ref(false)
@@ -143,8 +134,15 @@ const lastName = ref('')
 const email = ref('')
 const company = ref('')
 
-const submit = async () => {
+// infinite scroll
+const infiniteItems = ref([] as any[])
+const onInfinite = (items: any[]) => {
+  console.log('onInfinite')
+  infiniteItems.value = items
+}
 
+// Submit function
+const submit = async () => {
   const newGuest = {
     firstName: firstName.value,
     lastName: lastName.value,
@@ -152,32 +150,39 @@ const submit = async () => {
     companyName: company.value,
   }
 
-  await axios
-    .post(serverUrl + 'api/guests', newGuest)
-    .then(res => {
-      console.log(res)
-    })
-    .catch(err => {
-      console.error(err)
-      presentToast('bottom', `Errore! qualcosa è andato storto! - ${err}`, 'danger', 5000)
-    })
-    .finally(() => {
-      setTimeout(() => {
-        newGuest.firstName = ''
-        newGuest.lastName = ''
-        newGuest.email = ''
-        newGuest.companyName = ''
-        setOpen(false)
-        presentToast('bottom', 'Guest Registrato con Successo!', 'success', 2000)
-      }, 2000)
-    })
-
+  if (firstName.value == '' || lastName.value == '' || email.value == '' || company.value == '') {
+    presentToast('bottom', 'Tutti i campi sono obbligatori', 'danger', 2000)
+  }
+  else {
+    try {
+      await axios
+        .post(serverUrl + 'api/guests', newGuest)
+        .then(res => {
+          console.log(res)
+          setTimeout(() => {
+            newGuest.firstName = ''
+            newGuest.lastName = ''
+            newGuest.email = ''
+            newGuest.companyName = ''
+            setOpen(false)
+            presentToast('bottom', 'Guest Registrato con Successo!', 'success', 2000)
+          }, 2000)
+        })
+        .catch(err => {
+          console.error({ 'userCreation': err })
+          presentToast('bottom', `Errore! qualcosa è andato storto! - ${err}`, 'danger', 3000)
+        })
+    } catch (err) {
+      presentToast('bottom', `Errore! qualcosa è andato storto! - ${err}`, 'danger', 3000)
+    }
+  }
 }
+
+// test
 const getList = async () => {
   await axios.get(serverUrl + 'api/guests/?order=ASC&first=5000').then(res => {
     data.value = res.data.edges
     totalCount.value = res.data.pageInfo.totalCount
-    // console.table(data.value)
   })
 
 }
@@ -185,9 +190,10 @@ const getList = async () => {
 const guestInfo = (item: any) => {
   // console.log(item)
   setAlertStatus(true)
-  alertMsg.value = `${item.email} `
   alertTitle.value = `${item.firstName} ${item.lastName}`
-  alertSubTitle.value = `${item.companyName}`
+  alertSubTitle.value = `Azienda: ${item.companyName || '---'}`
+  alertMsg.value = `email: ${item.email} <br/>
+  Referente: ${item.accountManager} `
 }
 
 const filteredData = computed(() => {
@@ -226,6 +232,9 @@ const doRefresh = (event: CustomEvent) => {
 watch(filteredData, (val) => {
   filteredCount.value = val.length
 })
+// watch(guestsOnly, (val) => {
+//   console.log(val)
+// })
 
 const count = computed(() => {
   return `${filteredCount.value} of ${totalCount.value} guests`
@@ -251,35 +260,6 @@ const setAlertStatus = (value: boolean) => {
   // console.log({ alert: alert.value })
 }
 
-const items = ref(filteredData.value)
-
-const pushData = () => {
-  const max = items.value.length + 20;
-  const min = max - 20;
-  for (let i = min; i < max; i++) {
-    items.value.push(i);
-  }
-}
-
-const loadData = (ev: InfiniteScrollCustomEvent) => {
-  setTimeout(() => {
-    pushData();
-    console.log('Loaded data');
-    ev.target.complete();
-
-    // App logic to determine if all data is loaded
-    // and disable the infinite scroll
-    if (items.value.length === 200) {
-      ev.target.disabled = true;
-    }
-  }, 500);
-}
-
-pushData();
-
-
-
-
 onBeforeMount(() => {
   getList()
 })
@@ -297,6 +277,11 @@ onBeforeMount(() => {
   transform: translateY(-50%);
 }
 
+/* .list-item {
+  padding-top: 5px;
+  padding-bottom: 01px;
+} */
+
 #container strong {
   font-size: 20px;
   line-height: 26px;
@@ -311,5 +296,28 @@ onBeforeMount(() => {
 
 #container a {
   text-decoration: none;
+}
+
+.guest-name {
+  /* color: rgb(56,128,255); */
+  font-weight: 700;
+  vertical-align: middle;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.company {
+  font-size: 12px;
+  color: #7c7c7c;
+  font-weight: 600;
+}
+
+.input {
+  background: rgb(158, 200, 255, 0.3);
+  border-radius: 10px;
+  border: none;
+  color: black;
+  margin-bottom: 5px;
+  margin-top: 2px;
 }
 </style>

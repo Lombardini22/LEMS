@@ -32,7 +32,7 @@
         <div>
           <!-- List of Input Items -->
           <ion-list>
-            <ion-item v-for="item in filteredData" :key="item.id" :color="item.node.status==='RSVP'?'' : 'success'"
+            <ion-item v-for="item in infiniteItems" :key="item.id" :color="item.node.status==='RSVP'?'' : 'success'"
               @click="guestInfo(item.node)" class="list-item">
               <ion-label class="guest-name">{{ item.node.firstName }} {{ item.node.lastName }} <span class="company"
                   v-if="!!item.node.companyName">- {{item.node.companyName}} </span>
@@ -41,10 +41,15 @@
                 <ion-icon :icon="personOutline" />
               </ion-button>
             </ion-item>
-            <ion-item v-if="search&&!filteredData.length">
+            <ion-item v-if="search&&!infiniteItems.length">
               <p>No results found!</p>
             </ion-item>
+            <!-- <ion-item v-for="item in infiniteItems" :key="item" class="list-item">
+              {{item}}
+            </ion-item> -->
           </ion-list>
+
+          <infinite-guest @moreData="onInfinite" :all-items="filteredData"></infinite-guest>
 
         </div>
         <!-- ALERT -->
@@ -99,17 +104,19 @@ import {
   IonToggle,
   IonRefresher,
   IonRefresherContent,
-  toastController
+  toastController,
+
 } from '@ionic/vue'
 import { personOutline, addOutline, chevronDownCircleOutline } from 'ionicons/icons'
 import { computed } from '@vue/reactivity';
+import InfiniteGuest from './components/InfiniteGuest.vue';
 
 const serverUrl = process.env.VUE_APP_SERVER_URL
 // console.log({"serverUrl": serverUrl})
 const data = ref([] as any[])
 const search = ref()
 const isOpen = ref(false)
-const guestsOnly = ref(true)
+const guestsOnly = ref(false)
 
 // Print
 const alert = ref(false)
@@ -126,6 +133,12 @@ const firstName = ref('')
 const lastName = ref('')
 const email = ref('')
 const company = ref('')
+
+// infinite scroll
+const infiniteItems = ref([] as any[])
+const onInfinite = (items: any[]) => {
+  infiniteItems.value = items
+}
 
 // Submit function
 const submit = async () => {
@@ -144,7 +157,7 @@ const submit = async () => {
       await axios
         .post(serverUrl + 'api/guests', newGuest)
         .then(res => {
-          console.log(res)
+          // console.log(res)
           setTimeout(() => {
             newGuest.firstName = ''
             newGuest.lastName = ''
