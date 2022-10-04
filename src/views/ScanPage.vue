@@ -83,16 +83,13 @@ const searchTicket = async () => {
     .then(async () => {
       if (guest.status === 'CHECKED_IN') {
         presentToast('bottom', 'Guest già registrato ', 'warning', 4000)
-        window.navigator.vibrate(200);
       } else {
         await axios.get(serverUrl + 'api/guests/' + qrString.value + "/check-in").then(res => {
           console.log(res.data)
           if (res.status === 200)
             presentToast('bottom', 'Guest Checked In con Successo!', 'success', 4000)
-          window.navigator.vibrate(200);
         }).catch(() => {
           presentToast('bottom', 'An Error Has Occured!', 'danger', 4000)
-          window.navigator.vibrate(400);
         })
       }
     }

@@ -32,8 +32,10 @@
         <div>
           <!-- List of Input Items -->
           <ion-list>
-            <ion-item v-for="item in filteredData" :key="item.id" :color="item.node.status==='RSVP'?'' : 'success'">
-              <ion-label class="guest-name">{{ item.node.firstName }} {{ item.node.lastName }} <span class="company" v-if="!!item.node.companyName">- {{item.node.companyName}} </span>
+            <ion-item v-for="item in filteredData" :key="item.id" :color="item.node.status==='RSVP'?'' : 'success'"
+              @click="guestInfo(item.node)" class="list-item">
+              <ion-label class="guest-name">{{ item.node.firstName }} {{ item.node.lastName }} <span class="company"
+                  v-if="!!item.node.companyName">- {{item.node.companyName}} </span>
               </ion-label>
               <ion-button slot="end" @click="guestInfo(item.node)">
                 <ion-icon :icon="personOutline" />
@@ -174,9 +176,10 @@ const getList = async () => {
 const guestInfo = (item: any) => {
   // console.log(item)
   setAlertStatus(true)
-  alertMsg.value = `${item.email} `
   alertTitle.value = `${item.firstName} ${item.lastName}`
-  alertSubTitle.value = `${item.companyName}`
+  alertSubTitle.value = `Azienda: ${item.companyName || '---'}`
+  alertMsg.value = `email: ${item.email} <br/>
+  Referente: ${item.accountManager} `
 }
 
 const filteredData = computed(() => {
@@ -260,6 +263,11 @@ onBeforeMount(() => {
   transform: translateY(-50%);
 }
 
+/* .list-item {
+  padding-top: 5px;
+  padding-bottom: 01px;
+} */
+
 #container strong {
   font-size: 20px;
   line-height: 26px;
@@ -275,11 +283,16 @@ onBeforeMount(() => {
 #container a {
   text-decoration: none;
 }
-.guest-name{
+
+.guest-name {
   /* color: rgb(56,128,255); */
   font-weight: 700;
+  vertical-align: middle;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
-.company{
+
+.company {
   font-size: 12px;
   color: #7c7c7c;
   font-weight: 600;

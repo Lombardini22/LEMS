@@ -19,7 +19,6 @@
         </div>
         <div v-else>
           <h1 class="title">Grazie per aver confermato la tua presenza allo spettacolo!</h1>
-          <h2 class="subtitle">{{fullName}}</h2>
           <Tilt data-tilt data-tilt-full-page-listening gyroscope="false">
             <div class="ticket ticket-1">
               <div class="details-block">
