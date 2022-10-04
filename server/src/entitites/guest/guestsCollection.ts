@@ -87,3 +87,25 @@ export async function createGuestsCollectionIndexes(
 
   return indexInsertionResult.map(constVoid)
 }
+
+export async function ensureGuestsCollectionIndex(): Promise<
+  Result<ServerError, void>
+> {
+  const guestsHasIndex = await guestsCollection.raw(collection =>
+    Result.tryCatch(
+      () => collection.indexExists(UNIQUE_EMAIL_HASH_INDEX_NAME),
+      error =>
+        new ServerError(500, 'Unable to verify index on guests collection', {
+          error,
+        }),
+    ),
+  )
+
+  return guestsHasIndex.flatMap(guestsHasIndex => {
+    if (!guestsHasIndex) {
+      return guestsCollection.raw(createGuestsCollectionIndexes)
+    } else {
+      return Result.success(constVoid)
+    }
+  })
+}

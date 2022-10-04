@@ -30,22 +30,25 @@ interface MailchimpMember extends Omit<AddListMemberBody, 'merge_fields'> {
 
 export type MailchimpDatabaseListMember = MailchimpMember & {
   merge_fields: MailchimpMember['merge_fields'] & {
-    MMERGE7?: string
+    MMERGE6?: string // accountManager
+    MMERGE7?: string // companyName
   }
 }
 
 export type MailchimpEventListMember = MailchimpMember & {
   merge_fields: MailchimpMember['merge_fields'] & {
-    MMERGE4?: string
+    MMERGE3?: string // accountManager
+    MMERGE4?: string // companyName
   }
 }
 
-export interface MailchimpDatabaseListMembersResult {
-  members: MailchimpDatabaseListMember[]
+export interface MailchimpListMembersResult<M> {
+  members: M[]
   total_items: number
 }
 
-export interface MailchimpEventListMembersResult {
-  members: MailchimpEventListMember[]
-  total_items: number
-}
+export type MailchimpDatabaseListMembersResult =
+  MailchimpListMembersResult<MailchimpDatabaseListMember>
+
+export type MailchimpEventListMembersResult =
+  MailchimpListMembersResult<MailchimpEventListMember>

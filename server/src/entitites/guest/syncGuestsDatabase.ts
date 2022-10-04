@@ -9,12 +9,15 @@ import { Path } from '../../routing/Path'
 import { Request } from '../../routing/Router'
 import { ServerError } from '../../ServerError'
 import {
-  createGuestsCollectionIndexes,
+  ensureGuestsCollectionIndex,
   guestsCollection,
-  UNIQUE_EMAIL_HASH_INDEX_NAME,
 } from './guestsCollection'
 import { fetchMailchimpMembers } from './utils/fetchMailchimpMembers'
-import { MailchimpBatchListMembersResponse } from './utils/mailchimpTypes'
+import {
+  MailchimpBatchListMembersResponse,
+  MailchimpDatabaseListMember,
+  MailchimpEventListMember,
+} from './utils/mailchimpTypes'
 
 interface SyncSecretInput {
   secret: string
@@ -50,6 +53,10 @@ export const upsertGuestsDatabasePath = Path.start()
 
 export const syncMailchimpTagPath = Path.start().literal('sync').literal('tags')
 
+export const syncAccountManagersAndCompanyPath = Path.start()
+  .literal('sync')
+  .literal('account-managers-and-company')
+
 export async function cleanGuestsDatabase(
   request: Request<unknown, unknown, CleanShowTargetInput>,
 ): Promise<Result<ServerError, WithId<Guest>[]>>
@@ -63,9 +70,10 @@ export async function cleanGuestsDatabase(
 
   return guardResult.flatMap(() =>
     env.use(async env => {
-      const mailchimpMembers = await fetchMailchimpMembers(
-        env.MAILCHIMP_EVENT_LIST_ID,
-      )
+      const mailchimpMembers =
+        await fetchMailchimpMembers<MailchimpEventListMember>(
+          env.MAILCHIMP_EVENT_LIST_ID,
+        )
 
       if (request.body.delete) {
         const result = await mailchimpMembers.flatMap(members =>
@@ -129,35 +137,18 @@ export async function upsertGuestsDatabase(
 
   return guardResult.flatMap(() =>
     env.use(async env => {
-      const mailchimpMembers = await fetchMailchimpMembers(
-        env.MAILCHIMP_EVENT_LIST_ID,
-      )
+      const mailchimpMembers =
+        await fetchMailchimpMembers<MailchimpEventListMember>(
+          env.MAILCHIMP_EVENT_LIST_ID,
+        )
 
-      const tmpCollectionName = 'tmp_guests_sync'
+      const tmpCollectionName = `tmp_guests_sync_${Date.now()}_${Math.random()
+        .toString(10)
+        .replace('.', '')}`
 
       return mailchimpMembers.flatMap(members =>
         database.use(async db => {
-          const guestsHasIndex = await guestsCollection.raw(collection =>
-            Result.tryCatch(
-              () => collection.indexExists(UNIQUE_EMAIL_HASH_INDEX_NAME),
-              error =>
-                new ServerError(
-                  500,
-                  'Unable to verify index on guests collection',
-                  { error },
-                ),
-            ),
-          )
-
-          const indexCreationResult = await guestsHasIndex.flatMap(
-            guestsHasIndex => {
-              if (!guestsHasIndex) {
-                return guestsCollection.raw(createGuestsCollectionIndexes)
-              } else {
-                return Result.success(constVoid)
-              }
-            },
-          )
+          const indexCreationResult = await ensureGuestsCollectionIndex()
 
           const insertionResult = await indexCreationResult.flatMap(() =>
             Result.tryCatch(
@@ -243,7 +234,10 @@ export async function syncMailchimpTag(
     env.use(env =>
       mailchimp.use(async mailchimp => {
         const tag = request.body.tag || env.MAILCHIMP_RSVP_TAG_NAME
-        const members = await fetchMailchimpMembers(env.MAILCHIMP_EVENT_LIST_ID)
+
+        const members = await fetchMailchimpMembers<MailchimpEventListMember>(
+          env.MAILCHIMP_EVENT_LIST_ID,
+        )
 
         const result: Result<ServerError, MailchimpBatchListMembersResponse> =
           await members.flatMap(members =>
@@ -274,6 +268,97 @@ export async function syncMailchimpTag(
         return result
       }),
     ),
+  )
+}
+
+export async function syncAccountManagersAndCompany(
+  request: Request<unknown, unknown, SyncSecretInput>,
+): Promise<Result<ServerError, UpsertResponse>> {
+  const guardResult = await verifySecretRequest(request)
+
+  return guardResult.flatMap(() =>
+    env.use(async env => {
+      const mailchimpMembers =
+        await fetchMailchimpMembers<MailchimpDatabaseListMember>(
+          env.MAILCHIMP_DATABASE_LIST_ID,
+        )
+
+      const tmpCollectionName = `tmp_am_sync_${Date.now()}_${Math.random()
+        .toString(10)
+        .replace('.', '')}`
+
+      return mailchimpMembers.flatMap(members =>
+        database.use(async db => {
+          const indexCreationResult = await ensureGuestsCollectionIndex()
+
+          const insertionResult = await indexCreationResult.flatMap(() =>
+            Result.tryCatch(
+              () => {
+                const now = new Date()
+
+                return db.collection(tmpCollectionName).insertMany(
+                  members.map(
+                    (member): Partial<Guest> => ({
+                      emailHash: hashGuestEmail(member.email_address),
+                      companyName: member.merge_fields.MMERGE7 || null,
+                      accountManager: member.merge_fields.MMERGE6 || null,
+                      updatedAt: now,
+                    }),
+                  ),
+                )
+              },
+              error =>
+                new ServerError(
+                  500,
+                  'Unable to create temporary collection for syncing account managers',
+                  { error },
+                ),
+            ),
+          )
+
+          const syncResult = await insertionResult.flatMap(() =>
+            Result.tryCatch(
+              () =>
+                db
+                  .collection(tmpCollectionName)
+                  .aggregate([
+                    {
+                      $merge: {
+                        into: guestsCollection.name,
+                        on: 'emailHash',
+                        whenMatched: [
+                          {
+                            $set: {
+                              accountManager: '$$new.accountManager',
+                              companyName: '$$new.companyName',
+                              updatedAt: '$$new.updatedAt',
+                            },
+                          },
+                        ],
+                        whenNotMatched: 'discard',
+                      },
+                    },
+                  ])
+                  .toArray(),
+              error =>
+                new ServerError(
+                  500,
+                  'Unable to perform account manager sync aggregation',
+                  {
+                    error,
+                  },
+                ),
+            ),
+          )
+
+          // This needs to happen no matter which failures happened, and we don't care if it fails
+          // We just really need to drop the temporary collection
+          await db.collection(tmpCollectionName).drop()
+
+          return syncResult.map(() => ({ success: true }))
+        }),
+      )
+    }),
   )
 }
 
