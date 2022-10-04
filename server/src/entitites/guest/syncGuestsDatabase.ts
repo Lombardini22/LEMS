@@ -53,9 +53,9 @@ export const upsertGuestsDatabasePath = Path.start()
 
 export const syncMailchimpTagPath = Path.start().literal('sync').literal('tags')
 
-export const syncAccountManagersPath = Path.start()
+export const syncAccountManagersAndCompanyPath = Path.start()
   .literal('sync')
-  .literal('account-managers')
+  .literal('account-managers-and-company')
 
 export async function cleanGuestsDatabase(
   request: Request<unknown, unknown, CleanShowTargetInput>,
@@ -271,7 +271,7 @@ export async function syncMailchimpTag(
   )
 }
 
-export async function syncAccountManagers(
+export async function syncAccountManagersAndCompany(
   request: Request<unknown, unknown, SyncSecretInput>,
 ): Promise<Result<ServerError, UpsertResponse>> {
   const guardResult = await verifySecretRequest(request)
@@ -300,6 +300,7 @@ export async function syncAccountManagers(
                   members.map(
                     (member): Partial<Guest> => ({
                       emailHash: hashGuestEmail(member.email_address),
+                      companyName: member.merge_fields.MMERGE7 || null,
                       accountManager: member.merge_fields.MMERGE6 || null,
                       updatedAt: now,
                     }),
@@ -329,6 +330,7 @@ export async function syncAccountManagers(
                           {
                             $set: {
                               accountManager: '$$new.accountManager',
+                              companyName: '$$new.companyName',
                               updatedAt: '$$new.updatedAt',
                             },
                           },
