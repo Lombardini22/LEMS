@@ -1,17 +1,9 @@
-import { NextFunction } from 'express'
 import { Result } from '../../../shared/Result'
 import { expectResult } from '../../../shared/testUtils'
 import { Path } from '../routing/Path'
 import { Router } from '../routing/Router'
 import { sendHttpRequest } from '../testUtils'
 import { Server } from './Server'
-
-jest.mock('../cron', () => ({
-  cron: async (_req: any, _res: any, next: NextFunction): Promise<void> => {
-    await Promise.resolve()
-    next()
-  },
-}))
 
 describe('Server', () => {
   it('should work', async () => {

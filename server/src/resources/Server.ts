@@ -7,7 +7,6 @@ import { ServerError } from '../ServerError'
 import { Server as HttpServer } from 'http'
 import { constVoid } from '../../../shared/utils'
 import { Resource } from './Resource'
-import { cron } from '../cron'
 
 export class Server extends Resource<express.Express> {
   private readonly routers: Router[]
@@ -30,7 +29,6 @@ export class Server extends Resource<express.Express> {
               : {},
           ),
         )
-        .use(cron)
 
       const apiRouter = this.routers
         .reduce(
