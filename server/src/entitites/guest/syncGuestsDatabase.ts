@@ -63,7 +63,8 @@ export async function cleanGuestsDatabase(
 
   return guardResult.flatMap(() =>
     env.use(async env => {
-      const mailchimpMembers = await fetchMailchimpMembers(
+      const mailchimpMembers =
+        await fetchMailchimpMembers<MailchimpEventListMember>(
         env.MAILCHIMP_EVENT_LIST_ID,
       )
 
@@ -129,7 +130,8 @@ export async function upsertGuestsDatabase(
 
   return guardResult.flatMap(() =>
     env.use(async env => {
-      const mailchimpMembers = await fetchMailchimpMembers(
+      const mailchimpMembers =
+        await fetchMailchimpMembers<MailchimpEventListMember>(
         env.MAILCHIMP_EVENT_LIST_ID,
       )
 
@@ -243,7 +245,10 @@ export async function syncMailchimpTag(
     env.use(env =>
       mailchimp.use(async mailchimp => {
         const tag = request.body.tag || env.MAILCHIMP_RSVP_TAG_NAME
-        const members = await fetchMailchimpMembers(env.MAILCHIMP_EVENT_LIST_ID)
+
+        const members = await fetchMailchimpMembers<MailchimpEventListMember>(
+          env.MAILCHIMP_EVENT_LIST_ID,
+        )
 
         const result: Result<ServerError, MailchimpBatchListMembersResponse> =
           await members.flatMap(members =>
