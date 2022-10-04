@@ -13,6 +13,8 @@ import { getStats, getStatsPath } from './getStats'
 import {
   cleanGuestsDatabase,
   cleanGuestsDatabasePath,
+  syncAccountManagersAndCompany,
+  syncAccountManagersAndCompanyPath,
   syncMailchimpTag,
   syncMailchimpTagPath,
   upsertGuestsDatabase,
@@ -35,3 +37,4 @@ export const guestsRouter = Router.make('/guests')
   .put(cleanGuestsDatabasePath, cleanGuestsDatabase)
   .put(upsertGuestsDatabasePath, upsertGuestsDatabase)
   .put(syncMailchimpTagPath, syncMailchimpTag)
+  .put(syncAccountManagersAndCompanyPath, syncAccountManagersAndCompany)

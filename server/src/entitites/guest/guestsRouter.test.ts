@@ -1,4 +1,3 @@
-import { NextFunction } from 'express'
 import { ObjectId, WithId } from 'mongodb'
 import { Cursor } from '../../../../shared/Cursor'
 import { Guest, hashGuestEmail } from '../../../../shared/models/Guest'
@@ -23,13 +22,6 @@ jest.mock('../../resources/mailchimp', function () {
 
 jest.mock('./utils/subscribeGuest', () => ({
   subscribeGuest: (guest: WithId<Guest>) => Result.success(() => guest),
-}))
-
-jest.mock('../../cron', () => ({
-  cron: async (_req: any, _res: any, next: NextFunction): Promise<void> => {
-    await Promise.resolve()
-    next()
-  },
 }))
 
 describe('guestRouter', () => {
