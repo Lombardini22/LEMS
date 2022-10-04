@@ -5,7 +5,6 @@ import {
   UploadGuestsResult,
 } from '../../../../shared/models/Guest'
 import { Result } from '../../../../shared/Result'
-import { constVoid } from '../../../../shared/utils'
 import { database } from '../../resources/database'
 import { env } from '../../resources/env'
 import { mailchimp } from '../../resources/mailchimp'
@@ -14,9 +13,8 @@ import { Request } from '../../routing/Router'
 import { ServerError } from '../../ServerError'
 import { MailchimpBatchListMembersResponse } from './utils/mailchimpTypes'
 import {
-  createGuestsCollectionIndexes,
+  ensureGuestsCollectionIndex,
   guestsCollection,
-  UNIQUE_EMAIL_HASH_INDEX_NAME,
 } from './guestsCollection'
 import { guestToMailchimpListMember } from './utils/subscribeGuest'
 
@@ -62,27 +60,7 @@ export function uploadGuests(
         const mailchimpResultAfterLocalInsertion =
           await mailchimpResult.flatMap(async mailchimpResponse =>
             database.use(async db => {
-              const guestsHasIndex = await guestsCollection.raw(collection =>
-                Result.tryCatch(
-                  () => collection.indexExists(UNIQUE_EMAIL_HASH_INDEX_NAME),
-                  error =>
-                    new ServerError(
-                      500,
-                      'Unable to verify index on guests collection',
-                      { error },
-                    ),
-                ),
-              )
-
-              const indexCreationResult = await guestsHasIndex.flatMap(
-                guestsHasIndex => {
-                  if (!guestsHasIndex) {
-                    return guestsCollection.raw(createGuestsCollectionIndexes)
-                  } else {
-                    return Result.success(constVoid)
-                  }
-                },
-              )
+              const indexCreationResult = await ensureGuestsCollectionIndex()
 
               const insertionResult = await indexCreationResult.flatMap(() =>
                 Result.tryCatch(

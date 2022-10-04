@@ -9,12 +9,15 @@ import { Path } from '../../routing/Path'
 import { Request } from '../../routing/Router'
 import { ServerError } from '../../ServerError'
 import {
-  createGuestsCollectionIndexes,
+  ensureGuestsCollectionIndex,
   guestsCollection,
-  UNIQUE_EMAIL_HASH_INDEX_NAME,
 } from './guestsCollection'
 import { fetchMailchimpMembers } from './utils/fetchMailchimpMembers'
-import { MailchimpBatchListMembersResponse } from './utils/mailchimpTypes'
+import {
+  MailchimpBatchListMembersResponse,
+  MailchimpDatabaseListMember,
+  MailchimpEventListMember,
+} from './utils/mailchimpTypes'
 
 interface SyncSecretInput {
   secret: string
@@ -141,27 +144,7 @@ export async function upsertGuestsDatabase(
 
       return mailchimpMembers.flatMap(members =>
         database.use(async db => {
-          const guestsHasIndex = await guestsCollection.raw(collection =>
-            Result.tryCatch(
-              () => collection.indexExists(UNIQUE_EMAIL_HASH_INDEX_NAME),
-              error =>
-                new ServerError(
-                  500,
-                  'Unable to verify index on guests collection',
-                  { error },
-                ),
-            ),
-          )
-
-          const indexCreationResult = await guestsHasIndex.flatMap(
-            guestsHasIndex => {
-              if (!guestsHasIndex) {
-                return guestsCollection.raw(createGuestsCollectionIndexes)
-              } else {
-                return Result.success(constVoid)
-              }
-            },
-          )
+          const indexCreationResult = await ensureGuestsCollectionIndex()
 
           const insertionResult = await indexCreationResult.flatMap(() =>
             Result.tryCatch(
