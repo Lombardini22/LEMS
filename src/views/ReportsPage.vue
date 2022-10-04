@@ -62,7 +62,6 @@ const chartOptions = {
     type: 'donut',
     height: 350
   },
-  // labels: ['Team A', 'Team B', 'Team C', 'Team D', 'Team E'],
   responsive: [{
     breakpoint: 480,
     options: {

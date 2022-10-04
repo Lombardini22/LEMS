@@ -17,7 +17,16 @@
           </ion-toggle>
         </ion-buttons>
       </ion-toolbar>
-
+      <ion-toolbar>
+        <ion-segment :value="segment" @ionChange="segmentChanged($event)">
+          <ion-segment-button value="registrati">
+            <ion-label>Registrati ({{totalRegistrati}})</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="checkedIn">
+            <ion-label>Checked-In ({{totalCheckedIn}})</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </ion-toolbar>
     </ion-header>
 
 
@@ -32,21 +41,29 @@
         <div>
           <!-- List of Input Items -->
           <ion-list>
-            <ion-item v-for="item in infiniteItems" :key="item.id" :color="item.node.status==='RSVP'?'' : 'success'"
-              @click="guestInfo(item.node)" class="list-item">
-              <ion-label class="guest-name">{{ item.node.firstName }} {{ item.node.lastName }} <span class="company"
-                  v-if="!!item.node.companyName">- {{item.node.companyName}} </span>
-              </ion-label>
-              <ion-button slot="end" @click="guestInfo(item.node)">
-                <ion-icon :icon="personOutline" />
-              </ion-button>
-            </ion-item>
-            <ion-item v-if="search&&!infiniteItems.length">
-              <p>No results found!</p>
-            </ion-item>
-            <!-- <ion-item v-for="item in infiniteItems" :key="item" class="list-item">
-              {{item}}
-            </ion-item> -->
+            <ion-item-sliding v-for="item in infiniteItems" :key="item">
+              <!-- <ion-item-options side="start">
+                <ion-item-option color="primary">Check In</ion-item-option>
+              </ion-item-options> -->
+
+              <ion-item :color="item.node.status==='RSVP'?'' : 'success'" @click="guestInfo(item.node)"
+                class="list-item">
+                <ion-label class="guest-name">{{ item.node.firstName }} {{ item.node.lastName }} <span class="company"
+                    v-if="!!item.node.companyName">- {{item.node.companyName}} </span>
+                </ion-label>
+                <ion-button slot="end" @click="guestInfo(item.node)">
+                  <ion-icon :icon="personOutline" />
+                </ion-button>
+              </ion-item>
+
+              <ion-item v-if="search&&!infiniteItems.length">
+                <p>No results found!</p>
+              </ion-item>
+
+              <ion-item-options side="end">
+                <ion-item-option color="primary" @click="changeCheckin(item.node)">Check In</ion-item-option>
+              </ion-item-options>
+            </ion-item-sliding>
           </ion-list>
 
           <infinite-guest @moreData="onInfinite" :all-items="filteredData"></infinite-guest>
@@ -105,6 +122,8 @@ import {
   IonRefresher,
   IonRefresherContent,
   toastController,
+  IonSegment, IonSegmentButton,
+  IonItemOption, IonItemOptions, IonItemSliding
 
 } from '@ionic/vue'
 import { personOutline, addOutline, chevronDownCircleOutline } from 'ionicons/icons'
@@ -138,6 +157,36 @@ const company = ref('')
 const infiniteItems = ref([] as any[])
 const onInfinite = (items: any[]) => {
   infiniteItems.value = items
+}
+
+// segment
+const segment = ref('registrati');
+
+const segmentChanged = (ev: CustomEvent) => {
+  segment.value = ev.detail.value;
+}
+
+// search results count
+const totalRegistrati = computed(() => {
+  return prefilter().filter((item: any) => item.node.status === 'RSVP').length
+})
+const totalCheckedIn = computed(() => {
+  return prefilter().filter((item: any) => item.node.status === 'CHECKED_IN').length
+})
+
+
+// doCheckin
+
+const changeCheckin = async (item: any) => {
+  try {
+    await axios.put(`${serverUrl}api/guests/${item.emailHash}`, {
+      status: item.status === 'RSVP' ? 'CHECKED_IN' : 'RSVP'
+    })
+    item.status = item.status === 'RSVP' ? 'CHECKED_IN' : 'RSVP'
+  } catch (e) {
+    console.log(e)
+  }
+
 }
 
 // Submit function
@@ -194,8 +243,7 @@ const guestInfo = (item: any) => {
   alertMsg.value = `email: ${item.email} <br/>
   Referente: ${item.accountManager} `
 }
-
-const filteredData = computed(() => {
+const prefilter = () => {
   if (search.value) {
     return data.value.filter((item: any) => {
       if (guestsOnly.value == true) {
@@ -205,7 +253,6 @@ const filteredData = computed(() => {
         const fullName = `${item.node.firstName} ${item.node.lastName} ${item.node.email} ${item.node.companyName}`
         return fullName.toLowerCase().includes(search.value.toLowerCase())
       }
-
     })
   } else if (guestsOnly.value) {
     return data.value.filter((item: any) => {
@@ -217,6 +264,13 @@ const filteredData = computed(() => {
   } else {
     return data.value
   }
+}
+
+const filteredData = computed(() => {
+  // return prefilter()
+  return prefilter().filter((item: any) => {
+    return segment.value === 'registrati' ? item.node.status === 'RSVP' : item.node.status === 'CHECKED_IN'
+  })
 
 })
 
@@ -266,41 +320,10 @@ onBeforeMount(() => {
 </script>
 
 <style scoped>
-#container {
-  text-align: center;
-
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-/* .list-item {
-  padding-top: 5px;
-  padding-bottom: 01px;
-} */
-
-#container strong {
-  font-size: 20px;
-  line-height: 26px;
-}
-
-#container p {
-  font-size: 16px;
-  line-height: 22px;
-  color: #8c8c8c;
-  margin: 0;
-}
-
-#container a {
-  text-decoration: none;
-}
-
 .guest-name {
   /* color: rgb(56,128,255); */
   font-weight: 700;
-  vertical-align: middle;
+  /* vertical-align: middle; */
   padding-top: 10px;
   padding-bottom: 10px;
 }
