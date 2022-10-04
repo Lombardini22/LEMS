@@ -17,7 +17,16 @@
           </ion-toggle>
         </ion-buttons>
       </ion-toolbar>
-
+      <ion-toolbar>
+        <ion-segment :value="segment" @ionChange="segmentChanged($event)">
+          <ion-segment-button value="registrati">
+            <ion-label>Registrati ({{totalRegistrati}})</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="checkedIn">
+            <ion-label>Checked-In ({{totalCheckedIn}})</ion-label>
+          </ion-segment-button>
+        </ion-segment>
+      </ion-toolbar>
     </ion-header>
 
 
@@ -105,6 +114,7 @@ import {
   IonRefresher,
   IonRefresherContent,
   toastController,
+  IonSegment, IonSegmentButton
 
 } from '@ionic/vue'
 import { personOutline, addOutline, chevronDownCircleOutline } from 'ionicons/icons'
@@ -139,6 +149,22 @@ const infiniteItems = ref([] as any[])
 const onInfinite = (items: any[]) => {
   infiniteItems.value = items
 }
+
+// segment
+const segment = ref('registrati');
+
+const segmentChanged = (ev: CustomEvent) => {
+  segment.value = ev.detail.value;
+}
+
+// search results count
+const totalRegistrati = computed(() => {
+  return prefilter().filter((item: any) => item.node.status === 'RSVP').length
+})
+const totalCheckedIn = computed(() => {
+  return prefilter().filter((item: any) => item.node.status === 'CHECKED_IN').length
+})
+
 
 // Submit function
 const submit = async () => {
@@ -194,8 +220,7 @@ const guestInfo = (item: any) => {
   alertMsg.value = `email: ${item.email} <br/>
   Referente: ${item.accountManager} `
 }
-
-const filteredData = computed(() => {
+const prefilter = () => {
   if (search.value) {
     return data.value.filter((item: any) => {
       if (guestsOnly.value == true) {
@@ -217,6 +242,13 @@ const filteredData = computed(() => {
   } else {
     return data.value
   }
+}
+
+const filteredData = computed(() => {
+  // return prefilter()
+  return prefilter().filter((item: any) => {
+    return segment.value === 'registrati' ? item.node.status === 'RSVP' : item.node.status === 'CHECKED_IN'
+  })
 
 })
 
