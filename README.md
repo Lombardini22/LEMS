@@ -26,3 +26,17 @@
 
 - Add the environment variable to the `.env` **and** `.env.example` files. Do not use the real value in the example file (duh!)
 - If the environment should be read server side, add it to the `env.ts` file, where the `env` resource is. Use Zod to point out the runtime type
+
+### Android build
+
+- Update the client build: `yarn build:client`
+- Sync the Android build: `npx cap sync android`
+- Open the Android project in Android Studio: `npx cap open android`
+- Use Android Studio to build an APK or bundle
+
+### iOS build
+
+- Update the client build: `yarn build:client`
+- Sync the Android build: `npx cap sync ios`
+- Open the iOS project in XCode: `npx cap open ios`
+- Use iOS to build an IPA
