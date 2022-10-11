@@ -24,6 +24,7 @@ export class Server extends Resource<express.Express> {
                   origin: [
                     'https://iscrizioni.foresightmilano.it/',
                     'https://lems-staging.herokuapp.com/',
+                    'http://localhost/',
                   ],
                 }
               : {},
