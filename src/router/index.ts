@@ -10,6 +10,7 @@ import AddPlusOne from '@/views/AddPlusOne.vue'
 import LoginPage from '@/views/LoginPage.vue'
 import PrintPage from '@/views/PrintPage.vue'
 import { ref } from 'vue'
+import { isPlatform } from '@ionic/vue'
 
 const authCheck = () => {
   const isAuth = ref(false)
@@ -26,107 +27,119 @@ const logout = () => {
   localStorage.removeItem('user')
 }
 
+const initialRedirect: Array<RouteRecordRaw> =
+  isPlatform('android') || isPlatform('ios')
+    ? [
+        {
+          path: '/',
+          redirect: '/login',
+        },
+      ]
+    : []
 
 const routes: Array<RouteRecordRaw> = [
-  {
-    path: '/lems/management',
-    component: TabsPage,
-    children: [
-      {
-        path: '/lems/management',
-        redirect: '/lems/management/scan',
-      },
-      {
-        path: 'scan',
-        name: 'scan',
-        component: ScanPage,
-        beforeEnter: () => {
-          const { isAuth, check } = authCheck()
-          check()
-          if (isAuth.value) {
-            return true
-          } else {
-            return '/login'
-          }
+  ...initialRedirect,
+  ...[
+    {
+      path: '/lems/management',
+      component: TabsPage,
+      children: [
+        {
+          path: '/lems/management',
+          redirect: '/lems/management/scan',
+        },
+        {
+          path: 'scan',
+          name: 'scan',
+          component: ScanPage,
+          beforeEnter: () => {
+            const { isAuth, check } = authCheck()
+            check()
+            if (isAuth.value) {
+              return true
+            } else {
+              return '/login'
+            }
+          },
+        },
+        {
+          path: 'manual',
+          component: ManualPage,
+          beforeEnter: () => {
+            const { isAuth, check } = authCheck()
+            check()
+            if (isAuth.value) {
+              return true
+            } else {
+              return '/login'
+            }
+          },
+        },
+        {
+          path: 'reports',
+          component: ReportsPage,
+          beforeEnter: () => {
+            const { isAuth, check } = authCheck()
+            check()
+            if (isAuth.value) {
+              return true
+            } else {
+              return '/login'
+            }
+          },
+        },
+        {
+          path: 'test',
+          component: TestPage,
+        },
+      ],
+    },
+    // {
+    //   path: "/ticket2/:listId/:email",
+    //   component: TicketPage,
+    // },
+    {
+      path: '/ticket/:email',
+      component: TicketPage2,
+    },
+    {
+      path: '/ticket',
+      component: TicketPage2,
+    },
+    {
+      path: '/plusOne',
+      redirect: '/guest',
+    },
+    {
+      path: '/guest',
+      component: AddPlusOne,
+    },
+    {
+      path: '/print/:name/:email',
+      component: PrintPage,
+    },
+    {
+      path: '/login',
+      component: LoginPage,
+      beforeEnter: () => {
+        const { isAuth, check } = authCheck()
+        check()
+        if (isAuth.value) {
+          return '/lems/management'
+        } else {
+          return true
         }
       },
-      {
-        path: 'manual',
-        component: ManualPage,
-        beforeEnter: () => {
-          const { isAuth, check } = authCheck()
-          check()
-          if (isAuth.value) {
-            return true
-          } else {
-            return '/login'
-          }
-        }
+    },
+    {
+      path: '/logout',
+      component: LoginPage,
+      beforeEnter: () => {
+        logout()
+        return '/login'
       },
-      {
-        path: 'reports',
-        component: ReportsPage,
-        beforeEnter: () => {
-          const { isAuth, check } = authCheck()
-          check()
-          if (isAuth.value) {
-            return true
-          } else {
-            return '/login'
-          }
-        }
-      },
-      {
-        path: 'test',
-        component: TestPage,
-      },
-    ],
-  },
-  // {
-  //   path: "/ticket2/:listId/:email",
-  //   component: TicketPage,
-  // },
-  {
-    path: '/ticket/:email',
-    component: TicketPage2,
-  },
-  {
-    path: '/ticket',
-    component: TicketPage2,
-  },
-  {
-    path: '/plusOne',
-    redirect: '/guest'
-  },
-  {
-    path: '/guest',
-    component: AddPlusOne,
-  },
-  {
-    path: '/print/:name/:email',
-    component: PrintPage,
-  },
-  {
-    path: '/login',
-    component: LoginPage,
-    beforeEnter: () => {
-      const { isAuth, check } = authCheck()
-      check()
-      if (isAuth.value) {
-        return '/lems/management'
-      } else {
-        return true
-      }
-    }
-  },
-  {
-    path: '/logout',
-    component: LoginPage,
-    beforeEnter: () => {
-      logout()
-      return '/login'
-    }
-  },
+    },
+  ],
 ]
 
 const router = createRouter({
