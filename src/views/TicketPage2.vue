@@ -57,7 +57,7 @@
           <div class="footer">
             <!-- <AddToCalendar /> -->
             <ion-button class="btn mar-20" :href="printUrl">Salva Voucher in PDF</ion-button>
-<!-- 
+            <!-- 
             <ion-button class="btn mar-20" :href="plusOne">Invita un ospite</ion-button>
              <ManualAddGuest :refererEmail="params.email" /> 
             <ion-button class="btn mar-20" href="mailto:info@foresightmilano.it?subject=FORESIGHT 2022">Contattaci Via
@@ -81,7 +81,7 @@ import { searchOutline } from 'ionicons/icons'
 import { MD5 } from 'crypto-js'
 import Tilt from 'vanilla-tilt-vue'
 import axios from 'axios'
-import AddToCalendar from './components/AddToCalendar.vue'
+// import AddToCalendar from './components/AddToCalendar.vue'
 // import ManualAddGuest from './components/ManualAddGuest.vue'
 
 

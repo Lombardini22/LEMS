@@ -6,5 +6,10 @@
 
 <script lang="ts" setup>
 import { IonApp, IonRouterOutlet } from '@ionic/vue'
+import {useStoreGuest} from '@/stores'
+
+const storeGuest = useStoreGuest()
+
+
 
 </script>
