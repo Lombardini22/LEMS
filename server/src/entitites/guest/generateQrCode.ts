@@ -23,12 +23,11 @@ export const sendQrCode: RequestHandler<
 > = (req, res) => {
   env.use(async env => {
     try {
-
       const emailHash = hashGuestEmail(req.params.email)
 
       const guest = await fetchGuest(
         emailHash,
-        env.MAILCHIMP_EVENT_LIST_ID,
+        env.MAILCHIMP_DATABASE_LIST_ID,
         member => ({
           firstName: member.merge_fields['FNAME'],
           lastName: member.merge_fields['LNAME'],
@@ -39,14 +38,13 @@ export const sendQrCode: RequestHandler<
           status: 'RSVP',
           accountManager: null,
         }),
-
       )
 
       await guest.fold(
-        error => {
+        function handleError(error) {
           Router.handleError(error, res)
         },
-        async () => {
+        async function sendQRCodeStream() {
           const stream = new PassThrough()
 
           await toFileStream(stream, emailHash, {
@@ -65,5 +63,4 @@ export const sendQrCode: RequestHandler<
       throw new Error(`Errore!!!! - ${e}`)
     }
   })
-
 }

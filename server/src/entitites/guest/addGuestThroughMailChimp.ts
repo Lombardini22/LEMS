@@ -8,7 +8,6 @@ import { Guest, hashGuestEmail } from '../../../../shared/models/Guest'
 import { Path } from '../../routing/Path'
 import { env } from '../../resources/env'
 import { isMailchimpMembersSuccessResponse } from './utils/isMailchimpMembersSuccessResponse'
-import { subscribeGuest } from './utils/subscribeGuest'
 import { NoTimestamps } from '../../database/Collection'
 
 type AddGuestThroughMailChimpParams = {
@@ -29,7 +28,9 @@ export function addGuestThroughMailChimp(
       const emailHash = hashGuestEmail(email)
 
       const mailchimpMemberResponse = await Result.tryCatch(
-        () => mailchimp.lists.getListMember(sourceListId, emailHash),
+        function getMemberFromMailchimpList() {
+          return mailchimp.lists.getListMember(sourceListId, emailHash)
+        },
         error =>
           new ServerError(404, 'MailChimp subscriber not found', {
             error,
@@ -39,7 +40,7 @@ export function addGuestThroughMailChimp(
       )
 
       const mailchimpMember = await mailchimpMemberResponse.flatMap(
-        response => {
+        function validateMailchimpResponse(response) {
           if (isMailchimpMembersSuccessResponse(response)) {
             return Result.success(() => response)
           } else {
@@ -57,58 +58,56 @@ export function addGuestThroughMailChimp(
         },
       )
 
-      const localGuest = await mailchimpMember.flatMap(async mcGuest => {
-        if (!mcGuest.merge_fields['FNAME'] || !mcGuest.merge_fields['LNAME']) {
-          return Result.failure(
-            () =>
-              new ServerError(500, 'Invalid data returned by MailChimp API', {
-                guestData: mcGuest,
-              }),
-          )
-        }
-
-        const guestData: NoTimestamps<Guest> = {
-          ...{
-            firstName: mcGuest.merge_fields['FNAME'],
-            lastName: mcGuest.merge_fields['LNAME'],
-            email: mcGuest.email_address,
-            emailHash,
-            companyName: null,
-            source: 'RSVP',
-            status: 'RSVP',
-            accountManager: null,
-          },
-          ...(mcGuest.merge_fields['MMERGE7']
-            ? {
-              companyName: mcGuest.merge_fields['MMERGE7'],
+      const localGuest = await mailchimpMember.flatMap(
+        async function upsertLocalGuest(mcGuest) {
+          if (
+            !mcGuest.merge_fields['FNAME'] ||
+            !mcGuest.merge_fields['LNAME']
+          ) {
+            return Result.failure(
+              () =>
+                new ServerError(500, 'Invalid data returned by MailChimp API', {
+                  guestData: mcGuest,
+                }),
+            )
+          } else {
+            const guestData: NoTimestamps<Guest> = {
+              ...{
+                firstName: mcGuest.merge_fields['FNAME'],
+                lastName: mcGuest.merge_fields['LNAME'],
+                email: mcGuest.email_address,
+                emailHash,
+                companyName: null,
+                source: 'RSVP',
+                status: 'RSVP',
+                accountManager: null,
+              },
+              ...(mcGuest.merge_fields['MMERGE7']
+                ? {
+                    companyName: mcGuest.merge_fields['MMERGE7'],
+                  }
+                : {}),
             }
-            : {}),
-        }
 
-        const locallyExistingGuestResult = await guestsCollection.findOne({
-          emailHash,
-        })
+            const locallyExistingGuestResult = await guestsCollection.findOne({
+              emailHash,
+            })
 
-        return locallyExistingGuestResult.fold<
-          Result<ServerError, WithId<Guest>>
-        >(
-          async error => {
-            if (error.status === 404) {
-              const guest = await guestsCollection.insert(guestData)
-              return guest.flatMap(guest => {
-                try {
-                  return subscribeGuest(guest, false)
-                } catch (error) {
-                  throw new Error(`error: ${error}`)
+            return locallyExistingGuestResult.fold<
+              Result<ServerError, WithId<Guest>>
+            >(
+              async function insertLocalGuest(error) {
+                if (error.status === 404) {
+                  return guestsCollection.insert(guestData)
+                } else {
+                  return locallyExistingGuestResult
                 }
-              })
-            } else {
-              return locallyExistingGuestResult
-            }
-          },
-          guest => guestsCollection.update({ _id: guest._id }, guestData),
-        )
-      })
+              },
+              guest => guestsCollection.update({ _id: guest._id }, guestData),
+            )
+          }
+        },
+      )
 
       return localGuest
     }),
