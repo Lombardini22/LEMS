@@ -74,7 +74,7 @@ export async function getStats(): Promise<Result<ServerError, Stats>> {
     },
   ])
 
-  return result.flatMap(result => {
+  return result.flatMap(function extractFirstResult(result) {
     if (result[0]) {
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       return Result.success(() => result[0]!)

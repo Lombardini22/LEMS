@@ -70,10 +70,19 @@ export class Server extends Resource<express.Express> {
     this.routers = routers
   }
 
+  /**
+   * Creates a new Server as a Resource
+   * @returns the Server resource
+   */
   static override make(): Server {
     return new Server([])
   }
 
+  /**
+   * Attaches a Router to a server
+   * @param router the Router to be attached to this server
+   * @returns a new instance of Server with the router attached
+   */
   withRouter(router: Router): Server {
     return new Server([...this.routers, router])
   }

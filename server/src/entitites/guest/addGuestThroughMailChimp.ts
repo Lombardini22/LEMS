@@ -28,9 +28,7 @@ export function addGuestThroughMailChimp(
       const emailHash = hashGuestEmail(email)
 
       const mailchimpMemberResponse = await Result.tryCatch(
-        function getMemberFromMailchimpList() {
-          return mailchimp.lists.getListMember(sourceListId, emailHash)
-        },
+        () => mailchimp.lists.getListMember(sourceListId, emailHash),
         error =>
           new ServerError(404, 'MailChimp subscriber not found', {
             error,
