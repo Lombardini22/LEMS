@@ -7,21 +7,28 @@ import { Request } from '../../routing/Router'
 import { ServerError } from '../../ServerError'
 import { guestsCollection } from './guestsCollection'
 
-export const findGuestsPath = Path.start().withQuery<CursorQueryPath>()
+type FindGuestsPath = CursorQueryPath & {
+  searchField?: string
+}
 
-const findGuestsFn = guestsCollection.find('fullName', [
-  {
-    $addFields: {
-      fullName: {
-        $concat: ['$firstName', ' ', '$lastName'],
-      },
-    },
-  },
-])
+export const findGuestsPath = Path.start().withQuery<FindGuestsPath>()
 
 export function findGuests(
-  req: Request<unknown, CursorQueryPath, unknown>,
+  req: Request<unknown, FindGuestsPath, unknown>,
 ): Promise<Result<ServerError, Cursor<WithId<Guest>>>> {
+  const searchField = req.query.searchField || 'fullName'
+
+  const findGuestsFn = guestsCollection.find(searchField, [
+    {
+      $addFields: {
+        fullName: {
+          $concat: ['$firstName', ' ', '$lastName'],
+        },
+      },
+    },
+  ])
+
   const query = parseCursorQueryPath(req.query)
+
   return findGuestsFn(query)
 }

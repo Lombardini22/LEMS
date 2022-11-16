@@ -26,7 +26,7 @@ export function fetchMailchimpMembers<M>(
         () => new ServerError(500, 'Unable to get memebers from MailChimp'),
       )
 
-      return currentPage.flatMap(currentPage => {
+      return currentPage.flatMap(function recurse(currentPage) {
         const result = [...accumulator, ...currentPage.members]
 
         if (result.length >= currentPage.total_items) {

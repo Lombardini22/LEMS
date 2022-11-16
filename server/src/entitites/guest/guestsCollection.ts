@@ -1,4 +1,4 @@
-import { Collection } from '../../database/Collection'
+import { Collection, NoTimestamps } from '../../database/Collection'
 import {
   Collection as MongoCollection,
   OptionalId,
@@ -16,16 +16,20 @@ export const UNIQUE_EMAIL_INDEX_NAME = 'uniqueEmail'
 export const UNIQUE_EMAIL_HASH_INDEX_NAME = 'uniqueEmailHash'
 
 class GuestsCollection extends Collection<Guest> {
+  /**
+   * Insert one or many Guests, setting the status to checked-in if the current event is already started
+   * @param doc the Guest or guests to be inserted
+   */
   override insert(
-    doc: OptionalId<Omit<Guest, 'createdAt' | 'updatedAt'>>,
+    doc: OptionalId<NoTimestamps<Guest>>,
   ): Promise<Result<ServerError, WithId<Guest>>>
   override insert(
-    docs: OptionalId<Omit<Guest, 'createdAt' | 'updatedAt'>>[],
+    docs: OptionalId<NoTimestamps<Guest>>[],
   ): Promise<Result<ServerError, WithId<Guest>[]>>
   override async insert(
     doc:
-      | OptionalUnlessRequiredId<Omit<Guest, 'createdAt' | 'updatedAt'>>
-      | OptionalUnlessRequiredId<Omit<Guest, 'createdAt' | 'updatedAt'>>[],
+      | OptionalUnlessRequiredId<NoTimestamps<Guest>>
+      | OptionalUnlessRequiredId<NoTimestamps<Guest>>[],
   ): Promise<Result<ServerError, WithId<Guest> | WithId<Guest>[]>> {
     const isDocsArray = Array.isArray(doc)
     const docs = isDocsArray ? doc : [doc]
