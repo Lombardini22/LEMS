@@ -1,4 +1,4 @@
-import { addGuestThroughMailChimp } from './addGuestThroughMailChimp'
+import { findGuest } from './findGuest'
 import { expectResult } from '../../../../shared/testUtils'
 import { ObjectId } from 'mongodb'
 import { hashGuestEmail } from '../../../../shared/models/Guest'
@@ -57,7 +57,7 @@ describe('addGuestThroughMailChimp', () => {
 
   it('should work', async () => {
     return env.use(async env => {
-      const result = await addGuestThroughMailChimp({
+      const result = await findGuest({
         params: { email: 'mailchimp.user@example.com' },
         query: {},
         body: {},
@@ -106,7 +106,7 @@ describe('addGuestThroughMailChimp', () => {
 
     expectResult(insertionResult).toHaveSucceeded()
 
-    const result = await addGuestThroughMailChimp({
+    const result = await findGuest({
       params: { email: 'mailchimp.user@example.com' },
       query: {},
       body: {},

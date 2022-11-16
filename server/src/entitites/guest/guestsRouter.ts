@@ -1,8 +1,5 @@
 import { Router } from '../../routing/Router'
-import {
-  addGuestThroughMailChimp,
-  addGuestThroughMailChimpPath,
-} from './addGuestThroughMailChimp'
+import { findGuest, findGuestPath } from './findGuest'
 import { checkInGuest, checkInGuestPath } from './checkInGuest'
 import { findGuests, findGuestsPath } from './findGuests'
 import { sendQrCode, sendQrCodePath } from './generateQrCode'
@@ -15,4 +12,4 @@ export const guestsRouter = Router.make('/guests')
   .get(checkInGuestPath, checkInGuest)
   .put(updateGuestPath, updateGuest)
   .custom('GET', sendQrCodePath, sendQrCode)
-  .get(addGuestThroughMailChimpPath, addGuestThroughMailChimp)
+  .get(findGuestPath, findGuest)
