@@ -6,11 +6,17 @@ interface PageInfo {
   hasNextPage: boolean
 }
 
+/**
+ * Represents a single item of a paginated result. The cursor can be used as a reference in a `CursorQuery`, while the node is the actual document
+ */
 interface Edge<T> {
   cursor: string
   node: T
 }
 
+/**
+ * Represents a paginated result. See `PageInfo` and `Edge`
+ */
 export interface Cursor<T> {
   pageInfo: PageInfo
   edges: Edge<T>[]
@@ -29,6 +35,9 @@ export function emptyCursor<T>(): Cursor<T> {
   }
 }
 
+/**
+ * Represents a query with pagination in ascending order. `query` is the query string, `first` and `after` express the number of documents (i.e.: page size) that are wanted and which was the last known document. `after` should be a cursor retrieved from an `Edge`
+ */
 export interface CursorQueryAsc {
   order: 'ASC'
   query: string | null
@@ -36,6 +45,9 @@ export interface CursorQueryAsc {
   after: string | null
 }
 
+/**
+ * Represents a query with pagination in descending order. `query` is the query string, `last` and `before` express the number of documents (i.e.: page size) that are wanted and which was the last known document. `before` should be a cursor retrieved from an `Edge`
+ */
 export interface CursorQueryDesc {
   order: 'DESC'
   query: string | null
@@ -43,6 +55,9 @@ export interface CursorQueryDesc {
   before: string | null
 }
 
+/**
+ * Represents a query with pagination. See `CursorQueryAsc` and `CursorQueryDesc`
+ */
 export type CursorQuery = CursorQueryAsc | CursorQueryDesc
 
 export function emptyCursorQuery(perPage = 20): CursorQuery {
