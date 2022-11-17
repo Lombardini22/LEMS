@@ -2,7 +2,7 @@ import { reactive } from 'vue'
 
 export type State = {
   initialized: boolean
-  shops: Array<Guest>
+  guests: GuestNode[]
 }
 
 export type Guest = {
@@ -12,8 +12,27 @@ export type Guest = {
   email: string
 }
 
+export type GuestNode = {
+  node: {
+    _id: string
+    firstName: string
+    lastName: string
+    email: string
+    emailHash: string
+    companyName: string
+    accountManager: string
+    source: string
+    status: string
+    createdAt: string
+    updatedAt: string
+    fullName: string
+  }
+  cursor: string
+}
+
 export const useState = () => {
-  return reactive({
-    guest: [] as Guest[],
+  return reactive<State>({
+    initialized: false,
+    guests: [],
   })
 }

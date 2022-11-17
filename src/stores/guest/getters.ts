@@ -1,34 +1,19 @@
-import { Guest } from "./state";
+import {State } from './state'
 
-export type Getters = ReturnType<typeof useGetters>;
+export type Getters = ReturnType<typeof useGetters>
 
-export function useGetters(state: any) {
+export function useGetters(state: State) {
   const getters = {
     isInitialized: () => state.initialized,
-    getStore: () => {
-      try {
-        return state.guest;
-      } catch (e) {
-        console.error(e);
-        return [];
-      }
+    getGuests: () => {
+      return state.guests
     },
-    getStoreById: (id: string) => {
-      try {
-        return state.guest.find((item: Guest) => item.id === id);
-      } catch (e) {
-        console.error(e);
-        return null;
-      }
+    getGuestById: (id: string) => {
+      return state.guests.find((item) => item.node._id === id)
     },
-    getStoreByEmail: (email: string) => {
-      try {
-        return state.guest.find((item: any) => item.email === email);
-      } catch (e) {
-        console.error(e);
-        return null;
-      }
+    getGuestByEmail: (email: string) => {
+      return state.guests.find((item) => item.node.email === email)
     },
-  };
-  return getters;
+  }
+  return getters
 }
