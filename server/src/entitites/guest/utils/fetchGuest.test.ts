@@ -20,7 +20,7 @@ const getListMember = jest.fn((_listId: string, _emailHash: string) => {
     merge_fields: {
       FNAME: 'First name',
       LNAME: 'Last name',
-      MMERGE7: 'Company name',
+      AZIENDA: 'Company name',
     },
   })
 })
