@@ -6,6 +6,7 @@ import { Guest, hashGuestEmail } from '../../../../shared/models/Guest'
 import { Path } from '../../routing/Path'
 import { env } from '../../resources/env'
 import { fetchGuest } from './utils/fetchGuest'
+import { mailchimpDatabaseListMemberToGuest } from './utils/mailchimpDatabaseListMemberToGuest'
 
 type FindGuestParams = {
   email: string
@@ -22,22 +23,10 @@ export function findGuest(
     const { email } = req.params
     const emailHash = hashGuestEmail(email)
 
-    return fetchGuest(emailHash, env.MAILCHIMP_DATABASE_LIST_ID, member => ({
-      ...{
-        firstName: member.merge_fields['FNAME'],
-        lastName: member.merge_fields['LNAME'],
-        email: member.email_address,
-        emailHash,
-        companyName: null,
-        source: 'RSVP',
-        status: 'RSVP',
-        accountManager: null,
-      },
-      ...(member.merge_fields['MMERGE7']
-        ? {
-            companyName: member.merge_fields['MMERGE7'],
-          }
-        : {}),
-    }))
+    return fetchGuest(
+      emailHash,
+      env.MAILCHIMP_DATABASE_LIST_ID,
+      mailchimpDatabaseListMemberToGuest(emailHash),
+    )
   })
 }

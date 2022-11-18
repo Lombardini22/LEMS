@@ -8,6 +8,7 @@ import { Result } from '../../../../shared/Result'
 import { constVoid } from '../../../../shared/utils'
 import { fetchGuest } from './utils/fetchGuest'
 import { hashGuestEmail } from '../../../../shared/models/Guest'
+import { mailchimpDatabaseListMemberToGuest } from './utils/mailchimpDatabaseListMemberToGuest'
 
 type QrCodeParams = { email: string }
 
@@ -28,16 +29,7 @@ export const sendQrCode: RequestHandler<
       const guest = await fetchGuest(
         emailHash,
         env.MAILCHIMP_DATABASE_LIST_ID,
-        member => ({
-          firstName: member.merge_fields['FNAME'],
-          lastName: member.merge_fields['LNAME'],
-          email: member.email_address,
-          emailHash,
-          companyName: member.merge_fields['MMERGE4'] || null,
-          source: 'RSVP',
-          status: 'RSVP',
-          accountManager: null,
-        }),
+        mailchimpDatabaseListMemberToGuest(emailHash),
       )
 
       await guest.fold(
