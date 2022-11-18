@@ -9,6 +9,7 @@ import TicketPage2 from '../views/TicketPage2.vue'
 import AddPlusOne from '@/views/AddPlusOne.vue'
 import LoginPage from '@/views/LoginPage.vue'
 import PrintPage from '@/views/PrintPage.vue'
+import GuestListPage from '@/views/GuestListPage.vue'
 import { ref } from 'vue'
 import { isPlatform } from '@ionic/vue'
 
@@ -65,6 +66,19 @@ const routes: Array<RouteRecordRaw> = [
         {
           path: 'manual',
           component: ManualPage,
+          beforeEnter: () => {
+            const { isAuth, check } = authCheck()
+            check()
+            if (isAuth.value) {
+              return true
+            } else {
+              return '/login'
+            }
+          },
+        },
+        {
+          path: 'list',
+          component: GuestListPage,
           beforeEnter: () => {
             const { isAuth, check } = authCheck()
             check()

@@ -20,13 +20,10 @@ const Env = z.object({
   EVENT_ISO_DATE: ISODate,
   MAILCHIMP_API_KEY: z.string(),
   MAILCHIMP_DATABASE_LIST_ID: z.string(),
-  MAILCHIMP_EVENT_LIST_ID: z.string(),
-  MAILCHIMP_RSVP_TAG_NAME: z.string(),
   MAILCHIMP_SERVER_PREFIX: z.string(),
   MONGO_DB_NAME: z.string(),
   MONGO_URI: z.string(),
   PORT: z.string(),
-  SYNC_SECRET: z.string(),
   VUE_APP_SERVER_URL: z.string(),
 })
 export type Env = z.infer<typeof Env>

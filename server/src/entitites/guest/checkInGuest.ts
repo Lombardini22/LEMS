@@ -42,7 +42,7 @@ export async function checkInGuest(
     }))
   })
 
-  return updateResult.mapError(error => {
+  return updateResult.mapError(function rewrite404ErrorMessage(error) {
     if (error.status === 404) {
       return new ServerError(404, 'Guest not found', error.extra)
     } else {

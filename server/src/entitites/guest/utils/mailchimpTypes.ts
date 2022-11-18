@@ -35,13 +35,6 @@ export type MailchimpDatabaseListMember = MailchimpMember & {
   }
 }
 
-export type MailchimpEventListMember = MailchimpMember & {
-  merge_fields: MailchimpMember['merge_fields'] & {
-    MMERGE3?: string // accountManager
-    MMERGE4?: string // companyName
-  }
-}
-
 export interface MailchimpListMembersResult<M> {
   members: M[]
   total_items: number
@@ -49,6 +42,3 @@ export interface MailchimpListMembersResult<M> {
 
 export type MailchimpDatabaseListMembersResult =
   MailchimpListMembersResult<MailchimpDatabaseListMember>
-
-export type MailchimpEventListMembersResult =
-  MailchimpListMembersResult<MailchimpEventListMember>

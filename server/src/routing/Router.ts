@@ -46,6 +46,9 @@ type RouterHandler<
   | RestfulHandler<Params, Query, Body, Output>
   | CustomHandler<Params, Query, Body>
 
+/**
+ * A strongly types Express Router
+ */
 export class Router {
   private readonly path: string
   private readonly handlers: RouterHandler[]
@@ -58,6 +61,11 @@ export class Router {
     this.handlers = handlers
   }
 
+  /**
+   * Creates a new Router
+   * @param path the root path of this router. It should be static (i.e.: no params or query)
+   * @returns a new Router with the provided root
+   */
   static make(path: string) {
     return new Router(path, [])
   }
@@ -162,6 +170,13 @@ export class Router {
     return new Router(this.path, [...this.handlers, newHandler])
   }
 
+  /**
+   * Attaches a custom handler to this router. WARNING: custom handlers do not handle errors automatically. Call `Router.handleError` manually if an exception is caught
+   * @param method the HTTP method
+   * @param path the Path to attach the handler to
+   * @param handler the handler to be attached to the path
+   * @returns a copy of this router with the attached handler
+   */
   custom<Body, P extends Path<unknown>>(
     method: RouterMethod,
     path: P,
@@ -181,6 +196,10 @@ export class Router {
     return new Router(this.path, [...this.handlers, newHandler])
   }
 
+  /**
+   * Attaches the router to an Express app or router
+   * @param app the Express app or router to attach this router to
+   */
   attachTo(app: express.Express): express.Express
   attachTo(router: ExpressRouter): ExpressRouter
   attachTo(
@@ -235,6 +254,12 @@ export class Router {
     return source.use(this.path, withHandlers as express.Express)
   }
 
+  /**
+   * Handles exceptions that weren't caught during the execution of a handler
+   * @param error the caught exception
+   * @param res the response from the Express handler
+   * @returns res, with the error handled. You won't probably need to use it after having called this mehod
+   */
   static handleError(error: Error, res: Response): Response {
     const isTesting = process.env['NODE_ENV'] === 'test'
 
@@ -244,7 +269,7 @@ export class Router {
           console.log(error.message)
           console.log(error.extra)
         }
-        
+
         return res.status(500).end()
       } else {
         if (!isTesting) {
