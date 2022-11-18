@@ -1,10 +1,14 @@
-import { CapacitorConfig } from '@capacitor/cli';
+import { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
   appId: 'io.ionic.starter',
   appName: 'lems',
   webDir: 'dist',
-  bundledWebRuntime: false
-};
+  bundledWebRuntime: false,
+  server: {
+    hostname: 'localhost',
+    androidScheme: 'https',
+  },
+}
 
-export default config;
+export default config

@@ -19,10 +19,8 @@ export function fetchGuest(
     const localGuest = await guestsCollection.findOne({ emailHash })
 
     return localGuest.fold(
-      async error => {
-        if (error.status !== 404) {
-          return Result.failure(() => error)
-        } else {
+      async function fetchGuestThroughMailchimp(error) {
+        if (error.status === 404) {
           const response = await Result.tryCatch(
             () => mailchimp.lists.getListMember(mailchimpListId, emailHash),
             error =>
@@ -33,28 +31,32 @@ export function fetchGuest(
               }),
           )
 
-          const mailchimpMemberData = await response.flatMap(response => {
-            if (isMailchimpMembersSuccessResponse(response)) {
-              return Result.success(() => response)
-            } else {
-              return Result.failure(
-                () =>
-                  new ServerError(
-                    500,
-                    'Error in getting subscriber from MailChimp',
-                    {
-                      response,
-                    },
-                  ),
-              )
-            }
-          })
+          const mailchimpMemberData = await response.flatMap(
+            function validateMailchimpResponse(response) {
+              if (isMailchimpMembersSuccessResponse(response)) {
+                return Result.success(() => response)
+              } else {
+                return Result.failure(
+                  () =>
+                    new ServerError(
+                      500,
+                      'Error in getting subscriber from MailChimp',
+                      {
+                        response,
+                      },
+                    ),
+                )
+              }
+            },
+          )
 
           const guestData = await mailchimpMemberData.map(
             mailchimpMemberToGuest,
           )
 
           return guestData.flatMap(data => guestsCollection.insert(data))
+        } else {
+          return Result.failure(() => error)
         }
       },
       guest => Result.success(() => guest),

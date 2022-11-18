@@ -29,6 +29,7 @@
 
 ### Android build
 
+- Add an `.env.production` file. It will be included in the native app and used as client-side environment
 - Update the client build: `yarn build:client`
 - Sync the Android build: `npx cap sync android`
 - Open the Android project in Android Studio: `npx cap open android`
@@ -36,7 +37,8 @@
 
 ### iOS build
 
+- Add an `.env.production` file. It will be included in the native app and used as client-side environment
 - Update the client build: `yarn build:client`
 - Sync the Android build: `npx cap sync ios`
 - Open the iOS project in XCode: `npx cap open ios`
-- Use iOS to build an IPA
+- Use XCode to build an IPA

@@ -29,6 +29,11 @@ export class Collection<I extends Doc> {
     | ((collection: MongoCollection<I>) => Promise<Result<ServerError, void>>)
     | null
 
+  /**
+   * Creates a new Collection
+   * @param name the name of the collection
+   * @param init optional async init function. It will take the native MongoDB collection as an argument and return an empty Result. Can perform operations, e.g. create indexes on the collection
+   */
   constructor(
     name: string,
     init?: (
@@ -53,6 +58,11 @@ export class Collection<I extends Doc> {
     })
   }
 
+  /**
+   * Attempts to execute an operation on the native MongoDB collection
+   * @param op async operation on the native MongoDB collection
+   * @returns the result of the operation, or a failure if the collection cannot be accessed
+   */
   async raw<T>(
     op: (collection: MongoCollection<I>) => Promise<Result<ServerError, T>>,
   ): Promise<Result<ServerError, T>> {
@@ -60,6 +70,10 @@ export class Collection<I extends Doc> {
     return collection.flatMap(op)
   }
 
+  /**
+   * Attempts to insert one or many document(s)
+   * @param doc the document or documents to be inserted
+   */
   async insert(doc: NoTimestamps<I>): Promise<Result<ServerError, WithId<I>>>
   async insert(
     docs: NoTimestamps<I>[],
@@ -70,10 +84,10 @@ export class Collection<I extends Doc> {
     const docs = Array.isArray(doc) ? doc : [doc]
     const collection = await this.getCollection()
 
-    const insertResult = await collection.flatMap(c =>
+    const insertResult = await collection.flatMap(collection =>
       Result.tryCatch(
         () =>
-          c.insertMany(
+          collection.insertMany(
             docs.map(
               doc =>
                 ({
@@ -108,10 +122,10 @@ export class Collection<I extends Doc> {
         )
       }
 
-      const result = await collection.flatMap(c =>
+      const result = await collection.flatMap(collection =>
         Result.tryCatch(
           () =>
-            c
+            collection
               .find({ _id: { $in: insertedIds } } as unknown as Filter<I>)
               .toArray(),
           error =>
@@ -145,6 +159,11 @@ export class Collection<I extends Doc> {
     })
   }
 
+  /**
+   * Attempts to find a single document in the collection
+   * @param filter the MongoDB filter to be used to find the document
+   * @returns the found document, or a failure if it was impossible to find it
+   */
   async findOne(filter: Filter<I>): Promise<Result<ServerError, WithId<I>>> {
     const collection = await this.getCollection()
 
@@ -169,10 +188,21 @@ export class Collection<I extends Doc> {
     })
   }
 
+  /**
+   * Attempts to find a document by its _id
+   * @param _id the _id of the document to be found
+   * @returns the found document, or a failure if the document could not be found
+   */
   findById(_id: ObjectId): Promise<Result<ServerError, WithId<I>>> {
     return this.findOne({ _id } as Filter<I>)
   }
 
+  /**
+   * Creates a search and paginate function based on cursors pagination
+   * @param searchField the field that will be used both to search and order the documents, and to create the cursors
+   * @param initialFilters an array of aggregation stages to be executed before the actual search. Useful for filtering based on permissions, add or remove fields, do lookups, etc.
+   * @returns a search function. It takes the query and executes the actual search and pagination based on how the operation has been set
+   */
   find<T = WithId<I>>(
     searchField: string,
     initialFilters: Document[] = [],
@@ -328,6 +358,11 @@ export class Collection<I extends Doc> {
     }
   }
 
+  /**
+   * Attempts to perform an aggregation operation on the MongoDB collection
+   * @param pipeline the MongoDB aggregation pipeline
+   * @returns the result of the aggregation, or a failure if an error was raised
+   */
   async aggregate<T extends Document>(
     pipeline: Document[],
   ): Promise<Result<ServerError, T[]>> {
@@ -346,6 +381,12 @@ export class Collection<I extends Doc> {
     )
   }
 
+  /**
+   * Attempts to update a single document
+   * @param filter the filter to be used to find the document
+   * @param doc the fields to be updated and their new values
+   * @returns the updated document, or a failure of it was impossible to perform the update operation
+   */
   async update(
     filter: Filter<I>,
     doc: NoTimestamps<I>,
@@ -389,6 +430,11 @@ export class Collection<I extends Doc> {
     })
   }
 
+  /**
+   * Attempts to delete a single document
+   * @param filter the filter to be used to find the document
+   * @returns the deleted document, or a failure if it was impossible to perform the delete operation
+   */
   async delete(filter: Filter<I>): Promise<Result<ServerError, WithId<I>>> {
     const collection = await this.getCollection()
 

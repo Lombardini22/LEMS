@@ -7,8 +7,8 @@ import { findGuests } from './findGuests'
 import { guestsCollection } from './guestsCollection'
 
 describe('findGuests', () => {
-  it('should find by full name', async () => {
-    await guestsCollection.raw(collection =>
+  beforeAll(() =>
+    guestsCollection.raw(collection =>
       Result.tryCatch(
         () =>
           collection.insertMany([
@@ -39,8 +39,10 @@ describe('findGuests', () => {
           ]),
         () => new ServerError(500, 'Failed to insert test data'),
       ),
-    )
+    ),
+  )
 
+  it('should find by full name', async () => {
     const result = await findGuests({
       params: {},
       query: {
@@ -55,5 +57,25 @@ describe('findGuests', () => {
     expectResult(result).toHaveSucceeded()
     expectT(result.unsafeGetValue().edges.length).toEqual(1)
     expectT(result.unsafeGetValue().edges[0]?.cursor).toEqual('Jane Doe')
+  })
+
+  it('should find by other fields', async () => {
+    const result = await findGuests({
+      params: {},
+      query: {
+        searchField: 'email',
+        order: 'ASC',
+        query: 'jane',
+        first: '1',
+        after: null,
+      },
+      body: {},
+    })
+
+    expectResult(result).toHaveSucceeded()
+    expectT(result.unsafeGetValue().edges.length).toEqual(1)
+    expectT(result.unsafeGetValue().edges[0]?.cursor).toEqual(
+      'jane.doe@example.com',
+    )
   })
 })
