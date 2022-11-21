@@ -1,6 +1,5 @@
 <template>
   <ion-page>
-
     <ion-content>
       <div id="block">
         <div class="cerca" v-if="!validEmail">
@@ -18,7 +17,7 @@
           </center>
         </div>
         <div v-else>
-          <!-- <h1 class="title">Grazie per aver confermato la tua presenza allo spettacolo!</h1> -->
+          <h1 class="title">Grazie per aver confermato la tua presenza <br /> al nostro Christmas Party!</h1>
           <Tilt data-tilt data-tilt-full-page-listening gyroscope="false">
             <div class="ticket ticket-1">
               <div class="details-block">
@@ -57,18 +56,18 @@
           <div class="footer">
             <!-- <AddToCalendar /> -->
             <ion-button class="btn mar-20" :href="printUrl">Salva Voucher in PDF</ion-button>
-            <!-- 
-            <ion-button class="btn mar-20" :href="plusOne">Invita un ospite</ion-button>
-             <ManualAddGuest :refererEmail="params.email" /> 
+
+            <!-- <ion-button class="btn mar-20" :href="plusOne">Invita un ospite</ion-button> -->
+            <ManualAddGuest :refererEmail="params.email" />
             <ion-button class="btn mar-20" href="mailto:info@foresightmilano.it?subject=FORESIGHT 2022">Contattaci Via
               Mail
-            </ion-button> -->
+            </ion-button>
           </div>
         </div>
-        <!-- <h4 id="believers" style="color: black" class="pad-20">Sound Design and live performance</h4>
-        <img src="../../public/assets/logos/orchestra.png" alt="believers" width="100" class="pad-20" />
+        <!-- <h4 id="believers" style="color: black" class="pad-20">Sound Design and live performance</h4> -->
+        <!-- <img src="../../public/assets/logos/orchestra.png" alt="believers" width="100" class="pad-20" /> -->
         <h4 id="believers" style="color: black" class="pad-20">Our Believers</h4>
-        <img src="../../public/assets/logos/foresight-supporters1.png" alt="believers" width="700" class="pad-20" /> -->
+        <img src="../../public/assets/logos/foresight-supporters1.png" alt="believers" width="700" class="pad-20" />
       </div>
     </ion-content>
   </ion-page>
@@ -76,7 +75,7 @@
 
 <script lang="ts" setup>
 import { IonContent, IonPage, IonButton, IonInput } from '@ionic/vue'
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, defineProps } from 'vue'
 import { searchOutline } from 'ionicons/icons'
 import { MD5 } from 'crypto-js'
 import Tilt from 'vanilla-tilt-vue'
@@ -84,13 +83,20 @@ import axios from 'axios'
 // import AddToCalendar from './components/AddToCalendar.vue'
 // import ManualAddGuest from './components/ManualAddGuest.vue'
 
+type Props = {
+  query: string
+}
+
+const props = defineProps<Props>()
 
 const emailInput = ref('')
 
 const serverUrl = process.env.VUE_APP_SERVER_URL
 
-const params = ref({
-  email: window.location.href.split('/').pop()?.toLowerCase() || '',
+const params = computed(() => {
+  return {
+    email: props.query.toLowerCase(),
+  }
 })
 
 const validEmail = computed(() => {

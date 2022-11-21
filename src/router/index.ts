@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from '@ionic/vue-router'
-import { RouteRecordRaw } from 'vue-router'
+import { RouteRecordRaw, type RouteLocationNormalized } from 'vue-router'
 import ScanPage from '../views/ScanPage.vue'
 import TabsPage from '../views/TabsPage.vue'
 import ManualPage from '../views/ManualPage.vue'
@@ -12,6 +12,7 @@ import PrintPage from '@/views/PrintPage.vue'
 import GuestListPage from '@/views/GuestListPage.vue'
 import { ref } from 'vue'
 import { isPlatform } from '@ionic/vue'
+
 
 const authCheck = () => {
   const isAuth = ref(false)
@@ -113,8 +114,9 @@ const routes: Array<RouteRecordRaw> = [
     //   component: TicketPage,
     // },
     {
-      path: '/ticket/:email',
+      path: '/ticket',
       component: TicketPage2,
+      props: (route: RouteLocationNormalized) => ({ query: route.query['q'] })
     },
     {
       path: '/ticket',
