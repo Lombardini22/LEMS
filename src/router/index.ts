@@ -5,7 +5,7 @@ import TabsPage from '../views/TabsPage.vue'
 import ManualPage from '../views/ManualPage.vue'
 import TestPage from '../views/TestPage.vue'
 import ReportsPage from '../views/ReportsPage.vue'
-import TicketPage2 from '../views/TicketPage2.vue'
+import TicketPage from '../views/TicketPage.vue'
 import AddPlusOne from '@/views/AddPlusOne.vue'
 import LoginPage from '@/views/LoginPage.vue'
 import PrintPage from '@/views/PrintPage.vue'
@@ -115,12 +115,12 @@ const routes: Array<RouteRecordRaw> = [
     // },
     {
       path: '/ticket',
-      component: TicketPage2,
+      component: TicketPage,
       props: (route: RouteLocationNormalized) => ({ query: route.query['q'] })
     },
     {
       path: '/ticket',
-      component: TicketPage2,
+      component: TicketPage,
     },
     {
       path: '/plusOne',
