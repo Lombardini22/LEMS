@@ -14,17 +14,15 @@
 </template>
 
 <script lang="ts" setup>
-import { IonContent, IonPage } from '@ionic/vue'
+import { IonContent, IonPage, toastController } from '@ionic/vue'
 import { computed, reactive, ref, defineProps, onBeforeMount } from 'vue'
 import { MD5 } from 'crypto-js'
-import axios from 'axios'
 import SearchTicketVue from './Ticket/SearchTicket.vue'
 import TicketTemplateVue from './Ticket/TicketTemplate.vue'
 import { Ticket } from '@/stores/guest/state'
+import { useStoreGuest } from '@/stores'
 // import AddToCalendar from './components/AddToCalendar.vue'
 // import ManualAddGuest from './components/ManualAddGuest.vue'
-
-
 
 type Props = {
   query?: string
@@ -32,8 +30,7 @@ type Props = {
 
 const props = defineProps<Props>()
 
-
-const serverUrl = process.env.VUE_APP_SERVER_URL
+const store = useStoreGuest()
 
 const params = computed(() => {
   return {
@@ -53,21 +50,30 @@ const ticket = reactive<Ticket>({
   qrCode: '',
 })
 
-onBeforeMount(() => {
-  axios
-    .get(serverUrl + `api/guests/${params.value.email}/rsvp/`)
-    .then(response => {
-      ticket.firstName = response.data.firstName
-      ticket.lastName = response.data.lastName
-      ticket.company = response.data.companyName
-      ticket.id = response.data.emailHash
-      console.log('data:', response.data)
-      validEmail.value = true
-    })
-    .catch(error => {
-      console.log({ error })
+const presentToast = async (position: "bottom" | "top" | "middle", message: string, color: string, duration: number) => {
+  const toast = await toastController.create({
+    message: message,
+    duration: duration,
+    position: position,
+    color: color,
+  })
+  toast.present()
+}
 
-    })
+
+onBeforeMount(async () => {
+  try {
+    const tkt = await store.actions.getGuest(params.value.email)
+    ticket.firstName = tkt.firstName
+    ticket.lastName = tkt.lastName
+    ticket.company = tkt.companyName
+    ticket.id = tkt.emailHash
+    console.log('data:', tkt)
+    validEmail.value = true
+  } catch (e) {
+    console.error('error:', e)
+    presentToast('bottom', `Utente non trovato`, 'warning', 3000)
+  }
 })
 
 </script>

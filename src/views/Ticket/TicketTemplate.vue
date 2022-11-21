@@ -37,7 +37,7 @@
         </Tilt>
 
         <div class="footer">
-            <!-- <AddToCalendar /> -->
+            <AddToCalendar />
             <ion-button class="btn mar-20" :href="printUrl">Salva Voucher in PDF</ion-button>
 
             <!-- <ion-button class="btn mar-20" :href="plusOne">Invita un ospite</ion-button> -->
@@ -56,6 +56,8 @@ import { IonButton } from '@ionic/vue'
 import { computed,  ref, defineProps } from 'vue'
 import Tilt from 'vanilla-tilt-vue'
 import { Ticket } from '@/stores/guest/state';
+import AddToCalendar from '../components/AddToCalendar.vue'
+
 
 type Props = {
     ticket: Ticket
