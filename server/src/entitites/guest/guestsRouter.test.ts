@@ -4,9 +4,10 @@ import { Result } from '../../../../shared/Result'
 import { expectResult } from '../../../../shared/testUtils'
 import { constVoid } from '../../../../shared/utils'
 import { Server } from '../../resources/Server'
-import { expectT, sendHttpRequest } from '../../testUtils'
-import { guestsCollection } from './guestsCollection'
+import { sendHttpRequest } from '../../testUtils'
 import { guestsRouter } from './guestsRouter'
+import { expectT } from '../../testUtils'
+import { ObjectId } from 'mongodb'
 
 interface GuestResult extends Omit<Guest, '_id'> {
   _id: string
@@ -34,7 +35,7 @@ describe('guestRouter', () => {
   describe('happy path', () => {
     it('should provide basic CRUD functionality', () =>
       server.use(async () => {
-        const insertionResult = await guestsCollection.insert({
+        const data = {
           firstName: 'John',
           lastName: 'Doe',
           email: 'john.doe@example.com',
@@ -43,22 +44,46 @@ describe('guestRouter', () => {
           source: 'MANUAL' as const,
           status: 'RSVP' as const,
           accountManager: null,
+        }
+
+        const emailHash = hashGuestEmail(data.email)
+
+        const insertionResult = await sendHttpRequest<
+          Omit<Guest, 'createdAt' | 'updatedAt'>,
+          GuestResult
+        >('POST', '/api/guests', data)
+
+        expectResult(insertionResult).toHaveSucceededWith({
+          status: 200,
+          data: expect.objectContaining(data),
         })
 
-        expectResult(insertionResult).toHaveSucceeded()
+        const findOneResult = await sendHttpRequest<GuestResult>(
+          'GET',
+          `/api/guests/${data.email}/rsvp`,
+        )
 
-        const emailHash = insertionResult.unsafeGetValue().emailHash
-        const guest = insertionResult.unsafeGetValue()
+        expectResult(findOneResult).toHaveSucceeded()
 
-        const findResult = await sendHttpRequest<Cursor<GuestResult>>(
+        expectT(findOneResult.unsafeGetValue().data.emailHash).toEqual(
+          emailHash,
+        )
+
+        const guest: Guest = {
+          // Not true, but YOLO
+          ...(findOneResult.unsafeGetValue().data as unknown as Guest),
+          _id: new ObjectId(findOneResult.unsafeGetValue().data._id),
+        }
+
+        const findresult = await sendHttpRequest<Cursor<GuestResult>>(
           'GET',
           '/api/guests/?order=ASC&query=john+doe&first=1',
         )
 
-        expectResult(findResult).toHaveSucceeded()
-        expectT(findResult.unsafeGetValue().data.edges.length).toEqual(1)
+        expectResult(findresult).toHaveSucceeded()
+        expectT(findresult.unsafeGetValue().data.edges.length).toEqual(1)
         expectT(
-          findResult.unsafeGetValue().data.edges[0]?.node.emailHash,
+          findresult.unsafeGetValue().data.edges[0]?.node.emailHash,
         ).toEqual(emailHash)
 
         const updateResult = await sendHttpRequest<Guest, GuestResult>(
@@ -87,6 +112,16 @@ describe('guestRouter', () => {
         expectResult(checkInResult).toHaveSucceeded()
         expectT(checkInResult.unsafeGetValue().data.status).toEqual(
           'CHECKED_IN',
+        )
+
+        const deletionResult = await sendHttpRequest<GuestResult>(
+          'DELETE',
+          `/api/guests/${emailHash}`,
+        )
+
+        expectResult(deletionResult).toHaveSucceeded()
+        expectT(deletionResult.unsafeGetValue().data.emailHash).toEqual(
+          emailHash,
         )
 
         return Result.success(constVoid)

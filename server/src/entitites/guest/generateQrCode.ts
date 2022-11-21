@@ -8,6 +8,7 @@ import { Result } from '../../../../shared/Result'
 import { constVoid } from '../../../../shared/utils'
 import { fetchGuest } from './utils/fetchGuest'
 import { hashGuestEmail } from '../../../../shared/models/Guest'
+import { mailchimpDatabaseListMemberToGuest } from './utils/mailchimpDatabaseListMemberToGuest'
 
 type QrCodeParams = { email: string }
 
@@ -22,45 +23,31 @@ export const sendQrCode: RequestHandler<
   unknown
 > = (req, res) => {
   env.use(async env => {
-    try {
-      const emailHash = hashGuestEmail(req.params.email)
+    const emailHash = hashGuestEmail(req.params.email)
 
-      const guest = await fetchGuest(
-        emailHash,
-        env.MAILCHIMP_DATABASE_LIST_ID,
-        member => ({
-          firstName: member.merge_fields['FNAME'],
-          lastName: member.merge_fields['LNAME'],
-          email: member.email_address,
-          emailHash,
-          companyName: member.merge_fields['MMERGE4'] || null,
-          source: 'RSVP',
-          status: 'RSVP',
-          accountManager: null,
-        }),
-      )
+    const guest = await fetchGuest(
+      emailHash,
+      env.MAILCHIMP_DATABASE_LIST_ID,
+      mailchimpDatabaseListMemberToGuest(emailHash),
+    )
 
-      await guest.fold(
-        function handleError(error) {
-          Router.handleError(error, res)
-        },
-        async function sendQRCodeStream() {
-          const stream = new PassThrough()
+    await guest.fold(
+      function handleError(error) {
+        Router.handleError(error, res)
+      },
+      async function sendQRCodeStream() {
+        const stream = new PassThrough()
 
-          await toFileStream(stream, emailHash, {
-            type: 'png',
-            width: 200,
-            margin: 1,
-          })
+        await toFileStream(stream, emailHash, {
+          type: 'png',
+          width: 200,
+          margin: 1,
+        })
 
-          stream.pipe(res)
-        },
-      )
+        stream.pipe(res)
+      },
+    )
 
-      return Result.success(constVoid)
-    } catch (e) {
-      console.log(e)
-      throw new Error(`Errore!!!! - ${e}`)
-    }
+    return Result.success(constVoid)
   })
 }
