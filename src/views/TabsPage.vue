@@ -8,10 +8,10 @@
           <ion-label>QR Scan</ion-label>
         </ion-tab-button>
 
-        <ion-tab-button tab="tab2" href="manual">
+        <!-- <ion-tab-button tab="tab2" href="manual">
           <ion-icon :icon="listOutline" />
           <ion-label>List / Manual</ion-label>
-        </ion-tab-button>
+        </ion-tab-button> -->
         <ion-tab-button tab="tab3" href="list">
           <ion-icon :icon="listCircle" />
           <ion-label>Guest List</ion-label>
@@ -39,5 +39,5 @@ import {
   IonPage,
   IonRouterOutlet,
 } from '@ionic/vue'
-import {  listCircle, listOutline,  pieChartOutline,  qrCodeOutline, ticketOutline } from 'ionicons/icons'
+import {  listCircle,  qrCodeOutline, ticketOutline } from 'ionicons/icons'
 </script>
