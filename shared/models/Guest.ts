@@ -25,7 +25,7 @@ export interface Subscriber extends GuestCommonData {
   source: 'MANUAL' | 'RSVP' | 'UPLOAD' | 'SYNC'
 }
 
-type GuestStatus = 'RSVP' | 'CHECKED_IN'
+type GuestStatus = 'RSVP' | 'WAITING' | 'CHECKED_IN'
 
 export type Guest = Referree | Subscriber
 
