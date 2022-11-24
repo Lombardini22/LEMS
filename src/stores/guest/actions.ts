@@ -32,12 +32,47 @@ export function useActions(state: State, getters: Getters) {
         console.error({ e })
       }
     },
+    changeWaitingList: async (item: GuestNode) => {
+      try {
+        console.log('TODO: changeWaitingList', item)
+
+        // await axios.put(`${serverUrl}api/guests/${item.node.emailHash}`, {
+        //   status: item.node.status === 'RSVP' ? 'CHECKED_IN' : 'RSVP',
+        // })
+        // item.node.status = item.node.status === 'RSVP' ? 'CHECKED_IN' : 'RSVP'
+      } catch (e) {
+        console.error({ e })
+      }
+    },
+    isTicketAvailable: async (): Promise<boolean> => {
+      try {
+        const { data } = await axios.get<{ count: number }>(
+          `${serverUrl}api/guests/count-rsvp`,
+        )
+        return data.count < 0 ? true : false
+      } catch (e) {
+        console.error({ e })
+        return false
+      }
+    },
+    addGuestToWaitinglist: async (email: string) => {
+      try {
+        console.log('TODO: addGuestToWaitinglist', email)
+        const { data } = await axios.get<GuestNode['node']>(
+          `${serverUrl}api/guests/${email}/waitlist/`,
+        )
+        return data
+      } catch (e) {
+        console.error({ e })
+        throw new Error(`${e}`)
+      }
+    },
     getGuest: async (email: string) => {
       try {
-        const {data} = await axios.get<GuestNode['node']>(
+        const { data } = await axios.get<GuestNode['node']>(
           serverUrl + `api/guests/${email}/rsvp/`,
         )
-          return data
+        return data
       } catch (e) {
         throw new Error(`${e}`)
       }
