@@ -30,6 +30,17 @@ export type GuestNode = {
   cursor: string
 }
 
+
+export type Ticket = {
+  id: string
+  firstName: string
+  lastName: string
+  email: string
+  company: string
+  qrCode: string
+}
+
+
 export const useState = () => {
   return reactive<State>({
     initialized: false,

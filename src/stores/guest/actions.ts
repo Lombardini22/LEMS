@@ -32,6 +32,16 @@ export function useActions(state: State, getters: Getters) {
         console.error({ e })
       }
     },
+    getGuest: async (email: string) => {
+      try {
+        const {data} = await axios.get<GuestNode['node']>(
+          serverUrl + `api/guests/${email}/rsvp/`,
+        )
+          return data
+      } catch (e) {
+        throw new Error(`${e}`)
+      }
+    },
   }
   return actions
 }

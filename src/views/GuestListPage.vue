@@ -133,7 +133,6 @@ import { GuestNode } from '@/stores/guest/state';
 
 const serverUrl = process.env.VUE_APP_SERVER_URL
 const store = useStoreGuest()
-// console.log('store', store.getters.getGuests())
 
 const data = computed(() => store.getters.getGuests())
 const search = ref()
