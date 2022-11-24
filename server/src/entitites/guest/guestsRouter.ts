@@ -7,11 +7,13 @@ import { getStats, getStatsPath } from './getStats'
 import { updateGuest, updateGuestPath } from './updateGuest'
 import { createGuest, createGuestPath } from './createGuest'
 import { deleteGuest, deleteGuestPath } from './deleteGuest'
+import { countRsvp, countRsvpPath } from './countRsvp'
 
 export const guestsRouter = Router.make('/guests')
   .post(createGuestPath, createGuest)
   .get(findGuestsPath, findGuests)
   .get(findGuestPath, findGuest)
+  .get(countRsvpPath, countRsvp)
   .get(getStatsPath, getStats)
   .get(checkInGuestPath, checkInGuest)
   .put(updateGuestPath, updateGuest)
