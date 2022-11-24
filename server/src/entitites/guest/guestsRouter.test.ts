@@ -9,6 +9,7 @@ import { guestsRouter } from './guestsRouter'
 import { expectT } from '../../testUtils'
 import { ObjectId } from 'mongodb'
 import { CountRsvpResponse } from './countRsvp'
+import { NoTimestamps } from '../../database/Collection'
 
 interface GuestResult extends Omit<Guest, '_id'> {
   _id: string
@@ -50,7 +51,7 @@ describe('guestRouter', () => {
         const emailHash = hashGuestEmail(data.email)
 
         const insertionResult = await sendHttpRequest<
-          Omit<Guest, 'createdAt' | 'updatedAt'>,
+          NoTimestamps<Guest>,
           GuestResult
         >('POST', '/api/guests', data)
 
@@ -84,6 +85,13 @@ describe('guestRouter', () => {
           ...(findOneResult.unsafeGetValue().data as unknown as Guest),
           _id: new ObjectId(findOneResult.unsafeGetValue().data._id),
         }
+
+        const addToWaitlistResult = await sendHttpRequest<Guest>(
+          'GET',
+          `/api/guests/${guest.email}/waitlist`,
+        )
+
+        expectResult(addToWaitlistResult).toHaveSucceeded()
 
         const findResult = await sendHttpRequest<Cursor<GuestResult>>(
           'GET',
