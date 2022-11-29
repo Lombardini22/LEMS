@@ -9,6 +9,10 @@ import { createGuest, createGuestPath } from './createGuest'
 import { deleteGuest, deleteGuestPath } from './deleteGuest'
 import { countRsvp, countRsvpPath } from './countRsvp'
 import { addToWaitlist, addToWaitlistPath } from './addToWaitlist'
+import {
+  tagMailchimpMember,
+  tagMailchimpMemberPath,
+} from './tagMailchimpMember'
 
 export const guestsRouter = Router.make('/guests')
   .post(createGuestPath, createGuest)
@@ -18,6 +22,7 @@ export const guestsRouter = Router.make('/guests')
   .get(countRsvpPath, countRsvp)
   .get(getStatsPath, getStats)
   .get(checkInGuestPath, checkInGuest)
+  .put(tagMailchimpMemberPath, tagMailchimpMember)
   .put(updateGuestPath, updateGuest)
   .custom('GET', sendQrCodePath, sendQrCode)
   .delete(deleteGuestPath, deleteGuest)
