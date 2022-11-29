@@ -49,7 +49,7 @@ export function useActions(state: State, getters: Getters) {
         const { data } = await axios.get<{ count: number }>(
           `${serverUrl}api/guests/count-rsvp`,
         )
-        return data.count < 0 ? true : false
+        return data.count < process.env.VUE_APP_MAX_GUESTS ? true : false
       } catch (e) {
         console.error({ e })
         return false

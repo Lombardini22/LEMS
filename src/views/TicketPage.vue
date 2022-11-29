@@ -71,6 +71,7 @@ const presentToast = async (position: "bottom" | "top" | "middle", message: stri
 }
 
 
+
 onBeforeMount(async () => {
   try {
     isTicketAvailable.value = await store.actions.isTicketAvailable()
