@@ -8,7 +8,7 @@
             <div class="ticket ticket-1">
                 <div class="details-block">
                     <div class="logos-block">
-                        <img src="/assets/logos/logo-foresight1.png" class="logo-img" />
+                        <img src="/assets/logos/title_cp.png" class="logo-img" />
                         <img src="/assets/logos/Lombardini22.png" class="logo-lomb" />
                     </div>
 
@@ -50,8 +50,8 @@
                 Mail
             </ion-button>
         </div>
-        <p id="believers" style="color: black" class="pad-20">thanks to</p>
-        <img src="../../../public/assets/logos/foresight-supporters1.png" alt="believers" width="700" class="pad-20" />
+        <p id="believers" class="pad-10">thanks to</p>
+        <img src="../../../public/assets/logos/foresight-supporters1.png" alt="believers" width="700" class="pad-10" />
     </div>
 
 </template>
@@ -242,6 +242,9 @@ body {
 .pad-20 {
     padding-top: 20px;
 }
+.pad-10 {
+    padding-top: 20px;
+}
 
 .mar-20 {
     margin-top: 20px;
@@ -266,11 +269,11 @@ body {
 
 .details-block {
     display: flex;
-    /* background-image: url('../../../public/assets/media/bg-1.png'); */
+    background-image: url('../../../public/assets/media/bg-2.jpg');
     background-color: black !important;
     border-radius: 20px;
     flex-direction: column;
-    background-position: center;
+    background-position: inherit;
     background-size: cover;
     background-repeat: repeat;
     justify-content: space-between;
@@ -291,6 +294,7 @@ body {
 }
 
 .logo-lomb {
+
     height: 35px;
     margin-right: 20px;
 }
@@ -307,13 +311,13 @@ body {
 }
 
 .name {
-    margin-top: 25px;
-    font-size: 30px;
+    margin-top: 45px;
+    font-size: 25px;
     text-transform: uppercase;
 }
 
 .company {
-    font-size: 20px;
+    font-size: 17px;
 }
 
 .small {
@@ -402,11 +406,12 @@ body {
     text-align: center;
 }
 
-h2#believers {
+#believers {
     color: white;
-    /* padding-top: 20px; */
+    color: black;
     margin: 20px;
     text-shadow: none;
+    text-align: center;
 }
 
 /*  
@@ -482,12 +487,12 @@ h2#believers {
 
     .name {
         margin-top: 25px;
-        font-size: 30px;
+        font-size: 25px;
         text-transform: uppercase;
     }
 
     .company {
-        font-size: 20px;
+        font-size: 17px;
     }
 
     .small {
