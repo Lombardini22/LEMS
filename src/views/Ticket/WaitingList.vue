@@ -1,6 +1,6 @@
 <template>
-    <h1 id="believers" style="color: black" class="pad-20">Waiting List!</h1>
-    <p style="color: black">
+    <h1 id="believers" class="pad-20">Waiting List!</h1>
+    <p>
         Grazie per aver richiesto di partecipare al Christmas Party di Lombardini22!
         <br />
         <br />
@@ -12,3 +12,18 @@
         Grazie!
     </p>
 </template>
+<script lang="ts" setup>
+import { onMounted } from 'vue';
+import { snow } from '../utils/confetti'
+
+onMounted(() => {
+    snow()
+})
+</script>
+<style>
+#block {
+  background-color: #00265181 !important;
+  color: white !important;
+}
+
+</style>
