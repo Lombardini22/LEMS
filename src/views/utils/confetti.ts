@@ -1,7 +1,7 @@
 import confetti from 'canvas-confetti'
 
 // Confetti
-const duration = 1000 * 1000
+const duration = 60 * 1000
 const animationEnd = Date.now() + duration
 let skew = 1
 

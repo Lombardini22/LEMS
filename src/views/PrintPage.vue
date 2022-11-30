@@ -8,7 +8,7 @@
                     <center>
                         <!-- <h1>Ecco il tuo biglietto, <br /> portalo con te per partecipare allo spettacolo.</h1> -->
 
-                        <img src="../../public/assets/media/Sfondo_300.png" alt="poster" class="poster spacer">
+                        <img src="../../public/assets/logos/title_cp_print.png" alt="poster" class="poster spacer">
                         <span class="spacer"></span>
                         <div class="location">
                             <p><strong>22 Dicembre 2022 | 19:00</strong><br />
@@ -115,7 +115,7 @@ onMounted(() => {
     background: white;
 }
 .poster{
-    background-color: black;
+    /* background-color: black; */
 }
 
 .location {

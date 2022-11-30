@@ -3,9 +3,8 @@
     <div class="cerca">
         <center>
             <div class="login-logo">
-                <img src="/assets/logos/logo-foresight-bk.png" alt="logo" />
+                <img src="/assets/logos/Lombardini22-blk.jpg" alt="logo" />
             </div>
-
             <strong>Inserisci qui la tua email</strong>
             <ion-input rounded outlined v-model="emailInput" placeholder="email" class="input" autofocus ref="qrInput">
             </ion-input>
