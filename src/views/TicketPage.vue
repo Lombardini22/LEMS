@@ -1,8 +1,8 @@
 <template>
   <ion-page>
     <ion-content>
-      <div id="block">
-        <WaitingListVue v-if="isInWaitlist"></WaitingListVue>
+      <div :class="['block',{ color1: isInWaitlist}]">
+        <WaitingListVue v-if="isInWaitlist" ></WaitingListVue>
         <SearchTicketVue v-else-if="!validEmail" class="cerca" />
         <TicketTemplateVue :ticket="ticket" v-else-if="(ticket.firstName.length > 0)" />
         <!-- <h4 id="believers" style="color: black" class="pad-20">Sound Design and live performance</h4> -->
@@ -123,6 +123,10 @@ onBeforeMount(async () => {
   transform: translateY(-50%);
 }
 
+.color1 {
+  background-color: #002651 !important; 
+  color: white !important;
+}
 #container strong {
   font-size: 20px;
   line-height: 26px;
@@ -182,7 +186,6 @@ center strong {
 *::after {
   box-sizing: border-box;
   margin: 0;
-  /* text-shadow: 0px 0px 20px black; */
   font-family: helvetica neue, helvetica, arial, verdana, sans-serif;
 }
 
@@ -207,7 +210,7 @@ center strong {
   --background: #ff4a68;
 }
 
-#block {
+.block {
   display: flex;
   align-items: center;
   justify-content: center;

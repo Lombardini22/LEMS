@@ -4,11 +4,24 @@
             <div id="block">
                 <img src="../../public/assets/logos/Lombardini22.png" alt="Lombardini" class="logo" />
                 <h1 id="believers" class="pad-20 mar-bot-20">Ci mancherai!</h1>
-                <img src="https://media.tenor.com/BsKYBPwg6oAAAAAC/christmas-grinch.gif" alt="grinch" class="grinch" />
+                <!-- <img src="https://media.tenor.com/BsKYBPwg6oAAAAAC/christmas-grinch.gif" alt="grinch" class="grinch" /> -->
+                <model-viewer src="https://rd.lombardini22.com/viewer/models/santa_claus_walk.glb" ar ar-modes="webxr scene-viewer quick-look"
+                    camera-controls poster="poster.webp" shadow-intensity="1" autoplay 
+                    min-camera-orbit="auto 38deg auto" max-camera-orbit="auto 85deg auto">
+                    <div class="progress-bar hide" slot="progress-bar">
+                        <div class="update-bar"></div>
+                    </div>
+                    <button slot="ar-button" id="ar-button">
+                        View in your space
+                    </button>
+                    <!-- <div id="ar-prompt">
+        <img src="https://modelviewer.dev/shared-assets/icons/hand.png">
+    </div> -->
+                </model-viewer>
                 <p class="testo mar-20">
                     Ci dispiace, non sarai con noi al Christmas Party di quest’anno!
                     <br />
-                    Ma non preoccuparti, ci saranno altre occasioni per festeggiare insieme. <br />
+                    Ma non preoccuparti, ci saranno altre occasioni per festeggiare insieme. <br /><br />
                     Buone feste, a presto!
 
                 </p>

@@ -480,7 +480,7 @@ body {
 
     .guest {
         font-size: 25px;
-        margin: 20px 25px 0 35px;
+        margin: 80px 25px 0 35px;
         float: left;
         font-weight: bold;
     }

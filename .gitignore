@@ -37,3 +37,5 @@ tests/e2e/videos/
 !.env.example
 todo.md
 server/build/
+
+/public/assets/3d/
