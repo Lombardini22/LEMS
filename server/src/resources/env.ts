@@ -21,6 +21,7 @@ const Env = z.object({
   MAILCHIMP_API_KEY: z.string(),
   MAILCHIMP_DATABASE_LIST_ID: z.string(),
   MAILCHIMP_SERVER_PREFIX: z.string(),
+  MAILCHIMP_WAITING_LIST_TAG_NAME: z.string(),
   MONGO_DB_NAME: z.string(),
   MONGO_URI: z.string(),
   PORT: z.string(),
