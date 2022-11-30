@@ -53,10 +53,12 @@
   
 <script lang="ts" setup>
 import { IonButton } from '@ionic/vue'
-import { computed,  ref, defineProps } from 'vue'
+import { computed, ref, defineProps, onMounted } from 'vue'
 import Tilt from 'vanilla-tilt-vue'
 import { Ticket } from '@/stores/guest/state';
 import AddToCalendar from '../components/AddToCalendar.vue'
+import { sideConfetti } from '../utils/confetti'
+
 
 
 type Props = {
@@ -112,6 +114,10 @@ const qrCode = computed(() => {
 
 const printUrl = computed(() => {
     return `/print/${fullName.value}/${props.ticket.email}`
+})
+
+onMounted(() => {
+    sideConfetti()
 })
 
 

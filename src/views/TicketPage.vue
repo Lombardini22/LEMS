@@ -4,7 +4,7 @@
       <div id="block">
         <WaitingListVue v-if="isInWaitlist"></WaitingListVue>
         <SearchTicketVue v-else-if="!validEmail" class="cerca" />
-        <TicketTemplateVue :ticket="ticket" v-else />
+        <TicketTemplateVue :ticket="ticket" v-else-if="(ticket.firstName.length > 0)" />
         <!-- <h4 id="believers" style="color: black" class="pad-20">Sound Design and live performance</h4> -->
         <!-- <img src="../../public/assets/logos/orchestra.png" alt="believers" width="100" class="pad-20" /> -->
         <h4 id="believers" style="color: black" class="pad-20">Our Believers</h4>
@@ -23,7 +23,6 @@ import TicketTemplateVue from './Ticket/TicketTemplate.vue'
 import WaitingListVue from './Ticket/WaitingList.vue'
 import { Ticket } from '@/stores/guest/state'
 import { useStoreGuest } from '@/stores'
-import { sideConfetti } from './utils/confetti'
 
 
 type Props = {
@@ -42,7 +41,7 @@ const params = computed(() => {
 
 const isInWaitlist = ref(false)
 
-const validEmail = ref(false)
+const validEmail = ref(true)
 
 const isTicketAvailable = ref(false)
 
@@ -74,7 +73,6 @@ const presentToast = async (position: "bottom" | "top" | "middle", message: stri
 
 onBeforeMount(async () => {
   try {
-    sideConfetti()
     isTicketAvailable.value = await store.actions.isTicketAvailable()
     if (isTicketAvailable.value && !!params.value.email) {
       const tkt = await store.actions.getGuest(params.value.email)
@@ -103,8 +101,11 @@ onBeforeMount(async () => {
         ticket.id = tkt.emailHash
         validEmail.value = true
       }
+    }else{
+      validEmail.value = false
     }
   } catch (e) {
+    validEmail.value = false
     presentToast('bottom', `Utente non trovato`, 'warning', 3000)
   }
 })
