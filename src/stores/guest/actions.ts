@@ -36,10 +36,10 @@ export function useActions(state: State, getters: Getters) {
       try {
         console.log('TODO: changeWaitingList', item)
 
-        // await axios.put(`${serverUrl}api/guests/${item.node.emailHash}`, {
-        //   status: item.node.status === 'RSVP' ? 'CHECKED_IN' : 'RSVP',
-        // })
-        // item.node.status = item.node.status === 'RSVP' ? 'CHECKED_IN' : 'RSVP'
+        await axios.put(`${serverUrl}api/guests/${item.node.emailHash}`, {
+          status: item.node.status === 'WAITING' ? 'RSVP' : 'WAITING',
+        })
+        item.node.status = item.node.status === 'WAITING' ? 'RSVP' : 'WAITING'
       } catch (e) {
         console.error({ e })
       }
@@ -72,6 +72,20 @@ export function useActions(state: State, getters: Getters) {
         const { data } = await axios.get<GuestNode['node']>(
           serverUrl + `api/guests/${email}/rsvp/`,
         )
+        return data
+      } catch (e) {
+        throw new Error(`${e}`)
+      }
+    },
+    addTag: async (email: string, tag: string) => {
+      try {
+        if ( email == undefined || email.length == 0 ) {
+          return
+        }
+        const { data } = await axios.put<void>(serverUrl + `api/guests/tag/`, {
+          email,
+          tag,
+        })
         return data
       } catch (e) {
         throw new Error(`${e}`)

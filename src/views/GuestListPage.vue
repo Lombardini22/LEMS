@@ -25,6 +25,9 @@
           <ion-segment-button value="checkedIn">
             <ion-label>Checked-In ({{ totalCheckedIn }})</ion-label>
           </ion-segment-button>
+          <ion-segment-button value="waiting">
+            <ion-label>Waiting ({{ waitingCount }})</ion-label>
+          </ion-segment-button>
         </ion-segment>
       </ion-toolbar>
     </ion-header>
@@ -61,7 +64,8 @@
               </ion-item>
 
               <ion-item-options side="end">
-                <ion-item-option color="primary" @click="changeCheckin(item)">Check In</ion-item-option>
+                <ion-item-option color="warning" v-if="segment === 'waiting'" @click="approveGuest(item)">Approva</ion-item-option>
+                <ion-item-option color="primary" v-else @click="changeCheckin(item)">Check In</ion-item-option>
               </ion-item-options>
             </ion-item-sliding>
           </ion-list>
@@ -167,6 +171,7 @@ const segment = ref('registrati');
 const segmentChanged = (ev: CustomEvent) => {
   segment.value = ev.detail.value;
 }
+store.getters.getWaitingList()
 
 // search results count
 const totalRegistrati = computed(() => {
@@ -176,12 +181,26 @@ const totalCheckedIn = computed(() => {
   return prefilter().filter((item: any) => item.node.status === 'CHECKED_IN').length
 })
 
+const waitingCount = computed(() => {
+  return prefilter().filter((item: any) => item.node.status === 'WAITING').length
+})
 
 // doCheckin
 
 const changeCheckin = async (item: GuestNode) => {
   try {
     store.actions.changeCheckin(item)
+  }
+  catch (err) {
+    console.error(err)
+    presentToast('bottom', `Errore! qualcosa è andato storto! - ${err}`, 'danger', 3000)
+  }
+
+}
+
+const approveGuest = async (item: GuestNode) => {
+  try {
+    store.actions.changeWaitingList(item)
   }
   catch (err) {
     console.error(err)
@@ -261,13 +280,21 @@ const prefilter = () => {
 
 const filteredData = computed(() => {
   return prefilter().filter((item) => {
-    return segment.value === 'registrati' ? item.node.status === 'RSVP' : item.node.status === 'CHECKED_IN'
+    switch (segment.value) {
+      case 'registrati':
+        return item.node.status === 'RSVP'
+      case 'checked-in':
+        return item.node.status === 'CHECKED_IN'
+      case 'waiting':
+        return item.node.status === 'WAITING'
+      default:
+        return item.node.status === 'RSVP'
+    }
   })
 
 })
 
 const doRefresh = (event: CustomEvent & { target: { complete: () => void } }) => {
-
   event.target?.complete();
 }
 

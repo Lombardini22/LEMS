@@ -23,8 +23,8 @@ import TicketTemplateVue from './Ticket/TicketTemplate.vue'
 import WaitingListVue from './Ticket/WaitingList.vue'
 import { Ticket } from '@/stores/guest/state'
 import { useStoreGuest } from '@/stores'
-// import AddToCalendar from './components/AddToCalendar.vue'
-// import ManualAddGuest from './components/ManualAddGuest.vue'
+import { sideConfetti } from './utils/confetti'
+
 
 type Props = {
   query?: string
@@ -74,6 +74,7 @@ const presentToast = async (position: "bottom" | "top" | "middle", message: stri
 
 onBeforeMount(async () => {
   try {
+    sideConfetti()
     isTicketAvailable.value = await store.actions.isTicketAvailable()
     if (isTicketAvailable.value && !!params.value.email) {
       const tkt = await store.actions.getGuest(params.value.email)
@@ -82,9 +83,13 @@ onBeforeMount(async () => {
       ticket.company = tkt.companyName
       ticket.id = tkt.emailHash
       validEmail.value = true
+      console.log("Dates", new Date("2022-12-05"), new Date())
+      if (new Date("2022-12-05") > new Date()) {
+        await store.actions.addTag(tkt.email, 'SAVE THE DATE')
+      }
+      await store.actions.addTag(tkt.email, 'CP 2022')
     }
     else if (!isTicketAvailable.value && !!params.value.email) {
-
       const guest = await store.actions.addGuestToWaitinglist(params.value.email)
       if (guest.status == "WAITING") {
         isInWaitlist.value = true
@@ -103,6 +108,7 @@ onBeforeMount(async () => {
     presentToast('bottom', `Utente non trovato`, 'warning', 3000)
   }
 })
+
 
 </script>
 
@@ -207,6 +213,7 @@ center strong {
   justify-content: center;
   min-height: 100%;
   color: #999999;
+  /* background-color: #002651; */
   background-color: whitesmoke;
   flex-direction: column;
 }
