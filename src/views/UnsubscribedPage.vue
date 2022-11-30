@@ -1,134 +1,32 @@
 <template>
-    <div>
-        <h4 class="title"><strong>EVVIVA!</strong><br />
-            Grazie per la tua conferma.<br />
-            Parteciperai insieme a noi al Christmas Party 2022 ✨
-        </h4>
-        <Tilt data-tilt data-tilt-full-page-listening gyroscope="false">
-            <div class="ticket ticket-1">
-                <div class="details-block">
-                    <div class="logos-block">
-                        <img src="/assets/logos/logo-foresight1.png" class="logo-img" />
-                        <img src="/assets/logos/Lombardini22.png" class="logo-lomb" />
-                    </div>
+    <ion-page>
+        <ion-content>
+            <div id="block">
+                <img src="../../public/assets/logos/Lombardini22.png" alt="Lombardini" class="logo"/>
+                <h1 id="believers" class="pad-20 mar-bot-20">Ci mancherai!</h1>
+                <img src="https://media.tenor.com/BsKYBPwg6oAAAAAC/christmas-grinch.gif" alt="grinch" class="grinch"/>
+                <p class="testo mar-20">
+                    Ci dispiace, non sarai con noi al Christmas Party di quest’anno!
+                    <br />
+                    Ma non preoccuparti, ci saranno altre occasioni per festeggiare insieme. <br />
+                    Buone feste, a presto!
 
-                    <div class="guest">
-                        <span class="name"> {{ ticket.firstName }} {{ ticket.lastName }}</span>
-                        <br />
-                        <span class="company small">{{ ticket.company }}</span>
-                    </div>
-
-                    <div class="location-block">
-                        <span class="location">22.12.2022 ore 19:00</span>
-                        <br />
-                        <span class="location">Triennale Milano, Viale Alemagna 6</span>
-                    </div>
-                    <img src="/assets/logos/Lombardini22.png" class="logo-lomb-mob" />
-
-                    <!-- <div class="rip"></div> -->
-                </div>
-                <div class="qr-block">
-                    <div class="upper_block">
-                        <img :src="qrCode" alt="QR Code" class="qr-img" />
-                        <h3>Biglietto <br />#{{ tktNumber }}</h3>
-                    </div>
-                    <div class="lower_block">
-                        <span class="disclaimer">Il biglietto è strettamente personale</span>
-                    </div>
-                </div>
+                </p>
             </div>
-        </Tilt>
-
-        <div class="footer">
-            <AddToCalendar />
-            <ion-button class="btn mar-20" :href="printUrl">Scarica il biglietto</ion-button>
-
-            <!-- <ion-button class="btn mar-20" :href="plusOne">Invita un ospite</ion-button> -->
-            <ManualAddGuest :refererEmail="ticket.email" />
-            <ion-button class="btn mar-20" href="mailto:eventi@l22.it?subject=Christmas Party Lombardini22">
-                Contattaci Via
-                Mail
-            </ion-button>
-        </div>
-        <p id="believers" style="color: black" class="pad-20">thanks to</p>
-        <img src="../../../public/assets/logos/foresight-supporters1.png" alt="believers" width="700" class="pad-20" />
-    </div>
-
+        </ion-content>
+    </ion-page>
 </template>
-  
+
 <script lang="ts" setup>
-import { IonButton } from '@ionic/vue'
-import { computed, ref, defineProps, onMounted } from 'vue'
-import Tilt from 'vanilla-tilt-vue'
-import { Ticket } from '@/stores/guest/state';
-import AddToCalendar from '../components/AddToCalendar.vue'
-import { sideConfetti } from '../utils/confetti'
-
-
-
-type Props = {
-    ticket: Ticket
-}
-
-const props = defineProps<Props>()
-
-
-const serverUrl = process.env.VUE_APP_SERVER_URL
-
-
-// const validEmail = ref(false)
-
-
-const tktNumber = ref(props.ticket.id.slice(0, 5).toUpperCase())
-// onBeforeMount(() => {
-//     axios
-//         .get(serverUrl + `api/guests/${params.value.email}/rsvp/`)
-//         .then(response => {
-//             ticket.firstName = response.data.firstName
-//             ticket.lastName = response.data.lastName
-//             ticket.company = response.data.companyName
-//             ticket.id = response.data.emailHash
-//             console.log('data:', response.data)
-//             validEmail.value = true
-//         })
-//         .catch(error => {
-//             console.log({ error })
-
-//         })
-// })
-
-
-const fullName = computed(() => {
-    return props.ticket.firstName + ' ' + props.ticket.lastName
-})
-const qrCode = computed(() => {
-    return serverUrl + `api/guests/qr/${props.ticket.email}`
-})
-
-
-// axios
-//     .get(serverUrl + `api/guests/${ticket.id}`)
-//     .then(res => {
-//         ticket.firstName = res.data.firstName
-//         ticket.lastName = res.data.lastName
-//         ticket.company = res.data.companyName
-//     })
-//     .catch(err => {
-//         console.log(err)
-//     })
-
-const printUrl = computed(() => {
-    return `/print/${fullName.value}/${props.ticket.email}`
-})
+import { onMounted } from 'vue';
+import { snow } from './utils/confetti'
 
 onMounted(() => {
-    sideConfetti()
+    snow()
 })
-
-
-  // console.log(qrCode)
 </script>
   
+
 <style scoped>
 #container {
     text-align: center;
@@ -166,7 +64,14 @@ onMounted(() => {
     margin-bottom: 5px;
     margin-top: 2px;
 }
-
+.logo{
+    width: 100%;
+    max-width: 200px;
+    margin: 0 auto;
+    display: block;
+    position: absolute;
+    top: 50px;
+}
 .login-logo {
     padding: 20px 0;
     min-height: 200px;
@@ -204,7 +109,6 @@ center strong {
 }
 
 .title {
-    margin-top: 50px !important;
     text-align: center;
     font-size: 2rem;
     margin: 1rem;
@@ -222,7 +126,7 @@ center strong {
 
 .btn {
     background: #ff5772;
-    --background: #ff5772;
+    --background: #ff4a68;
 }
 
 #block {
@@ -231,7 +135,8 @@ center strong {
     justify-content: center;
     min-height: 100%;
     color: #999999;
-    background-color: whitesmoke;
+    background-color: #002651;
+    /* background-color: whitesmoke; */
     flex-direction: column;
 }
 
@@ -247,6 +152,15 @@ body {
     margin-top: 20px;
 }
 
+.mar-bot-20{
+    margin-bottom: 20px;
+}
+
+.grinch {
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 30px;
+}
 .ticket {
     font-family: sans-serif;
     background-repeat: no-repeat;
@@ -264,10 +178,17 @@ body {
     margin-bottom: 25px;
 }
 
+.testo{
+    text-align: center;
+    font-size: 20px;
+    line-height: 26px;
+    color: white;
+    margin: 0;
+}
+
 .details-block {
     display: flex;
-    /* background-image: url('../../../public/assets/media/bg-1.png'); */
-    background-color: black !important;
+    background-image: url('../../public/assets/media/bg-1.png');
     border-radius: 20px;
     flex-direction: column;
     background-position: center;
@@ -320,6 +241,8 @@ body {
     font-weight: 200;
 }
 
+
+
 .location-block {
     float: left;
     margin: 25px 0 25px 35px;
@@ -360,8 +283,7 @@ body {
 .qr-block {
     width: 175px;
     height: 100%;
-    background-color: #ff5772;
-
+    background-color: #a23cfd;
     border-radius: 20px;
     color: #fff;
     text-decoration: none;
@@ -402,12 +324,13 @@ body {
     text-align: center;
 }
 
-h2#believers {
+#believers {
     color: white;
     /* padding-top: 20px; */
     margin: 20px;
     text-shadow: none;
 }
+
 
 /*  
    Responsive design
@@ -435,8 +358,7 @@ h2#believers {
 
     .details-block {
         display: flex;
-        /* background-image: url('../../../public/assets/media/bg-1.png'); */
-        background-color: black !important;
+        background-image: url('../../public/assets/media/bg-1.png');
         border-radius: 20px;
         flex-direction: column;
         background-position: center;
@@ -534,7 +456,7 @@ h2#believers {
     .qr-block {
         width: 100%;
         height: 25%;
-        background-color: #ff5772;
+        background-color: #a23cfd;
         border-radius: 20px;
         color: #fff;
         text-decoration: none;

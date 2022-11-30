@@ -7,8 +7,7 @@
         <TicketTemplateVue :ticket="ticket" v-else-if="(ticket.firstName.length > 0)" />
         <!-- <h4 id="believers" style="color: black" class="pad-20">Sound Design and live performance</h4> -->
         <!-- <img src="../../public/assets/logos/orchestra.png" alt="believers" width="100" class="pad-20" /> -->
-        <h4 id="believers" style="color: black" class="pad-20">Our Believers</h4>
-        <img src="../../public/assets/logos/foresight-supporters1.png" alt="believers" width="700" class="pad-20" />
+        
       </div>
     </ion-content>
   </ion-page>
@@ -204,8 +203,8 @@ center strong {
 }
 
 .btn {
-  background: #a23cfd;
-  --background: #a23cfd;
+  background: #ff5772;
+  --background: #ff4a68;
 }
 
 #block {
@@ -391,6 +390,12 @@ h2#believers {
   text-shadow: none;
 }
 
+#believers{
+  margin-top: 30px;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
 /*  
  Responsive design
  */

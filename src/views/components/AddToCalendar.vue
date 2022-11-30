@@ -10,7 +10,7 @@
         font-weight: bold;
         color: black;
       ">
-      Aggiungi al calendario
+      Aggiungi l’evento al calendar e scegli l'outfit,<br/> al resto ci pensiamo noi!
     </p>
     <p style="margin:0px 0px 10px 0px;text-align:center;font-size:0px;"><a
         href="https://www.addevent.com/event/CT15652222+apple" title="Apple" target="_blank"

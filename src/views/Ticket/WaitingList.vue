@@ -20,10 +20,8 @@ onMounted(() => {
     snow()
 })
 </script>
-<style>
-#block {
-  background-color: #00265181 !important;
-  color: white !important;
+<style scoped>
+html, body {
+    background: #000;
 }
-
 </style>
