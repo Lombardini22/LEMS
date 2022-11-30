@@ -38,8 +38,8 @@ export const snow = () => {
 
 
 // Side Confetti - School Pride
-const end = Date.now() + 5 * 1000
-const colors = ['#bb0000', '#ffffff']
+const end = Date.now() + 1 * 1000
+const colors = ['#ff5772', '#ffffff']
 
 export const sideConfetti = () => {
   confetti({
