@@ -19,7 +19,7 @@
     </div>
                 </model-viewer> -->
 
-                <model-viewer class="Model3d" src="santa_claus_walk.glb" ar ar-modes="scene-viewer webxr quick-look"
+                <model-viewer class="Model3d" src="/assets/3d/Santa_Claus_walk.gltf" ar ar-modes="scene-viewer webxr quick-look"
                     camera-controls poster="poster.webp" shadow-intensity="1" autoplay
                     camera-orbit="-89.13deg 72deg 3.945m" field-of-view="30deg" camera-target="0.002791m 0.9288m 0.72m"
                     min-camera-orbit="auto 50deg auto" max-camera-orbit="auto 72deg auto">
