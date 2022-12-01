@@ -1,0 +1,25 @@
+{
+  "description": "Christmas Party 2022",
+  "organizationName": "Lombardini22 SpA",
+  "passTypeIdentifier": "pass.it.l22.lems",
+  "teamIdentifier": "MF2A3GFZH6",
+  "backgroundColor": "rgb(252,185,0)",
+  "foregroundColor": "rgb(255,255,255)",
+  "logoText": "Christmas Party22",
+  "labelColor": "rgb(235,20,76)",
+  "formatVersion": 1,
+  "eventTicket": {
+    "auxiliaryFields": [
+      {
+        "key": "place",
+        "value": "Via Elia Lombardini 22, 20143, Milano",
+        "label": "Dove",
+        "isRelative": false
+      }
+    ],
+    "primaryFields": [
+      { "key": "name", "value": "Mario Lario", "label": "Nome" }
+    ],
+    "backFields": [{ "key": "greeting", "value": "CIAOOOO", "label": "Saluti" }]
+  }
+}
