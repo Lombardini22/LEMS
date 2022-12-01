@@ -3,7 +3,7 @@
 
     <h1 id="believers" class="pad-20">Waiting List!</h1>
     <!-- <img src="https://media.tenor.com/S71h7S1QxeYAAAAC/eyes-puss-in-boots.gif" alt="grinch" class="grinch" /> -->
-    <model-viewer src="https://rd.lombardini22.com/viewer/models/santa_claus_sad.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls
+    <model-viewer src="/assets/3d/Santa_Claus_sad.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls
         poster="poster.webp" shadow-intensity="1" autoplay min-camera-orbit="auto 38deg auto"
         max-camera-orbit="auto 85deg auto">
         <div class="progress-bar hide" slot="progress-bar">
