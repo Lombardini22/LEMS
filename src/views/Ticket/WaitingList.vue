@@ -12,9 +12,9 @@
         <button slot="ar-button" id="ar-button">
             Show on your device
         </button>
-        <div id="ar-prompt">
+        <!-- <div id="ar-prompt">
             <img src="https://modelviewer.dev/shared-assets/icons/hand.png">
-        </div>
+        </div> -->
     </model-viewer>
 
 
