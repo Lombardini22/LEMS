@@ -8,11 +8,8 @@ import { Router } from '../../routing/Router'
 import { Stream } from 'stream'
 import { Path } from '../../routing/Path'
 
-const certificatesPath = 'server/src/entitites/guest/certificates'
-
-const passJson = fs.readFileSync(
-  path.join(process.cwd(), certificatesPath, 'pass.json'),
-)
+const certificatesPath = 'server/src/entitites/guest/christmas-party.pass'
+const modelDirectory = path.join(process.cwd(), certificatesPath)
 
 const signerCert = fs.readFileSync(
   path.join(process.cwd(), certificatesPath, 'signerCert.pem'),
@@ -37,12 +34,10 @@ export async function generatePassStream(): Promise<
 > {
   const pass = await Result.tryCatch(
     () =>
-      new PKPass(
-        {
-          'pass.json': passJson,
-        },
-        { signerCert, signerKey, wwdr },
-      ),
+      PKPass.from({
+        model: modelDirectory,
+        certificates: { signerCert, signerKey, wwdr },
+      }),
     error => new ServerError(500, 'Unable to generate pass', { error }),
   )
 
