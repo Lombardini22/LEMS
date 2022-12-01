@@ -72,7 +72,7 @@ const pdfOptions = {
     },
 }
 
-const exportFilename = `Foresight 2022 Voucher ${name.value}.pdf`;
+const exportFilename = `Christmas Party Lombardini22 - ${name.value}.pdf`;
 
 // il codice e' troppo veloce e non riesce a caricare l'immagine
 const onPrint = () => {
