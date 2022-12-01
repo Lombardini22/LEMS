@@ -117,6 +117,7 @@ const routes: Array<RouteRecordRaw> = [
     // },
     {
       path: '/ticket',
+      name: 'ticketPage',
       component: TicketPage,
       props: (route: RouteLocationNormalized) => ({ query: route.query['q'] })
     },
@@ -127,6 +128,7 @@ const routes: Array<RouteRecordRaw> = [
     {
       path: '/unsubscribe',
       component: UnsubscribedPage,
+      props: (route: RouteLocationNormalized) => ({ query: route.query['q'] })
     },
     {
       path: '/plusOne',

@@ -3,23 +3,23 @@
 
     <h1 id="believers" class="pad-20">Waiting List!</h1>
     <!-- <img src="https://media.tenor.com/S71h7S1QxeYAAAAC/eyes-puss-in-boots.gif" alt="grinch" class="grinch" /> -->
-    <model-viewer src="/assets/3d/Santa_Claus_sad.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls
-        poster="poster.webp" shadow-intensity="1" autoplay min-camera-orbit="auto 38deg auto"
+    <model-viewer class="Model3d" src="/assets/3d/Santa_Claus_sad.gltf" ar ar-modes="webxr scene-viewer quick-look"
+        camera-controls poster="poster.webp" shadow-intensity="1" autoplay min-camera-orbit="auto 38deg auto"
         max-camera-orbit="auto 85deg auto">
         <div class="progress-bar hide" slot="progress-bar">
             <div class="update-bar"></div>
         </div>
         <button slot="ar-button" id="ar-button">
-            View in your space
+            Show on your device
         </button>
-        <!-- <div id="ar-prompt">
-        <img src="https://modelviewer.dev/shared-assets/icons/hand.png">
-    </div> -->
+        <div id="ar-prompt">
+            <img src="https://modelviewer.dev/shared-assets/icons/hand.png">
+        </div>
     </model-viewer>
 
 
 
-    <p>
+    <p class="center">
         Grazie per aver richiesto di partecipare al Christmas Party di Lombardini22!
         <br />
         <br />
@@ -30,6 +30,15 @@
         Riceverai presto nostre notizie,<br />
         Grazie!
     </p>
+    <!-- <model-viewer bounds="tight" enable-pan src="/assets/3d/Santa_Claus_sad.gltf" ar
+        ar-modes="webxr scene-viewer quick-look" camera-controls poster="poster.webp" shadow-intensity="1"
+        environment-image="neutral" shadow-softness="1" min-camera-orbit="auto 44deg 4.671m"
+        min-field-of-view="20.11deg" max-camera-orbit="auto 84deg auto" camera-orbit="339.5deg 72.95deg auto"
+        data-js-focus-visible="" ar-status="not-presenting" class="Models3d">
+        <div class="progress-bar hide" slot="progress-bar">
+            <div class="update-bar"></div>
+        </div>
+    </model-viewer> -->
 </template>
 <script lang="ts" setup>
 import { onMounted } from 'vue';
@@ -49,6 +58,11 @@ onMounted(() => {
     top: 50px;
 }
 
+.Model3d {
+    height: 400px;
+
+}
+
 center {
     background: white;
     padding: 25px;
@@ -60,6 +74,11 @@ center strong {
     font-size: 20px;
     line-height: 26px;
     color: black;
+}
+
+.center {
+    text-align: center;
+    padding: 10px;
 }
 
 *,
