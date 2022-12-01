@@ -5,24 +5,13 @@
                 <img src="../../public/assets/logos/Lombardini22.png" alt="Lombardini" class="logo" />
                 <h1 id="believers" class="pad-20 mar-bot-20">Ci mancherai!</h1>
                 <!-- <img src="https://media.tenor.com/BsKYBPwg6oAAAAAC/christmas-grinch.gif" alt="grinch" class="grinch" /> -->
-                <!-- <model-viewer src="/assets/3d/Santa_Claus_walk.gltf" ar loop
-                    ar-modes="webxr scene-viewer quick-look" camera-controls poster="poster.webp" shadow-intensity="1"
-                    autoplay min-camera-orbit="auto 38deg auto" max-camera-orbit="auto 85deg auto">
-                    <div class="progress-bar hide" slot="progress-bar">
-                        <div class="update-bar"></div>
-                    </div>
-                    <button slot="ar-button" id="ar-button">
-                        View in your space
-                    </button>
-                 <div id="ar-prompt">
-        <img src="https://modelviewer.dev/shared-assets/icons/hand.png">
-    </div>
-                </model-viewer> -->
 
-                <model-viewer class="Model3d" src="/assets/3d/Santa_Claus_walk.gltf" ar ar-modes="scene-viewer webxr quick-look"
-                    camera-controls poster="poster.webp" shadow-intensity="1" autoplay
-                    camera-orbit="-89.13deg 72deg 3.945m" field-of-view="30deg" camera-target="0.002791m 0.9288m 0.72m"
-                    min-camera-orbit="auto 50deg auto" max-camera-orbit="auto 72deg auto">
+
+                <model-viewer class="Model3d" src="/assets/3d/Santa_Claus_walk.gltf" ar
+                    ar-modes="scene-viewer webxr quick-look" camera-controls poster="poster.webp" shadow-intensity="1"
+                    autoplay camera-orbit="-89.13deg 72deg 3.945m" field-of-view="30deg"
+                    camera-target="0.002791m 0.9288m 0.72m" min-camera-orbit="auto 50deg auto"
+                    max-camera-orbit="auto 72deg auto">
                     <div class="progress-bar" slot="progress-bar">
                         <div class="update-bar"></div>
                     </div>

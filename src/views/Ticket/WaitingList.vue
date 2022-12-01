@@ -30,15 +30,7 @@
         Riceverai presto nostre notizie,<br />
         Grazie!
     </p>
-    <!-- <model-viewer bounds="tight" enable-pan src="/assets/3d/Santa_Claus_sad.gltf" ar
-        ar-modes="webxr scene-viewer quick-look" camera-controls poster="poster.webp" shadow-intensity="1"
-        environment-image="neutral" shadow-softness="1" min-camera-orbit="auto 44deg 4.671m"
-        min-field-of-view="20.11deg" max-camera-orbit="auto 84deg auto" camera-orbit="339.5deg 72.95deg auto"
-        data-js-focus-visible="" ar-status="not-presenting" class="Models3d">
-        <div class="progress-bar hide" slot="progress-bar">
-            <div class="update-bar"></div>
-        </div>
-    </model-viewer> -->
+
 </template>
 <script lang="ts" setup>
 import { onMounted } from 'vue';
