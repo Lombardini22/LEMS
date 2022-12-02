@@ -94,7 +94,7 @@ export function useActions(state: State, getters: Getters) {
       } catch (e) {
         throw new Error(`${e}`)
       }
-    }
+    },
     addTag: async (email: string, tag: string) => {
       try {
         if (email == undefined || email.length == 0) {
