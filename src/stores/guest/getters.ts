@@ -16,7 +16,10 @@ export function useGetters(state: State) {
     },
     getWaitingList: () => {
       return state.guests.find((item) => item.node.status === "WAITING") || []
-    }
+    },
+    getTotalGuests: () => {
+      return state.guests.length
+    },
   }
   return getters
 }

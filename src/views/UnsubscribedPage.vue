@@ -5,19 +5,24 @@
                 <img src="../../public/assets/logos/Lombardini22.png" alt="Lombardini" class="logo" />
                 <h1 id="believers" class="pad-20 mar-bot-20">Ci mancherai!</h1>
                 <!-- <img src="https://media.tenor.com/BsKYBPwg6oAAAAAC/christmas-grinch.gif" alt="grinch" class="grinch" /> -->
-                <model-viewer src="https://rd.lombardini22.com/viewer/models/santa_claus_walk.glb" ar ar-modes="webxr scene-viewer quick-look"
-                    camera-controls poster="poster.webp" shadow-intensity="1" autoplay 
-                    min-camera-orbit="auto 38deg auto" max-camera-orbit="auto 85deg auto">
-                    <div class="progress-bar hide" slot="progress-bar">
+
+
+                <model-viewer class="Model3d" src="/assets/3d/Santa_Claus_walk.gltf" ar
+                    ar-modes="scene-viewer webxr quick-look" camera-controls poster="poster.webp" shadow-intensity="1"
+                    autoplay camera-orbit="-89.13deg 72deg 3.945m" field-of-view="30deg"
+                    camera-target="0.002791m 0.9288m 0.72m" min-camera-orbit="auto 50deg auto"
+                    max-camera-orbit="auto 72deg auto">
+                    <div class="progress-bar" slot="progress-bar">
                         <div class="update-bar"></div>
                     </div>
                     <button slot="ar-button" id="ar-button">
                         View in your space
                     </button>
                     <!-- <div id="ar-prompt">
-        <img src="https://modelviewer.dev/shared-assets/icons/hand.png">
-    </div> -->
+                        <img src="https://modelviewer.dev/shared-assets/icons/hand.png">
+                    </div> -->
                 </model-viewer>
+
                 <p class="testo mar-20">
                     Ci dispiace, non sarai con noi al Christmas Party di quest’anno!
                     <br />
@@ -31,8 +36,31 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted } from 'vue';
+import { useStoreGuest } from '@/stores';
+import { onBeforeMount, onMounted, defineProps } from 'vue';
+import { useRouter } from 'vue-router';
 import { snow } from './utils/confetti'
+
+type Props = {
+    query?: string
+}
+
+const props = defineProps<Props>()
+
+const store = useStoreGuest()
+
+const email = props.query?.toLowerCase() || '';
+
+
+
+onBeforeMount(async () => {
+    if (email.length > 0) {
+        await store.actions.addTag(email, 'NON PRESENTE')
+    } else {
+        useRouter().push({ name: 'ticketPage' })
+    }
+
+})
 
 onMounted(() => {
     snow()
@@ -41,6 +69,11 @@ onMounted(() => {
   
 
 <style scoped>
+.Model3d {
+    height: 400px;
+
+}
+
 .logo {
     width: 100%;
     max-width: 200px;

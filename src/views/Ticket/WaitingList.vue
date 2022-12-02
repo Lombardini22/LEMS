@@ -3,23 +3,23 @@
 
     <h1 id="believers" class="pad-20">Waiting List!</h1>
     <!-- <img src="https://media.tenor.com/S71h7S1QxeYAAAAC/eyes-puss-in-boots.gif" alt="grinch" class="grinch" /> -->
-    <model-viewer src="https://rd.lombardini22.com/viewer/models/santa_claus_sad.glb" ar ar-modes="webxr scene-viewer quick-look" camera-controls
-        poster="poster.webp" shadow-intensity="1" autoplay min-camera-orbit="auto 38deg auto"
+    <model-viewer class="Model3d" src="/assets/3d/Santa_Claus_sad.gltf" ar ar-modes="webxr scene-viewer quick-look"
+        camera-controls poster="poster.webp" shadow-intensity="1" autoplay min-camera-orbit="auto 38deg auto"
         max-camera-orbit="auto 85deg auto">
         <div class="progress-bar hide" slot="progress-bar">
             <div class="update-bar"></div>
         </div>
         <button slot="ar-button" id="ar-button">
-            View in your space
+            Show on your device
         </button>
         <!-- <div id="ar-prompt">
-        <img src="https://modelviewer.dev/shared-assets/icons/hand.png">
-    </div> -->
+            <img src="https://modelviewer.dev/shared-assets/icons/hand.png">
+        </div> -->
     </model-viewer>
 
 
 
-    <p>
+    <p class="center">
         Grazie per aver richiesto di partecipare al Christmas Party di Lombardini22!
         <br />
         <br />
@@ -30,6 +30,7 @@
         Riceverai presto nostre notizie,<br />
         Grazie!
     </p>
+
 </template>
 <script lang="ts" setup>
 import { onMounted } from 'vue';
@@ -49,6 +50,11 @@ onMounted(() => {
     top: 50px;
 }
 
+.Model3d {
+    height: 400px;
+
+}
+
 center {
     background: white;
     padding: 25px;
@@ -60,6 +66,11 @@ center strong {
     font-size: 20px;
     line-height: 26px;
     color: black;
+}
+
+.center {
+    text-align: center;
+    padding: 10px;
 }
 
 *,

@@ -45,9 +45,9 @@
           <!-- List of Input Items -->
           <ion-list>
             <ion-item-sliding v-for="item in infiniteItems" :key="item.node._id">
-              <!-- <ion-item-options side="start">
-                <ion-item-option color="primary">Check In</ion-item-option>
-              </ion-item-options> -->
+              <ion-item-options side="start" @click="removeGuest(item)">
+                <ion-item-option color="danger">ELIMINA</ion-item-option>
+              </ion-item-options>
 
               <ion-item :color="item.node.status === 'RSVP' ? '' : 'success'" @click="guestInfo(item)"
                 class="list-item">
@@ -150,7 +150,7 @@ const alertTitle = ref()
 const alertSubTitle = ref()
 
 // Counts
-const totalCount = ref(0)
+const totalCount = computed(() => store.getters.getTotalGuests())
 const filteredCount = ref(0)
 
 // Form
@@ -201,6 +201,18 @@ const changeCheckin = async (item: GuestNode) => {
 const approveGuest = async (item: GuestNode) => {
   try {
     store.actions.changeWaitingList(item)
+  }
+  catch (err) {
+    console.error(err)
+    presentToast('bottom', `Errore! qualcosa è andato storto! - ${err}`, 'danger', 3000)
+  }
+
+}
+
+
+const removeGuest = async (item: GuestNode) => {
+  try {
+    store.actions.removeGuest(item)
   }
   catch (err) {
     console.error(err)
@@ -297,7 +309,6 @@ const filteredData = computed(() => {
 const doRefresh = (event: CustomEvent & { target: { complete: () => void } }) => {
   event.target?.complete();
 }
-
 
 
 watch(filteredData, (val) => {

@@ -34,12 +34,21 @@ export function useActions(state: State, getters: Getters) {
     },
     changeWaitingList: async (item: GuestNode) => {
       try {
-        console.log('TODO: changeWaitingList', item)
 
         await axios.put(`${serverUrl}api/guests/${item.node.emailHash}`, {
           status: item.node.status === 'WAITING' ? 'RSVP' : 'WAITING',
         })
         item.node.status = item.node.status === 'WAITING' ? 'RSVP' : 'WAITING'
+      } catch (e) {
+        console.error({ e })
+      }
+    },
+    removeGuest: async (item: GuestNode) => {
+      try {
+        await axios.put(`${serverUrl}api/guests/${item.node.emailHash}`, {
+          status: item.node.status === 'REMOVED' ? 'RSVP' : 'REMOVED',
+        })
+        item.node.status = item.node.status === 'REMOVED' ? 'RSVP' : 'REMOVED'
       } catch (e) {
         console.error({ e })
       }
@@ -57,7 +66,6 @@ export function useActions(state: State, getters: Getters) {
     },
     addGuestToWaitinglist: async (email: string) => {
       try {
-        console.log('TODO: addGuestToWaitinglist', email)
         const { data } = await axios.get<GuestNode['node']>(
           `${serverUrl}api/guests/${email}/waitlist/`,
         )
@@ -79,7 +87,7 @@ export function useActions(state: State, getters: Getters) {
     },
     addTag: async (email: string, tag: string) => {
       try {
-        if ( email == undefined || email.length == 0 ) {
+        if (email == undefined || email.length == 0) {
           return
         }
         const { data } = await axios.put<void>(serverUrl + `api/guests/tag/`, {
