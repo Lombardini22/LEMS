@@ -16,23 +16,12 @@
         <ion-list>
           <ion-item>
             <ion-label position="stacked" color="primary">Username</ion-label>
-            <ion-input
-              v-model="username"
-              name="username"
-              type="text"
-              autocapitalize="off"
-              required
-            ></ion-input>
+            <ion-input v-model="username" name="username" type="text" autocapitalize="off" required></ion-input>
           </ion-item>
 
           <ion-item>
             <ion-label position="stacked" color="primary">Password</ion-label>
-            <ion-input
-              v-model="password"
-              name="password"
-              type="password"
-              required
-            ></ion-input>
+            <ion-input v-model="password" name="password" type="password" required></ion-input>
           </ion-item>
         </ion-list>
 
@@ -73,30 +62,40 @@ const password = ref("");
 const submitted = ref(false);
 const userValid = ref(false);
 
-const onLogin =  () => {
-  submitted.value = true;
-axios
-    .post(process.env.VUE_APP_SERVER_URL+"api/users/login", {
-      username: username.value,
-      password: password.value,
-    })
-    .then((res) => {
-    console.log(res);
-    if(res.status == 200){
-        userValid.value = true;
-        console.log("User Valid");
-        localStorage.setItem("user", res.data.accessToken);
-        setTimeout(() => {
-          window.location.href = "/lems/management";
-        }, 1000);
-    }else {
-        userValid.value = false;
-        console.log("User Invalid");
-    }
-    })
-    .catch((err) => {
-      console.log(err);
-    });
+const onLogin = () => {
+  try {
+    submitted.value = true;
+    axios
+      .post(process.env.VUE_APP_SERVER_URL + "api/users/login", {
+        username: username.value,
+        password: password.value,
+      })
+      .then((res) => {
+        console.log(res);
+        if (res.status == 200) {
+          userValid.value = true;
+          console.log("User Valid");
+          localStorage.setItem("user", res.data.accessToken);
+          setTimeout(() => {
+            window.location.href = "/lems/management";
+          }, 1000);
+        } else {
+          userValid.value = false;
+          console.log("User Invalid");
+          alert("User Invalid");
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+        alert(err);
+
+      });
+  } catch (err) {
+    console.log(err);
+    alert(err);
+
+  }
+
 };
 
 </script>

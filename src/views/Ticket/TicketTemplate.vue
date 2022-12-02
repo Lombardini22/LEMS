@@ -57,6 +57,7 @@ import { computed,  ref, defineProps } from 'vue'
 import Tilt from 'vanilla-tilt-vue'
 import { Ticket } from '@/stores/guest/state';
 import AddToCalendar from '../components/AddToCalendar.vue'
+import { useStoreGuest } from '@/stores';
 
 
 type Props = {
@@ -71,25 +72,23 @@ const serverUrl = process.env.VUE_APP_SERVER_URL
 
 // const validEmail = ref(false)
 
+const store = useStoreGuest()
 
 const tktNumber = ref(props.ticket.id.slice(0, 5).toUpperCase())
-// onBeforeMount(() => {
-//     axios
-//         .get(serverUrl + `api/guests/${params.value.email}/rsvp/`)
-//         .then(response => {
-//             ticket.firstName = response.data.firstName
-//             ticket.lastName = response.data.lastName
-//             ticket.company = response.data.companyName
-//             ticket.id = response.data.emailHash
-//             console.log('data:', response.data)
-//             validEmail.value = true
-//         })
-//         .catch(error => {
-//             console.log({ error })
 
-//         })
-// })
 
+
+// Convert blob to file
+const blob =  new Blob([new Uint8Array( await store.actions.getPass(props.ticket.email))], { type: "application/vnd.apple.pkpass" });
+
+const url = URL.createObjectURL(blob);
+
+Object.assign(document.createElement("a"), {
+    href: url,
+    download: "mypass_file_name.pkpass"
+}).click();
+
+URL.revokeObjectURL(url);
 
 const fullName = computed(() => {
     return props.ticket.firstName + ' ' + props.ticket.lastName
@@ -99,16 +98,6 @@ const qrCode = computed(() => {
 })
 
 
-// axios
-//     .get(serverUrl + `api/guests/${ticket.id}`)
-//     .then(res => {
-//         ticket.firstName = res.data.firstName
-//         ticket.lastName = res.data.lastName
-//         ticket.company = res.data.companyName
-//     })
-//     .catch(err => {
-//         console.log(err)
-//     })
 
 const printUrl = computed(() => {
     return `/print/${fullName.value}/${props.ticket.email}`
