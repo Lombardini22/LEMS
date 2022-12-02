@@ -85,6 +85,16 @@ export function useActions(state: State, getters: Getters) {
         throw new Error(`${e}`)
       }
     },
+    getPass: async (email: string) => {
+      try {
+        const { data } = await axios.get(
+          serverUrl + `api/guests/pass/${email}`,
+        )
+        return data
+      } catch (e) {
+        throw new Error(`${e}`)
+      }
+    }
     addTag: async (email: string, tag: string) => {
       try {
         if (email == undefined || email.length == 0) {
