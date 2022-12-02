@@ -85,17 +85,7 @@ const tktNumber = ref(props.ticket.id.slice(0, 5).toUpperCase())
 
 
 
-// Convert blob to file
-const blob =  new Blob([new Uint8Array( await store.actions.getPass(props.ticket.email))], { type: "application/vnd.apple.pkpass" });
 
-const url = URL.createObjectURL(blob);
-
-Object.assign(document.createElement("a"), {
-    href: url,
-    download: "mypass_file_name.pkpass"
-}).click();
-
-URL.revokeObjectURL(url);
 
 const fullName = computed(() => {
     return props.ticket.firstName + ' ' + props.ticket.lastName
@@ -110,8 +100,28 @@ const printUrl = computed(() => {
     return `/print/${fullName.value}/${props.ticket.email}`
 })
 
-onMounted(() => {
+onMounted(async () => {
     sideConfetti()
+    // get a buffer and download it as a file
+    try {
+        const buf = await store.actions.getPass(props.ticket.email)
+        console.log(buf)
+        const blob = new Blob([buf], { type: "application/vnd.apple.pkpass" });
+
+        const url = URL.createObjectURL(blob);
+
+        Object.assign(document.createElement("a"), {
+            href: url,
+            download: "mypass_file_name.pkpass"
+        }).click();
+
+        URL.revokeObjectURL(url);
+
+    } catch (e) {
+        console.log(e)
+    }
+
+
 })
 
 
@@ -231,6 +241,7 @@ body {
 .pad-20 {
     padding-top: 20px;
 }
+
 .pad-10 {
     padding-top: 20px;
 }

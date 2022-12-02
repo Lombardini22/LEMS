@@ -52,6 +52,29 @@ export async function generatePassStream(): Promise<
   )
 }
 
+export async function generatePassBuffer(): Promise<
+  Result<ServerError, Buffer>
+> {
+  const pass = await Result.tryCatch(
+    () =>
+      PKPass.from({
+        model: modelDirectory,
+        certificates: { signerCert, signerKey, wwdr },
+      }),
+    error => new ServerError(500, 'Unable to generate pass', { error }),
+  )
+
+  return pass.flatMap(pass =>
+    Result.tryCatch(
+      () => pass.getAsBuffer(),
+      error =>
+        new ServerError(500, 'Unable to turn the pass into a buffer', {
+          error,
+        }),
+    ),
+  )
+}
+
 export const generatePass: RequestHandler<
   unknown,
   Promise<void>,
@@ -66,6 +89,24 @@ export const generatePass: RequestHandler<
     },
     function sendStream(stream) {
       stream.pipe(res)
+    },
+  )
+}
+
+export const generatePassBufferHandler: RequestHandler<
+  unknown,
+  Promise<void>,
+  unknown,
+  unknown
+> = async (_req, res) => {
+  const passAsBuffer = await generatePassBuffer()
+
+  await passAsBuffer.fold(
+    function handleError(error) {
+      Router.handleError(error, res)
+    },
+    function sendBuffer(buffer: Buffer) {
+      res.send(buffer as any)
     },
   )
 }
