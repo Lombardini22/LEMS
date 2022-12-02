@@ -10,8 +10,10 @@ import AddPlusOne from '@/views/AddPlusOne.vue'
 import LoginPage from '@/views/LoginPage.vue'
 import PrintPage from '@/views/PrintPage.vue'
 import GuestListPage from '@/views/GuestListPage.vue'
+import UnsubscribedPage from '@/views/UnsubscribedPage.vue'
 import { ref } from 'vue'
 import { isPlatform } from '@ionic/vue'
+
 
 
 const authCheck = () => {
@@ -115,12 +117,18 @@ const routes: Array<RouteRecordRaw> = [
     // },
     {
       path: '/ticket',
+      name: 'ticketPage',
       component: TicketPage,
       props: (route: RouteLocationNormalized) => ({ query: route.query['q'] })
     },
     {
       path: '/ticket',
       component: TicketPage,
+    },
+    {
+      path: '/unsubscribe',
+      component: UnsubscribedPage,
+      props: (route: RouteLocationNormalized) => ({ query: route.query['q'] })
     },
     {
       path: '/plusOne',

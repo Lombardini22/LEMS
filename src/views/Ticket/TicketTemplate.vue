@@ -1,11 +1,14 @@
 <template>
     <div>
-        <h1 class="title">Grazie per aver confermato la tua presenza <br /> al nostro Christmas Party!</h1>
+        <h4 class="title"><strong>EVVIVA!</strong><br />
+            Grazie per la tua conferma.<br />
+            Parteciperai insieme a noi al Christmas Party 2022 ✨
+        </h4>
         <Tilt data-tilt data-tilt-full-page-listening gyroscope="false">
             <div class="ticket ticket-1">
                 <div class="details-block">
                     <div class="logos-block">
-                        <img src="/assets/logos/logo-foresight1.png" class="logo-img" />
+                        <img src="/assets/logos/title_cp.png" class="logo-img" />
                         <img src="/assets/logos/Lombardini22.png" class="logo-lomb" />
                     </div>
 
@@ -16,9 +19,9 @@
                     </div>
 
                     <div class="location-block">
-                        <span class="location">05.10.2022 ore 9:00</span>
+                        <span class="location">22.12.2022 ore 19:00</span>
                         <br />
-                        <span class="location">Auditorium Fondazione Cariplo Largo G. Mahler, Milano</span>
+                        <span class="location">Triennale Milano, Viale Alemagna 6</span>
                     </div>
                     <img src="/assets/logos/Lombardini22.png" class="logo-lomb-mob" />
 
@@ -38,25 +41,29 @@
 
         <div class="footer">
             <AddToCalendar />
-            <ion-button class="btn mar-20" :href="printUrl">Salva Voucher in PDF</ion-button>
+            <ion-button class="btn mar-20" :href="printUrl">Scarica il biglietto</ion-button>
 
             <!-- <ion-button class="btn mar-20" :href="plusOne">Invita un ospite</ion-button> -->
             <ManualAddGuest :refererEmail="ticket.email" />
-            <ion-button class="btn mar-20" href="mailto:info@foresightmilano.it?subject=FORESIGHT 2022">
+            <ion-button class="btn mar-20" href="mailto:eventi@l22.it?subject=Christmas Party Lombardini22">
                 Contattaci Via
                 Mail
             </ion-button>
         </div>
+        <p id="believers" class="pad-10">thanks to</p>
+        <img src="../../../public/assets/logos/foresight-supporters1.png" alt="believers" width="700" class="pad-10" />
     </div>
 
 </template>
   
 <script lang="ts" setup>
 import { IonButton } from '@ionic/vue'
-import { computed,  ref, defineProps } from 'vue'
+import { computed, ref, defineProps, onMounted } from 'vue'
 import Tilt from 'vanilla-tilt-vue'
 import { Ticket } from '@/stores/guest/state';
 import AddToCalendar from '../components/AddToCalendar.vue'
+import { sideConfetti } from '../utils/confetti'
+
 
 
 type Props = {
@@ -112,6 +119,10 @@ const qrCode = computed(() => {
 
 const printUrl = computed(() => {
     return `/print/${fullName.value}/${props.ticket.email}`
+})
+
+onMounted(() => {
+    sideConfetti()
 })
 
 
@@ -193,6 +204,7 @@ center strong {
 }
 
 .title {
+    margin-top: 50px !important;
     text-align: center;
     font-size: 2rem;
     margin: 1rem;
@@ -209,8 +221,8 @@ center strong {
 }
 
 .btn {
-    background: #a23cfd;
-    --background: #a23cfd;
+    background: #ff5772;
+    --background: #ff5772;
 }
 
 #block {
@@ -228,6 +240,9 @@ body {
 }
 
 .pad-20 {
+    padding-top: 20px;
+}
+.pad-10 {
     padding-top: 20px;
 }
 
@@ -254,10 +269,11 @@ body {
 
 .details-block {
     display: flex;
-    background-image: url('../../../public/assets/media/bg-1.png');
+    background-image: url('../../../public/assets/media/bg-2.jpg');
+    background-color: black !important;
     border-radius: 20px;
     flex-direction: column;
-    background-position: center;
+    background-position: inherit;
     background-size: cover;
     background-repeat: repeat;
     justify-content: space-between;
@@ -278,6 +294,7 @@ body {
 }
 
 .logo-lomb {
+
     height: 35px;
     margin-right: 20px;
 }
@@ -294,13 +311,13 @@ body {
 }
 
 .name {
-    margin-top: 25px;
-    font-size: 30px;
+    margin-top: 45px;
+    font-size: 25px;
     text-transform: uppercase;
 }
 
 .company {
-    font-size: 20px;
+    font-size: 17px;
 }
 
 .small {
@@ -347,7 +364,8 @@ body {
 .qr-block {
     width: 175px;
     height: 100%;
-    background-color: #a23cfd;
+    background-color: #ff5772;
+
     border-radius: 20px;
     color: #fff;
     text-decoration: none;
@@ -388,11 +406,12 @@ body {
     text-align: center;
 }
 
-h2#believers {
+#believers {
     color: white;
-    /* padding-top: 20px; */
+    color: black;
     margin: 20px;
     text-shadow: none;
+    text-align: center;
 }
 
 /*  
@@ -421,7 +440,8 @@ h2#believers {
 
     .details-block {
         display: flex;
-        background-image: url('../../../public/assets/media/bg-1.png');
+        /* background-image: url('../../../public/assets/media/bg-1.png'); */
+        background-color: black !important;
         border-radius: 20px;
         flex-direction: column;
         background-position: center;
@@ -460,19 +480,19 @@ h2#believers {
 
     .guest {
         font-size: 25px;
-        margin: 20px 25px 0 35px;
+        margin: 80px 25px 0 35px;
         float: left;
         font-weight: bold;
     }
 
     .name {
         margin-top: 25px;
-        font-size: 30px;
+        font-size: 25px;
         text-transform: uppercase;
     }
 
     .company {
-        font-size: 20px;
+        font-size: 17px;
     }
 
     .small {
@@ -519,7 +539,7 @@ h2#believers {
     .qr-block {
         width: 100%;
         height: 25%;
-        background-color: #a23cfd;
+        background-color: #ff5772;
         border-radius: 20px;
         color: #fff;
         text-decoration: none;

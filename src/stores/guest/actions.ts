@@ -32,12 +32,69 @@ export function useActions(state: State, getters: Getters) {
         console.error({ e })
       }
     },
+    changeWaitingList: async (item: GuestNode) => {
+      try {
+
+        await axios.put(`${serverUrl}api/guests/${item.node.emailHash}`, {
+          status: item.node.status === 'WAITING' ? 'RSVP' : 'WAITING',
+        })
+        item.node.status = item.node.status === 'WAITING' ? 'RSVP' : 'WAITING'
+      } catch (e) {
+        console.error({ e })
+      }
+    },
+    removeGuest: async (item: GuestNode) => {
+      try {
+        await axios.put(`${serverUrl}api/guests/${item.node.emailHash}`, {
+          status: item.node.status === 'REMOVED' ? 'RSVP' : 'REMOVED',
+        })
+        item.node.status = item.node.status === 'REMOVED' ? 'RSVP' : 'REMOVED'
+      } catch (e) {
+        console.error({ e })
+      }
+    },
+    isTicketAvailable: async (): Promise<boolean> => {
+      try {
+        const { data } = await axios.get<{ count: number }>(
+          `${serverUrl}api/guests/count-rsvp`,
+        )
+        return data.count < process.env.VUE_APP_MAX_GUESTS ? true : false
+      } catch (e) {
+        console.error({ e })
+        return false
+      }
+    },
+    addGuestToWaitinglist: async (email: string) => {
+      try {
+        const { data } = await axios.get<GuestNode['node']>(
+          `${serverUrl}api/guests/${email}/waitlist/`,
+        )
+        return data
+      } catch (e) {
+        console.error({ e })
+        throw new Error(`${e}`)
+      }
+    },
     getGuest: async (email: string) => {
       try {
-        const {data} = await axios.get<GuestNode['node']>(
+        const { data } = await axios.get<GuestNode['node']>(
           serverUrl + `api/guests/${email}/rsvp/`,
         )
-          return data
+        return data
+      } catch (e) {
+        throw new Error(`${e}`)
+      }
+    },
+    addTag: async (email: string, tag: string) => {
+      try {
+        if (email == undefined || email.length == 0) {
+          return
+        }
+        const { data } = await axios.put<void>(serverUrl + `api/guests/tag/`, {
+          email,
+          tag,
+        })
+        return data
       } catch (e) {
         throw new Error(`${e}`)
       }

@@ -8,21 +8,21 @@
                     <center>
                         <!-- <h1>Ecco il tuo biglietto, <br /> portalo con te per partecipare allo spettacolo.</h1> -->
 
-                        <img src="../../public/assets/media/foresight-poster.jpg" alt="poster" class="poster spacer">
+                        <img src="../../public/assets/logos/title_cp_print.png" alt="poster" class="poster spacer">
                         <span class="spacer"></span>
                         <div class="location">
-                            <p><strong>5 ottobre 2022 | 9:00</strong><br />
-                                Auditorium Fondazione Cariplo <br />
-                                Largo Gustav Mahler, Milano</p>
+                            <p><strong>22 Dicembre 2022 | 19:00</strong><br />
+                                Triennale Milano <br />
+                                Viale Alemagna 6</p>
                             <h3 class="spacer">{{name}}</h3>
-                            <center><img class="qrCode" :src="img64" id="qr-code" /></center>
-                            <p class="footer">Un’iniziativa di</p>
-                            <img class="logo" src="../../public/assets/logos/Lombardini22-blk.png" alt="Lombardini22">
+                            <center><img class="qrCode " :src="img64" id="qr-code" /></center>
+                            <!-- <p class="footer">Un’iniziativa di</p> -->
+                            <img class="logo spacer" src="../../public/assets/logos/Lombardini22-blk.png" alt="Lombardini22">
                         </div>
                     </center>
                 </div>
                 <center>
-                    <ion-button @click="onPrint">Download PDF</ion-button>
+                    <ion-button @click="onPrint">Scarica il biglietto</ion-button>
                 </center>
             </center>
             <!-- </vue3-simple-html2pdf> -->
@@ -72,7 +72,7 @@ const pdfOptions = {
     },
 }
 
-const exportFilename = `Foresight 2022 Voucher ${name.value}.pdf`;
+const exportFilename = `Christmas Party Lombardini22 - ${name.value}.pdf`;
 
 // il codice e' troppo veloce e non riesce a caricare l'immagine
 const onPrint = () => {
@@ -106,13 +106,16 @@ onMounted(() => {
 }
 
 .voucher {
-    border-top: 5px solid #97f5ff;
-    border-bottom: 5px solid #97f5ff;
+    border-top: 5px solid #ff5772;
+    border-bottom: 5px solid #ff5772;
     margin: 10px;
     padding: 10px;
     max-width: 500px;
     height: 100%;
     background: white;
+}
+.poster{
+    /* background-color: black; */
 }
 
 .location {

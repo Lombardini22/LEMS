@@ -14,6 +14,12 @@ export function useGetters(state: State) {
     getGuestByEmail: (email: string) => {
       return state.guests.find((item) => item.node.email === email)
     },
+    getWaitingList: () => {
+      return state.guests.find((item) => item.node.status === "WAITING") || []
+    },
+    getTotalGuests: () => {
+      return state.guests.length
+    },
   }
   return getters
 }

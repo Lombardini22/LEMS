@@ -3,9 +3,8 @@
     <div class="cerca">
         <center>
             <div class="login-logo">
-                <img src="/assets/logos/logo-foresight-bk.png" alt="logo" />
+                <img src="/assets/logos/title_cp_print.png" alt="logo" />
             </div>
-
             <strong>Inserisci qui la tua email</strong>
             <ion-input rounded outlined v-model="emailInput" placeholder="email" class="input" autofocus ref="qrInput">
             </ion-input>
@@ -60,9 +59,7 @@ const getTicket = async () => {
 #container p {
     font-size: 16px;
     line-height: 22px;
-
     color: #8c8c8c;
-
     margin: 0;
 }
 
@@ -80,7 +77,7 @@ const getTicket = async () => {
 }
 
 .login-logo {
-    padding: 20px 0;
+    padding: 50px 0;
     min-height: 200px;
     text-align: center;
 }

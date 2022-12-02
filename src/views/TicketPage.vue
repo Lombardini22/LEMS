@@ -1,13 +1,13 @@
 <template>
   <ion-page>
     <ion-content>
-      <div id="block">
-        <SearchTicketVue v-if="!validEmail" class="cerca" />
-        <TicketTemplateVue :ticket="ticket" v-else />
+      <div :class="['block',{ color1: isInWaitlist}]">
+        <WaitingListVue v-if="isInWaitlist" ></WaitingListVue>
+        <SearchTicketVue v-else-if="!validEmail" class="cerca" />
+        <TicketTemplateVue :ticket="ticket" v-else-if="(ticket.firstName.length > 0)" />
         <!-- <h4 id="believers" style="color: black" class="pad-20">Sound Design and live performance</h4> -->
         <!-- <img src="../../public/assets/logos/orchestra.png" alt="believers" width="100" class="pad-20" /> -->
-        <h4 id="believers" style="color: black" class="pad-20">Our Believers</h4>
-        <img src="../../public/assets/logos/foresight-supporters1.png" alt="believers" width="700" class="pad-20" />
+        
       </div>
     </ion-content>
   </ion-page>
@@ -19,10 +19,10 @@ import { computed, reactive, ref, defineProps, onBeforeMount } from 'vue'
 import { MD5 } from 'crypto-js'
 import SearchTicketVue from './Ticket/SearchTicket.vue'
 import TicketTemplateVue from './Ticket/TicketTemplate.vue'
+import WaitingListVue from './Ticket/WaitingList.vue'
 import { Ticket } from '@/stores/guest/state'
 import { useStoreGuest } from '@/stores'
-// import AddToCalendar from './components/AddToCalendar.vue'
-// import ManualAddGuest from './components/ManualAddGuest.vue'
+
 
 type Props = {
   query?: string
@@ -38,7 +38,15 @@ const params = computed(() => {
   }
 })
 
-const validEmail = ref(false)
+const isInWaitlist = ref(false)
+
+const validEmail = ref(true)
+
+const isTicketAvailable = ref(false)
+
+
+
+// const isTicketAvailable = store.actions.isTicketAvailable()
 
 
 const ticket = reactive<Ticket>({
@@ -61,20 +69,46 @@ const presentToast = async (position: "bottom" | "top" | "middle", message: stri
 }
 
 
+
 onBeforeMount(async () => {
   try {
-    const tkt = await store.actions.getGuest(params.value.email)
-    ticket.firstName = tkt.firstName
-    ticket.lastName = tkt.lastName
-    ticket.company = tkt.companyName
-    ticket.id = tkt.emailHash
-    console.log('data:', tkt)
-    validEmail.value = true
+    isTicketAvailable.value = await store.actions.isTicketAvailable()
+    if (isTicketAvailable.value && !!params.value.email) {
+      const tkt = await store.actions.getGuest(params.value.email)
+      ticket.firstName = tkt.firstName
+      ticket.lastName = tkt.lastName
+      ticket.company = tkt.companyName
+      ticket.id = tkt.emailHash
+      validEmail.value = true
+      console.log("Dates", new Date("2022-12-05"), new Date())
+      if (new Date("2022-12-05") > new Date()) {
+        await store.actions.addTag(tkt.email, 'SAVE THE DATE')
+      }
+      await store.actions.addTag(tkt.email, 'CP 2022')
+    }
+    else if (!isTicketAvailable.value && !!params.value.email) {
+      const guest = await store.actions.addGuestToWaitinglist(params.value.email)
+      if (guest.status == "WAITING") {
+        isInWaitlist.value = true
+        console.log("added to waiting list")
+      }
+      else {
+        const tkt = await store.actions.getGuest(params.value.email)
+        ticket.firstName = tkt.firstName
+        ticket.lastName = tkt.lastName
+        ticket.company = tkt.companyName
+        ticket.id = tkt.emailHash
+        validEmail.value = true
+      }
+    }else{
+      validEmail.value = false
+    }
   } catch (e) {
-    console.error('error:', e)
+    validEmail.value = false
     presentToast('bottom', `Utente non trovato`, 'warning', 3000)
   }
 })
+
 
 </script>
 
@@ -89,6 +123,10 @@ onBeforeMount(async () => {
   transform: translateY(-50%);
 }
 
+.color1 {
+  background-color: #002651 !important; 
+  color: white !important;
+}
 #container strong {
   font-size: 20px;
   line-height: 26px;
@@ -148,7 +186,6 @@ center strong {
 *::after {
   box-sizing: border-box;
   margin: 0;
-  /* text-shadow: 0px 0px 20px black; */
   font-family: helvetica neue, helvetica, arial, verdana, sans-serif;
 }
 
@@ -169,16 +206,17 @@ center strong {
 }
 
 .btn {
-  background: #a23cfd;
-  --background: #a23cfd;
+  background: #ff5772;
+  --background: #ff4a68;
 }
 
-#block {
+.block {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100%;
   color: #999999;
+  /* background-color: #002651; */
   background-color: whitesmoke;
   flex-direction: column;
 }
@@ -355,6 +393,12 @@ h2#believers {
   text-shadow: none;
 }
 
+#believers{
+  margin-top: 30px;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: center;
+}
 /*  
  Responsive design
  */

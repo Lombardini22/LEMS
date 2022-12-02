@@ -8,6 +8,8 @@ import { sendHttpRequest } from '../../testUtils'
 import { guestsRouter } from './guestsRouter'
 import { expectT } from '../../testUtils'
 import { ObjectId } from 'mongodb'
+import { CountRsvpResponse } from './countRsvp'
+import { NoTimestamps } from '../../database/Collection'
 
 interface GuestResult extends Omit<Guest, '_id'> {
   _id: string
@@ -33,7 +35,7 @@ describe('guestRouter', () => {
   })
 
   describe('happy path', () => {
-    it('should provide basic CRUD functionality', () =>
+    it('should work', () =>
       server.use(async () => {
         const data = {
           firstName: 'John',
@@ -49,7 +51,7 @@ describe('guestRouter', () => {
         const emailHash = hashGuestEmail(data.email)
 
         const insertionResult = await sendHttpRequest<
-          Omit<Guest, 'createdAt' | 'updatedAt'>,
+          NoTimestamps<Guest>,
           GuestResult
         >('POST', '/api/guests', data)
 
@@ -69,21 +71,37 @@ describe('guestRouter', () => {
           emailHash,
         )
 
+        const countRsvpResult = await sendHttpRequest<CountRsvpResponse>(
+          'GET',
+          '/api/guests/count-rsvp',
+        )
+
+        expectResult(
+          await countRsvpResult.map(_ => _.data),
+        ).toHaveSucceededWith({ count: 1 })
+
         const guest: Guest = {
           // Not true, but YOLO
           ...(findOneResult.unsafeGetValue().data as unknown as Guest),
           _id: new ObjectId(findOneResult.unsafeGetValue().data._id),
         }
 
-        const findresult = await sendHttpRequest<Cursor<GuestResult>>(
+        const addToWaitlistResult = await sendHttpRequest<Guest>(
+          'GET',
+          `/api/guests/${guest.email}/waitlist`,
+        )
+
+        expectResult(addToWaitlistResult).toHaveSucceeded()
+
+        const findResult = await sendHttpRequest<Cursor<GuestResult>>(
           'GET',
           '/api/guests/?order=ASC&query=john+doe&first=1',
         )
 
-        expectResult(findresult).toHaveSucceeded()
-        expectT(findresult.unsafeGetValue().data.edges.length).toEqual(1)
+        expectResult(findResult).toHaveSucceeded()
+        expectT(findResult.unsafeGetValue().data.edges.length).toEqual(1)
         expectT(
-          findresult.unsafeGetValue().data.edges[0]?.node.emailHash,
+          findResult.unsafeGetValue().data.edges[0]?.node.emailHash,
         ).toEqual(emailHash)
 
         const updateResult = await sendHttpRequest<Guest, GuestResult>(
