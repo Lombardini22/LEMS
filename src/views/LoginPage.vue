@@ -8,7 +8,7 @@
 
     <ion-content>
       <div class="login-logo">
-        <img src="/assets/logos/logo-foresight-bk.png" alt="logo" />
+        <img src="/assets/logos/title_cp_print.png" alt="logo" />
       </div>
 
       <!-- <form novalidate> -->
