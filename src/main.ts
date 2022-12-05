@@ -2,10 +2,12 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
+import './registerServiceWorker';
 
 import { IonicVue } from '@ionic/vue'
 import { Vue3SimpleHtml2pdf } from 'vue3-simple-html2pdf'
 import VueApexCharts from 'vue3-apexcharts'
+
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/vue/css/core.css'

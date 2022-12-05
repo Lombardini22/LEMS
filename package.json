@@ -2,19 +2,24 @@
   "name": "lems",
   "version": "0.0.1",
   "private": true,
+  "description": "LEMS Project",
   "scripts": {
+    "":" ----- DEV ----- ",
     "dev": "vue-cli-service serve --port 8080",
     "start": "nodemon --watch server/src --exec ts-node --swc server/src/index.ts",
-    "lint": "vue-cli-service lint",
+    "build": "yarn build:client && yarn build:server",
+    "serve": "vue-cli-service serve",
+    "":" ----- TEST ----- ",
+    "test:unit": "vue-cli-service test:unit",
+    "test:e2e": "vue-cli-service test:e2e",
+    "test": "vue-cli-service test:unit && vue-cli-service test:e2e --headless && jest -c server/jest.config.js",
+    "test:server": "jest -c server/jest.config.js --runInBand",
+    "":" ----- DEPLOY ----- ",
+    "deploy": "node server/build/server/src/index.js",
     "build:client": "vue-cli-service build",
     "build:server": "tsc --project server/tsconfig.json",
-    "build": "yarn build:client && yarn build:server",
-    "test:e2e": "vue-cli-service test:e2e",
-    "test:server": "jest -c server/jest.config.js --runInBand",
-    "test:unit": "vue-cli-service test:unit",
-    "test": "vue-cli-service test:unit && vue-cli-service test:e2e --headless && jest -c server/jest.config.js",
-    "deploy": "node server/build/server/src/index.js",
-    "heroku-logs-staging": "heroku logs --tail -a lems-staging"
+    "heroku-logs-staging": "heroku logs --tail -a lems-staging",
+    "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "@capacitor/android": "4.1.0",
@@ -69,6 +74,7 @@
     "pinia": "^2.0.23",
     "qrcode": "^1.5.1",
     "quasar": "^2.7.7",
+    "register-service-worker": "^1.7.2",
     "ts-jest": "^28.0.8",
     "ts-node": "^10.9.1",
     "typescript": "^4.3.5",
@@ -83,6 +89,8 @@
     "yarn": "^1.22.19",
     "zod": "^3.18.0"
   },
-  "description": "LEMS Project",
+  "devDependencies": {
+    "@vue/cli-plugin-pwa": "~5.0.0"
+  },
   "heroku-run-build-script": true
 }
