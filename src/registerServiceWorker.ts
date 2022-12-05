@@ -3,7 +3,9 @@
 import { register } from 'register-service-worker'
 
 try {
+  console.log('registering service worker')
   if (process.env.NODE_ENV === 'production') {
+    console.log('registering service worker?')
     register(`${process.env.VUE_APP_SERVER_URL}service-worker.js`, {
       ready() {
         console.log(
@@ -17,8 +19,11 @@ try {
       cached() {
         console.log('Content has been cached for offline use.')
       },
-      updatefound() {
+      updatefound(reg) {
         console.log('New content is downloading.')
+        document.dispatchEvent(
+          new CustomEvent('swUpdated', { detail: reg.waiting }),
+        )
       },
       updated() {
         console.log('New content is available; please refresh.')

@@ -9,6 +9,7 @@
     "start": "nodemon --watch server/src --exec ts-node --swc server/src/index.ts",
     "build": "yarn build:client && yarn build:server",
     "serve": "vue-cli-service serve",
+    "serve-production": "vue-cli-service serve --port 8080 --mode production",
     "":" ----- TEST ----- ",
     "test:unit": "vue-cli-service test:unit",
     "test:e2e": "vue-cli-service test:e2e",
