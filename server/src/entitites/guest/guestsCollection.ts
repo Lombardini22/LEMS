@@ -1,6 +1,7 @@
 import { Collection, NoTimestamps } from '../../database/Collection'
 import {
   Collection as MongoCollection,
+  Filter,
   OptionalId,
   OptionalUnlessRequiredId,
   WithId,
@@ -11,6 +12,11 @@ import { ServerError } from '../../ServerError'
 import { constVoid } from '../../../../shared/utils'
 import { env } from '../../resources/env'
 import { isSameDay } from '../../utils'
+import { Server } from '../../resources/Server'
+import {
+  WebSocketEvent,
+  WebSocketEventType,
+} from '../../../../shared/WebSocketEvent'
 
 export const UNIQUE_EMAIL_INDEX_NAME = 'uniqueEmail'
 export const UNIQUE_EMAIL_HASH_INDEX_NAME = 'uniqueEmailHash'
@@ -46,6 +52,11 @@ class GuestsCollection extends Collection<Guest> {
       )
     })
 
+    // This is a side effect, but we don't want to fail if the socket doesn't work
+    await result.flatMap(guests =>
+      GuestsCollection.sendWebSocketEvent('Insertion', guests),
+    )
+
     if (isDocsArray) {
       return result
     } else {
@@ -61,6 +72,56 @@ class GuestsCollection extends Collection<Guest> {
         }
       })
     }
+  }
+
+  override async update(
+    filter: Filter<Guest>,
+    doc: NoTimestamps<Guest>,
+  ): Promise<Result<ServerError, WithId<Guest>>> {
+    const result = await super.update(filter, doc)
+
+    // This is a side effect, but we don't want to fail if the socket doesn't work
+    await result.flatMap(guest =>
+      GuestsCollection.sendWebSocketEvent('Update', [guest]),
+    )
+
+    return result
+  }
+
+  override async delete(
+    filter: Filter<Guest>,
+  ): Promise<Result<ServerError, WithId<Guest>>> {
+    const result = await super.delete(filter)
+
+    // This is a side effect, but we don't want to fail if the socket doesn't work
+    await result.flatMap(guest =>
+      GuestsCollection.sendWebSocketEvent('Deletion', [guest]),
+    )
+
+    return result
+  }
+
+  static sendWebSocketEvent<T extends WebSocketEventType>(
+    type: T,
+    data: WithId<Guest>[],
+  ): Promise<Result<ServerError, void>> {
+    return Server.useSocket(socket => {
+      const event: WebSocketEvent<T, 'Guest', Guest> = {
+        type,
+        subject: 'Guest',
+        data,
+      }
+
+      const didSocketWork = socket.emit('update', event)
+
+      if (!didSocketWork) {
+        console.error(
+          `Unable to send event through WebSocket: ${JSON.stringify(event)}`,
+        )
+      }
+
+      return Result.success(constVoid)
+    })
   }
 }
 

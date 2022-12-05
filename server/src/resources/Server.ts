@@ -4,9 +4,24 @@ import { Result } from '../../../shared/Result'
 import { env } from './env'
 import { Router } from '../routing/Router'
 import { ServerError } from '../ServerError'
-import { Server as HttpServer } from 'http'
+import { createServer, Server as HttpServer } from 'http'
 import { constVoid } from '../../../shared/utils'
 import { Resource } from './Resource'
+import { Server as OriginalSocketServer } from 'socket.io'
+import {
+  WebSocketEvent,
+  WebSocketEventSubject,
+  WebSocketEventType,
+} from '../../../shared/WebSocketEvent'
+
+type SocketServer = Omit<OriginalSocketServer, 'emit'> & {
+  emit: <T>(
+    eventName: 'update',
+    event: WebSocketEvent<WebSocketEventType, WebSocketEventSubject, T>,
+  ) => boolean
+}
+
+let socket: SocketServer | null = null
 
 export class Server extends Resource<express.Express> {
   private readonly routers: Router[]
@@ -32,7 +47,9 @@ export class Server extends Resource<express.Express> {
 
       const result = await env.use(env => {
         if (!this.server) {
-          this.server = app.listen(env.PORT)
+          this.server = createServer(app)
+          socket = new OriginalSocketServer(this.server) as SocketServer
+          this.server.listen(env.PORT)
         }
 
         return Result.success(() => app)
@@ -46,6 +63,11 @@ export class Server extends Resource<express.Express> {
     }
 
     const release = (): Promise<Result<ServerError, void>> => {
+      if (socket) {
+        socket.close()
+        socket = null
+      }
+
       if (this.server) {
         this.server.close()
         this.server = null
@@ -64,6 +86,22 @@ export class Server extends Resource<express.Express> {
    */
   static override make(): Server {
     return new Server([])
+  }
+
+  static useSocket<T>(
+    op: (socket: SocketServer) => Promise<Result<ServerError, T>>,
+  ): Promise<Result<ServerError, T>> {
+    if (!socket) {
+      return Result.failure(
+        () =>
+          new ServerError(
+            500,
+            'Trying to use WebSockets before starting a Server',
+          ),
+      )
+    } else {
+      return op(socket)
+    }
   }
 
   /**
