@@ -19,14 +19,14 @@ try {
       cached() {
         console.log('Content has been cached for offline use.')
       },
-      updatefound(reg) {
+      updatefound() {
         console.log('New content is downloading.')
+      },
+      updated(reg) {
+        console.log('New content is available; please refresh.')
         document.dispatchEvent(
           new CustomEvent('swUpdated', { detail: reg.waiting }),
         )
-      },
-      updated() {
-        console.log('New content is available; please refresh.')
       },
       offline() {
         console.log(
