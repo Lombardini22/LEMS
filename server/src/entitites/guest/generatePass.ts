@@ -94,6 +94,13 @@ export const generatePass: RequestHandler<
       Router.handleError(error, res)
     },
     function sendStream(stream) {
+      res
+        .header('Content-Type', 'application/vnd.apple.pkpass')
+        .header(
+          'Content-Disposition',
+          'attachment; filename="l22-christmas-party.pkpass"',
+        )
+
       stream.pipe(res)
     },
   )
