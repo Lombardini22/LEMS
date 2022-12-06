@@ -2,7 +2,6 @@ import { createRouter, createWebHistory } from '@ionic/vue-router'
 import { RouteRecordRaw, type RouteLocationNormalized } from 'vue-router'
 import ScanPage from '../views/ScanPage.vue'
 import TabsPage from '../views/TabsPage.vue'
-import ManualPage from '../views/ManualPage.vue'
 import TestPage from '../views/TestPage.vue'
 import ReportsPage from '../views/ReportsPage.vue'
 import TicketPage from '../views/TicketPage.vue'
@@ -56,19 +55,6 @@ const routes: Array<RouteRecordRaw> = [
           path: 'scan',
           name: 'scan',
           component: ScanPage,
-          beforeEnter: () => {
-            const { isAuth, check } = authCheck()
-            check()
-            if (isAuth.value) {
-              return true
-            } else {
-              return '/login'
-            }
-          },
-        },
-        {
-          path: 'manual',
-          component: ManualPage,
           beforeEnter: () => {
             const { isAuth, check } = authCheck()
             check()

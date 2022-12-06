@@ -70,8 +70,8 @@ onMounted(() => {
 
 <style scoped>
 .Model3d {
-    height: 400px;
-
+    max-height: 400px;
+    
 }
 
 .logo {
