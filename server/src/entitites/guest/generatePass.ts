@@ -7,6 +7,8 @@ import { RequestHandler } from 'express'
 import { Router } from '../../routing/Router'
 import { Stream } from 'stream'
 import { Path } from '../../routing/Path'
+import { hashGuestEmail } from '../../../../shared/models/Guest'
+import { guestsCollection } from './guestsCollection'
 
 const certificatesPath = 'server/src/entitites/guest/christmas-party.pass'
 const modelDirectory = path.join(process.cwd(), certificatesPath)
@@ -29,21 +31,34 @@ export const generatePassPath = Path.start()
   .literal('pass')
   .param<PassParams>('email')
 
-export async function generatePassStream(): Promise<
-  Result<ServerError, Stream>
-> {
+export async function generatePassStream(
+  emailHash: string,
+): Promise<Result<ServerError, Stream>> {
   const pass = await Result.tryCatch(
     () =>
-      PKPass.from({
-        model: modelDirectory,
-        certificates: { signerCert, signerKey, wwdr },
-      }),
+      PKPass.from(
+        {
+          model: modelDirectory,
+          certificates: { signerCert, signerKey, wwdr },
+        },
+        {
+          serialNumber: emailHash,
+        },
+      ),
     error => new ServerError(500, 'Unable to generate pass', { error }),
   )
 
   return pass.flatMap(pass =>
     Result.tryCatch(
-      () => pass.getAsStream(),
+      () => {
+        pass.setBarcodes({
+          message: emailHash,
+          format: 'PKBarcodeFormatQR',
+          messageEncoding: 'iso-8859-1',
+        })
+
+        return pass.getAsStream()
+      },
       error =>
         new ServerError(500, 'Unable to turn the pass into a stream', {
           error,
@@ -53,14 +68,28 @@ export async function generatePassStream(): Promise<
 }
 
 export const generatePass: RequestHandler<
-  unknown,
+  PassParams,
   Promise<void>,
   unknown,
   unknown
-> = async (_req, res) => {
-  const passAsStream = await generatePassStream()
+> = async (req, res) => {
+  const email = req.params.email
+  const emailHash = hashGuestEmail(email)
+  const guest = await guestsCollection.findOne({ emailHash })
 
-  await passAsStream.fold(
+  const result = await guest.flatMap(function rejectWaitingListOrGenerateStream(
+    guest,
+  ) {
+    if (guest.status === 'WAITING') {
+      return Result.failure(
+        () => new ServerError(400, 'Guest is in waiting list'),
+      )
+    } else {
+      return generatePassStream(emailHash)
+    }
+  })
+
+  await result.fold(
     function handleError(error) {
       Router.handleError(error, res)
     },
