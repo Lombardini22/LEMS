@@ -19,7 +19,7 @@
       </ion-toolbar>
       <ion-toolbar>
         <ion-segment :value="segment" @ionChange="segmentChanged($event)">
-          <ion-segment-button value="registrati">
+          <ion-segment-button value="registrati" color="red">
             <ion-label>Registrati ({{ totalRegistrati }})</ion-label>
           </ion-segment-button>
           <ion-segment-button value="checkedIn">
@@ -27,6 +27,9 @@
           </ion-segment-button>
           <ion-segment-button value="waiting">
             <ion-label>Waiting ({{ waitingCount }})</ion-label>
+          </ion-segment-button>
+          <ion-segment-button value="removed">
+            <ion-label>Removed ({{ removedCount }})</ion-label>
           </ion-segment-button>
         </ion-segment>
       </ion-toolbar>
@@ -49,8 +52,7 @@
                 <ion-item-option color="danger">ELIMINA</ion-item-option>
               </ion-item-options>
 
-              <ion-item :color="item.node.status === 'RSVP' ? '' : 'success'" @click="guestInfo(item)"
-                class="list-item">
+              <ion-item :color="colorItem(item)" @click="guestInfo(item)" class="list-item">
                 <ion-label class="guest-name">{{ item.node.firstName }} {{ item.node.lastName }} <span class="company"
                     v-if="!!item.node.companyName">- {{ item.node.companyName }} </span>
                 </ion-label>
@@ -64,7 +66,8 @@
               </ion-item>
 
               <ion-item-options side="end">
-                <ion-item-option color="warning" v-if="segment === 'waiting'" @click="approveGuest(item)">Approva</ion-item-option>
+                <ion-item-option color="warning" v-if="segment === 'waiting'"
+                  @click="approveGuest(item)">Approva</ion-item-option>
                 <ion-item-option color="primary" v-else @click="changeCheckin(item)">Check In</ion-item-option>
               </ion-item-options>
             </ion-item-sliding>
@@ -141,7 +144,7 @@ const store = useStoreGuest()
 const data = computed(() => store.getters.getGuests())
 const search = ref()
 const isOpen = ref(false)
-const guestsOnly = ref(false)
+const guestsOnly = ref(true)
 
 // Print
 const alert = ref(false)
@@ -183,6 +186,10 @@ const totalCheckedIn = computed(() => {
 
 const waitingCount = computed(() => {
   return prefilter().filter((item: any) => item.node.status === 'WAITING').length
+})
+
+const removedCount = computed(() => {
+  return prefilter().filter((item: any) => item.node.status === 'REMOVED').length
 })
 
 // doCheckin
@@ -267,6 +274,9 @@ const guestInfo = (item: GuestNode) => {
   Referente: ${item.node.accountManager} `
 }
 
+
+
+
 const prefilter = () => {
   if (search.value) {
     return data.value.filter((item) => {
@@ -290,15 +300,35 @@ const prefilter = () => {
   }
 }
 
+const colorItem = (item: GuestNode) => {
+  if (item.node.status === 'RSVP') {
+    return ''
+  }
+  else if (item.node.status === 'CHECKED_IN') {
+    return 'success'
+  }
+  else if (item.node.status === 'WAITING') {
+    return 'warning'
+  }
+  else if (item.node.status === 'REMOVED') {
+    return 'danger'
+  }
+  else {
+    return ''
+  }
+}
+
 const filteredData = computed(() => {
   return prefilter().filter((item) => {
     switch (segment.value) {
       case 'registrati':
         return item.node.status === 'RSVP'
-      case 'checked-in':
+      case 'checkedIn':
         return item.node.status === 'CHECKED_IN'
       case 'waiting':
         return item.node.status === 'WAITING'
+      case 'removed':
+        return item.node.status === 'REMOVED'
       default:
         return item.node.status === 'RSVP'
     }
@@ -363,5 +393,35 @@ const setAlertStatus = (value: boolean) => {
   color: black;
   margin-bottom: 5px;
   margin-top: 2px;
+}
+
+ion-segment-button::part(indicator-background) {
+  background: #08a391;
+}
+
+/* Material Design styles */
+ion-segment-button.md::part(native) {
+  color: #000;
+}
+
+.segment-button-checked.md::part(native) {
+  color: #08a391;
+}
+
+ion-segment-button.md::part(indicator-background) {
+  height: 4px;
+}
+
+/* iOS styles */
+ion-segment-button.ios::part(native) {
+  color: #08a391;
+}
+
+.segment-button-checked.ios::part(native) {
+  color: #fff;
+}
+
+ion-segment-button.ios::part(indicator-background) {
+  border-radius: 20px;
 }
 </style>
