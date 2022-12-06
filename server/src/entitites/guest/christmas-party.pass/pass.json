@@ -1,25 +1,45 @@
 {
-  "description": "Christmas Party 2022",
-  "organizationName": "Lombardini22 SpA",
+  "formatVersion": 1,
   "passTypeIdentifier": "pass.it.l22.lems",
+  "serialNumber": "nmyuxofgna",
   "teamIdentifier": "MF2A3GFZH6",
-  "backgroundColor": "rgb(252,185,0)",
+  "webServiceURL": "https://example.com/passes/",
+  "authenticationToken": "vxwxd7J8AlNNFPS8k0a0FfUFtq0ewzFdc",
+  "relevantDate": "2022-12-22T18:00:00.000Z",
+  "locations": [
+    {
+      "longitude": 9.1631314,
+      "latitude": 45.4474331
+    }
+  ],
+  "barcode": {
+    "message": "123456789",
+    "format": "PKBarcodeFormatPDF417",
+    "messageEncoding": "iso-8859-1"
+  },
+  "organizationName": "Lombardini22 SpA",
+  "description": "Christmas Party 2022",
   "foregroundColor": "rgb(255,255,255)",
+  "backgroundColor": "rgb(252,185,0)",
   "logoText": "Christmas Party22",
   "labelColor": "rgb(235,20,76)",
-  "formatVersion": 1,
   "eventTicket": {
-    "auxiliaryFields": [
+    "headerFields": [],
+    "primaryFields": [
       {
-        "key": "place",
-        "value": "Via Elia Lombardini 22, 20143, Milano",
-        "label": "Dove",
-        "isRelative": false
+        "key": "event",
+        "label": "EVENT",
+        "value": "Christmas Party"
       }
     ],
-    "primaryFields": [
-      { "key": "name", "value": "Mario Lario", "label": "Nome" }
+    "secondaryFields": [
+      {
+        "key": "loc",
+        "label": "LOCATION",
+        "value": "Via Elia Lombardini, 22, 20143 Milano"
+      }
     ],
-    "backFields": [{ "key": "greeting", "value": "CIAOOOO", "label": "Saluti" }]
+    "auxiliaryFields": [],
+    "backFields": []
   }
 }
