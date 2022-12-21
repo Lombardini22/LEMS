@@ -26,6 +26,10 @@
             <ion-icon :icon="qrCodeOutline" /> Scan
           </ion-button>
         </p>
+
+        <!-- <ion-button @click="handleReset">
+          <ion-icon :icon="qrCodeOutline" /> reset Permessi Camera
+        </ion-button> -->
       </div>
     </ion-content>
   </ion-page>
@@ -51,6 +55,7 @@ const serverUrl = process.env.VUE_APP_SERVER_URL
 const qrString = ref('')
 const id = ref()
 const hasWebcam = ref(false)
+
 
 const route = useRoute()
 
@@ -120,6 +125,25 @@ onBeforeMount(async () => {
   }
 
 })
+
+
+// const handleReset = async () => {
+//   try {
+//     navigator.mediaDevices.getUserMedia({ audio: false, video: true })
+//       .then(function (stream) {
+//         stream.getTracks().forEach(function (track) {
+//           track.stop();
+//         });
+//       })
+//       .catch(function (error) {
+//         console.error("Error resetting camera permissions:", error);
+//       });
+
+//   } catch (error) {
+//     console.error(error)
+//   }
+// }
+
 
 const validRoute = computed(() => {
   return route.name === "scan"
