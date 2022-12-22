@@ -144,7 +144,7 @@ const store = useStoreGuest()
 const data = computed(() => store.getters.getGuests())
 const search = ref()
 const isOpen = ref(false)
-const guestsOnly = ref(true)
+const guestsOnly = ref(false)
 
 // Print
 const alert = ref(false)
