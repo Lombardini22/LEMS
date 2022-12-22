@@ -53,6 +53,7 @@ import {
   IonList,
   IonPage,
   IonRow,
+  toastController
 } from "@ionic/vue";
 import axios from "axios";
 import { ref } from "vue";
@@ -73,20 +74,32 @@ const onLogin = () => {
       console.log(res);
       if (res.status == 200) {
         userValid.value = true;
-        console.log("User Valid");
+        console.log("User Valid"); 
+        presentToast('bottom', `Success - Please wait...`, 'success', 4000);
         localStorage.setItem("user", res.data.accessToken);
         setTimeout(() => {
           window.location.href = "/lems/management";
         }, 1000);
       } else {
         userValid.value = false;
-        console.log("User Invalid");
+        presentToast('bottom', `Invalid User`, 'danger', 4000)
       }
     })
     .catch((err) => {
       console.log(err);
+      presentToast('bottom', `Invalid User`, 'danger', 4000)
     });
 };
+
+const presentToast = async (position: any, message: any, color: any, duration: number) => {
+  const toast = await toastController.create({
+    message: message,
+    duration: duration,
+    position: position,
+    color: color,
+  })
+  toast.present()
+}
 
 </script>
 
